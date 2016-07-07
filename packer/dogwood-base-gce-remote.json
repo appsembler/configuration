@@ -1,0 +1,25 @@
+{
+  "description": "Dogwood.3 edX image for GCE",
+  "builders": [{
+    "type": "googlecompute",
+    "account_file": "../gcloud-account.json",
+    "project_id": "appsembler-testing",
+    "source_image": "ubuntu-1204-precise-v20160516",
+    "zone": "us-east1-b",
+    "disk_size": 50,
+    "image_name": "dogwood3-packer-remote"
+  }],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "../playbooks/edx_sandbox.yml",
+      "command": "/Users/bezidejni/.pyenv/versions/edx_configuration/bin/ansible-playbook",
+      "extra_arguments": [ "--extra-vars", "@../server-vars.yml" ],
+      "ansible_env_vars": [
+        "ANSIBLE_HOST_KEY_CHECKING=False",
+        "ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.do",
+        "ANSIBLE_ROLES_PATH='../../ansible-roles/roles:../../ansible-private/roles:../../ansible-roles/'"
+      ]
+    }
+  ]
+}

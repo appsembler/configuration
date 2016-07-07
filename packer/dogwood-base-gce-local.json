@@ -1,0 +1,43 @@
+{
+  "description": "Dogwood.3 edX image for GCE",
+  "builders": [{
+    "type": "googlecompute",
+    "account_file": "../gcloud-account.json",
+    "project_id": "appsembler-testing",
+    "source_image": "ubuntu-1204-precise-v20160516",
+    "zone": "us-east1-b",
+    "disk_size": 50,
+    "image_name": "dogwood-packer-local"
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get update -y",
+        "sudo apt-get install -y build-essential software-properties-common python-software-properties curl git-core libxml2-dev libxslt1-dev libfreetype6-dev python-pip python-apt python-dev libxmlsec1-dev swig libmysqlclient-dev",
+        "sudo pip install --upgrade pip",
+        "sudo pip install --upgrade virtualenv",
+        "cd /tmp",
+        "git clone https://github.com/appsembler/configuration.git --branch appsembler/release --depth 1",
+        "cd configuration",
+        "sudo pip install -r requirements.txt",
+        "sudo pip install setuptools --upgrade"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "../server-vars.yml",
+      "destination": "/tmp/server-vars.yml"
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "../playbooks/edx_sandbox.yml",
+      "playbook_dir": "../playbooks",
+      "extra_arguments": [ "--extra-vars", "@/tmp/server-vars.yml" ]
+    },
+    {
+      "type": "shell",
+      "inline": "rm /tmp/server-vars.yml"
+    }
+  ]
+}

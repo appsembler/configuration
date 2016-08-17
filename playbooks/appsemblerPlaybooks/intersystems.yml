@@ -9,10 +9,10 @@
     sftp_users: 
       iscreportsftp:
         pwd: "{{ ISC_SFTP_user_password }}"
-        reports_dir: "course_participation"
+        reports_dir: "{{ ISC_COURSE_PARTICIPATION_LOCAL_STORAGE_DIR }}"
       cmcreportsftp: 
         pwd: "{{ CMC_SFTP_user_password }}"
-        reports_dir: "cmc_reports"
+        reports_dir: "{{ CMC_COURSE_COMPLETION_LOCAL_STORAGE_DIR }}"
 
     sftp_group: "filetransfer"
   tasks:

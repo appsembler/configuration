@@ -6,33 +6,41 @@
 - hosts: "edxapp-server"
   sudo: true
   vars:
-    sftp_user: "iscreportsftp"
+    sftp_users: 
+      iscreportsftp:
+        pwd: "{{ ISC_SFTP_user_password }}"
+        reports_dir: "course_participation"
+      cmcreportsftp: 
+        pwd: "{{ CMC_SFTP_user_password }}"
+        reports_dir: "cmc_reports"
+
     sftp_group: "filetransfer"
-    course_participation_dir: "course_participation"
   tasks:
     - include_vars: "/edx/app/edx_ansible/edx_ansible/playbooks/roles/common/defaults/main.yml"
 
     - name: create SFTP group
       group: name={{ sftp_group }} state=present
 
-    - name: create SFTP user
-      user: "name={{ sftp_user}} password={{SFTP_user_password}} groups={{ sftp_group }} shell=/sbin/nologin createhome=yes"
+    - name: create SFTP users
+      user: "name={{ item.key }} password={{item.value.pwd}} groups={{ sftp_group }} shell=/sbin/nologin createhome=yes"
+      with_dict: sftp_users
+
 
     - name: change owner of SFTP user home dir to root
       file: >
-        path="/home/{{ sftp_user }}"
+        path="/home/{{ item.key }}"
         owner="root"
         state="directory"
+      with_dict: sftp_users
 
     - name: make reports subdirectories
       file: >
-        path="/home/{{ sftp_user }}/{{ item }}"
+        path="/home/{{ item.key }}/{{ item.value.reports_dir }}"
         state=directory
-        owner={{ sftp_user }}
+        owner={{ item.key }}
         group=edxapp
         mode=0755
-      with_items:
-        - "{{ course_participation_dir }}"
+      with_dict: sftp_users 
 
   # would rather use blockinfile here but not present < ansible 2.0
   # these aren't working on GCloud VM and will kill your sshd and you will be locked out.
@@ -92,3 +100,14 @@
           "cmd": "/edx/app/edxapp/venvs/edxapp/bin/python /edx/app/edxapp/edx-platform/manage.py lms isc_course_participation --settings=aws > /dev/null 2>&1"
         }
       }
+
+    - name: cron job for cleaning out old reports
+      cron: >
+        user=root
+        name="Remove {{item.value.reports_dir}} csv files older than 7 days, each time after the report is run"
+        job="find /home/{{ item.key }}/{{ item.value.reports_dir }}/ -mtime +7 -exec rm {} \;"
+        minute="10"
+        hour="20"
+      with_dict: sftp_users 
+
+

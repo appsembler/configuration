@@ -84,7 +84,7 @@
         "cmc": {
           "name": "ISC CMC course completion and access report every morning 8:00PM GMT",
           "minute": 0,
-          "hour": 20,
+          "hour": 5,
           "cmd": "/edx/app/edxapp/venvs/edxapp/bin/python /edx/app/edxapp/edx-platform/manage.py lms cmc_course_completion --settings=aws > /dev/null 2>&1"
         },
         "va": {
@@ -106,8 +106,8 @@
         user=root
         name="Remove {{item.value.reports_dir}} csv files older than 7 days, each time after the report is run"
         job="find /home/{{ item.key }}/{{ item.value.reports_dir }}/ -mtime +7 -exec rm {} \;"
-        minute="10"
-        hour="20"
+        minute="15"
+        hour="5"
       with_dict: sftp_users 
 
 

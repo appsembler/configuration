@@ -81,6 +81,8 @@
   gather_facts: True
   vars:
     migrate_db: "yes"
+    mysql_cert_owner: "{{ xqueue_user }}"
+    mysql_cert_group: "{{ common_web_user }}"
   roles:
     - edxapp_common
     - mysql_init

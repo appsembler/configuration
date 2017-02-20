@@ -71,7 +71,6 @@
     - notifier
     - analytics_api
     - edx_notes_api
-    - demo
     - oauth_client_setup
     - { role: 'rabbitmq', rabbitmq_ip: '127.0.0.1' }
     - oraclejdk

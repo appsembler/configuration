@@ -25,7 +25,7 @@
       - edx_notes_api
       nginx_default_sites:
       - lms
-    - mysql
+#    - mysql
     - mysql_init
     - role: memcache
       when: "'localhost' in ' '.join(EDXAPP_MEMCACHE)"

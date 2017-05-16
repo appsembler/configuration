@@ -117,3 +117,21 @@
     - role: newrelic
       when: COMMON_ENABLE_NEWRELIC
 
+
+- name: Install Scampersand Reporting
+  hosts: "edxapp-server-0"
+  sudo: True
+  gather_facts: True
+  vars:
+    POSTGRESQL_AGGREGATION_INSTALL_CRON: true
+  roles:
+    - postgresql_aggregation
+
+- name: Install Scampersand Reporting
+  hosts: "edxapp-server-1"
+  sudo: True
+  gather_facts: True
+  vars:
+    POSTGRESQL_AGGREGATION_INSTALL_CRON: false
+  roles:
+    - postgresql_aggregation

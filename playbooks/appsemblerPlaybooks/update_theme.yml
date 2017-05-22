@@ -133,7 +133,7 @@
 
     - name: "gather cms static assets with paver"
       command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-cms"
-      when: celery_worker is not defined and not devstack"
+      when: celery_worker is not defined and not devstack
       tags:
         - gather_static_assets
         - assets

@@ -80,7 +80,7 @@
     repo: "{{ edxapp_theme_source_repo }}"
     version: "{{ edxapp_theme_version }}"
     accept_hostkey: yes
-  when: edxapp_theme_name != ''
+  when: edxapp_theme_name != '' and EDXAPP_SITE_THEMES is not defined
   become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"

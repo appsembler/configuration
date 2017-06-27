@@ -70,7 +70,7 @@
         repo: "{{ edxapp_theme_source_repo }}"
         version: "{{ edxapp_theme_version }}"
         accept_hostkey: yes
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_DEFAULT_SITE_THEME != ''
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_DEFAULT_SITE_THEME != '' and EDXAPP_SITE_THEMES is not defined      
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
@@ -87,10 +87,47 @@
         version: "{{ edxapp_customer_theme_version }}"
         accept_hostkey: yes
         key_file: "/edx/app/edxapp/.ssh/id_rsa"
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and edxapp_customer_theme_source_repo != ''
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and edxapp_customer_theme_source_repo is defined and EDXAPP_SITE_THEMES is not defined
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
+      tags:
+        - install
+        - install:code
+        - update_lms_theme
+
+    - name: checkout multiple comprehensive themes
+      git_2_0_1:
+        dest: "{{ edxapp_theme_dir }}/{{ item.value.theme_name }}"
+        repo: "{{ item.value.theme_source_repo }}"
+        version: "{{ item.value.theme_version }}"
+        accept_hostkey: yes
+      with_dict: "{{EDXAPP_SITE_THEMES}}"
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES is defined
+      become_user: "{{ edxapp_user }}"
+      environment:
+        GIT_SSH: "{{ edxapp_git_ssh }}"
+      notify: recompile SASS
+      register: edxapp_theme_checkout
+      tags:
+        - install
+        - install:code
+        - update_lms_theme
+
+    - name: checkout multiple customer override themes
+      git_2_0_1:
+        dest: "{{ edxapp_theme_dir }}/{{ item.value.theme_name }}/customer_specific"
+        repo: "{{ item.value.customer_theme_source_repo }}"
+        version: "{{ item.value.customer_theme_version }}"
+        accept_hostkey: yes
+        key_file: "/edx/app/edxapp/.ssh/id_rsa"
+      with_dict: "{{EDXAPP_SITE_THEMES}}"
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES is defined
+      become_user: "{{ edxapp_user }}"
+      environment:
+        GIT_SSH: "{{ edxapp_git_ssh }}"
+      notify: recompile SASS
+      register: edxapp_theme_override_checkout
       tags:
         - install
         - install:code

@@ -616,6 +616,9 @@ EDXAPP_COMPREHENSIVE_THEME_DIRS:
 EDXAPP_DEFAULT_SITE_THEME: ""
 EDXAPP_ENABLE_COMPREHENSIVE_THEMING: false
 
+# Whether to use a list of site themes or just one
+EDXAPP_SITE_THEMES: !!null
+
 # Git repo for the comprehensive theme (if using a comprehensive theme
 # other than the ones bundled with edx/platform)
 EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO: ""

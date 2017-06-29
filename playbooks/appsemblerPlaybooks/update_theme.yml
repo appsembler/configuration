@@ -70,7 +70,7 @@
         repo: "{{ edxapp_theme_source_repo }}"
         version: "{{ edxapp_theme_version }}"
         accept_hostkey: yes
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_DEFAULT_SITE_THEME != '' and EDXAPP_SITE_THEMES is not defined      
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_DEFAULT_SITE_THEME != '' and not EDXAPP_SITE_THEMES
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
@@ -87,7 +87,7 @@
         version: "{{ edxapp_customer_theme_version }}"
         accept_hostkey: yes
         key_file: "/edx/app/edxapp/.ssh/id_rsa"
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and edxapp_customer_theme_source_repo is defined and EDXAPP_SITE_THEMES is not defined
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and edxapp_customer_theme_source_repo is defined and not EDXAPP_SITE_THEMES
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
@@ -103,7 +103,7 @@
         version: "{{ item.value.theme_version }}"
         accept_hostkey: yes
       with_dict: "{{EDXAPP_SITE_THEMES}}"
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES is defined
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
@@ -122,7 +122,7 @@
         accept_hostkey: yes
         key_file: "/edx/app/edxapp/.ssh/id_rsa"
       with_dict: "{{EDXAPP_SITE_THEMES}}"
-      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES is defined
+      when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and EDXAPP_SITE_THEMES
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"

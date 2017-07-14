@@ -632,10 +632,10 @@ EDXAPP_COMPREHENSIVE_THEME_VERSION: ""
 EDXAPP_SITE_THEMES: "{
     '{{ EDXAPP_LMS_SITE_NAME }}': {
       'theme_name': '{{ EDXAPP_DEFAULT_SITE_THEME | default(\'edx-theme-codebase\', true) }}',
-      'theme_source_repo': '{{ EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO | default(\'git@github.com:appsembler/edx-theme-codebase.git\', true) }}',
-      'theme_version': '{{ EDXAPP_COMPREHENSIVE_THEME_VERSION | default(\'master\', true) }}',
+      'theme_source_repo': '{{ edxapp_theme_source_repo | default(\'git@github.com:appsembler/edx-theme-codebase.git\', true) }}',
+      'theme_version': '{{ edxapp_theme_version | default(\'master\', true) }}',
       'customer_theme_source_repo': '{{ edxapp_customer_theme_source_repo | default(\'https://github.com/appsembler/edx-theme-customers.git\', true) }}',
-      'customer_theme_version': ''
+      'customer_theme_version': '{{ edxapp_customer_theme_version | default(\'\', true) }}'
     }
   }
   "

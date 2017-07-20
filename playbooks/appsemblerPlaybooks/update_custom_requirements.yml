@@ -1,0 +1,104 @@
+- hosts: "edxapp-server"
+  become: true
+
+  # Update extra requirements, private requirements, 
+  # collect static assets, and restart edx app and workers
+
+  tasks:
+    - include_vars: roles/common_vars/defaults/main.yml
+    - include_vars: roles/edxapp/defaults/main.yml
+
+
+    - name: install read-only ssh key
+      copy: >
+        content="{{ EDXAPP_GIT_IDENTITY }}" dest={{ edxapp_git_identity }}
+        force=yes owner={{ edxapp_user }} mode=0600
+      when: EDXAPP_USE_GIT_IDENTITY
+
+    - name: set git fetch.prune to ignore deleted remote refs
+      shell: git config --global fetch.prune true
+      sudo_user: "{{ edxapp_user }}"
+
+    - name: install python private requirements
+      shell: >
+        {{ edxapp_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r {{ item }}
+        chdir={{ edxapp_code_dir }}
+      with_items:
+      - "{{ private_requirements_file }}"
+      become_user: "{{ edxapp_user }}"
+      environment:
+        GIT_SSH: "{{ edxapp_git_ssh }}"
+      when: EDXAPP_INSTALL_PRIVATE_REQUIREMENTS
+      tags:
+        - install
+        - install:app-requirements     
+
+    - name: install python extra requirements
+      pip: >
+        name="{{ item.name }}"
+        version="{{ item.version|default(omit) }}"
+        extra_args="--exists-action w {{ item.extra_args|default('') }}"
+        virtualenv="{{ edxapp_venv_dir }}"
+        state=present
+      with_items: EDXAPP_EXTRA_REQUIREMENTS
+      sudo_user: "{{ edxapp_user }}"
+
+
+
+    - name: remove read-only ssh key
+      file: path={{ edxapp_git_identity }} state=absent
+      when: EDXAPP_USE_GIT_IDENTITY
+
+    - name: migrate
+      command: "{{ COMMON_BIN_DIR }}/edxapp-migrate-{{ item }}"
+      when: migrate_db is defined and migrate_db|lower == "yes" and COMMON_MYSQL_MIGRATE_PASS and item != "lms-preview"
+      environment:
+        DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
+        DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"
+      with_items: "{{ service_variants_enabled }}"
+      tags:
+        - migrate
+
+
+
+    - name: Remove and recreate the staticfiles directory so nothing stale can exist
+      file:
+          path: "{{ edxapp_staticfile_dir }}"
+          state: "{{ item }}"
+          owner: "{{ edxapp_user }}"
+          group: "{{ common_web_group }}"
+          mode:  "0755"
+      when: celery_worker is not defined and not devstack
+      with_items: ['absent', 'directory']
+      tags:
+        - gather_static_assets
+        - assets
+
+    - name: "gather {{ item }} static assets with paver"
+      command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-{{ item }}"
+      when: celery_worker is not defined and not devstack and item != "lms-preview"
+      with_items: "{{ service_variants_enabled }}"
+      tags:
+        - gather_static_assets
+
+
+
+    - name: restart edxapp
+      supervisorctl: >
+        state=restarted
+        supervisorctl_path={{ supervisor_ctl }}
+        config={{ supervisor_cfg }}
+        name="edxapp:{{ item }}"
+      when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
+      sudo_user: "{{ supervisor_service_user }}"
+      with_items: service_variants_enabled
+
+    - name: restart edxapp_workers
+      supervisorctl: >
+        name="edxapp_worker:{{ item.service_variant }}_{{ item.queue }}_{{ item.concurrency }}"
+        supervisorctl_path={{ supervisor_ctl }}
+        config={{ supervisor_cfg }}
+        state=restarted
+      when: edxapp_installed is defined and celery_worker is defined and not disable_edx_services
+      with_items: edxapp_workers
+      sudo_user: "{{ common_web_user }}"

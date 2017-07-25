@@ -1,0 +1,15 @@
+server {
+  server_name {{ item }};
+  listen {{ EDXAPP_LMS_NGINX_PORT }};
+
+  {% if NGINX_ENABLE_SSL %}
+  listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} ssl;
+
+  ssl_certificate {{ item.ssl_certificate_path }};
+  ssl_certificate_key {{ item.ssl_key_path }};
+  # request the browser to use SSL for all connections
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+  {% endif %}
+
+  {% include "lms-common-settings.j2" %}
+}

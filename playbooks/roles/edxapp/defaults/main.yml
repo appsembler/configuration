@@ -106,6 +106,13 @@ EDXAPP_MYSQL_CSMH_OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
 EDXAPP_MYSQL_HOST: 'localhost'
 EDXAPP_MYSQL_PORT: '3306'
 
+EDXAPP_POSTGRESQL_AGGREGATION_HOST: "localhost"
+EDXAPP_POSTGRESQL_AGGREGATION_DATABASE: ""
+EDXAPP_POSTGRESQL_AGGREGATION_USER: "aggregation_user"
+EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD: "password"
+EDXAPP_POSTGRESQL_AGGREGATION_PORT: 5432
+EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS: {}
+
 # list of dictionaries of the format
 # { 'host': 'hostname', 'port': 'portnumber', 'otherconfigsuchas use_ssl': 'True' }
 # http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch
@@ -740,6 +747,14 @@ edxapp_databases:
     HOST: "{{ EDXAPP_MYSQL_CSMH_HOST }}"
     PORT: "{{ EDXAPP_MYSQL_CSMH_PORT }}"
     OPTIONS: "{{ EDXAPP_MYSQL_CSMH_OPTIONS }}"
+  appsembler_usage:
+    ENGINE: 'django.db.backends.postgresql_psycopg2'
+    NAME: "{{ EDXAPP_POSTGRESQL_AGGREGATION_DATABASE }}"
+    USER: "{{ EDXAPP_POSTGRESQL_AGGREGATION_USER }}"
+    PASSWORD: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD }}"
+    HOST: "{{ EDXAPP_POSTGRESQL_AGGREGATION_HOST }}"
+    PORT: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PORT }}"
+    OPTIONS: "{{ EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS }}"
 
 edxapp_generic_auth_config:  &edxapp_generic_auth
   EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST: "{{ EDXAPP_EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST }}"

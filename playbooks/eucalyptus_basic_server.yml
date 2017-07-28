@@ -49,3 +49,6 @@
     - certs
     - stackdriver
     - { role: backups, BACKUPS_MONGO: True, BACKUPS_MYSQL: True, when: COMMON_ENABLE_BACKUPS }
+    - role: newrelic
+      when: COMMON_ENABLE_NEWRELIC
+

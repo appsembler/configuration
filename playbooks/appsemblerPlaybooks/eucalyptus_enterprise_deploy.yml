@@ -98,6 +98,8 @@
     - notifier
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
+    - role: newrelic
+      when: COMMON_ENABLE_NEWRELIC
 
 
 # must come after xqueue running
@@ -112,3 +114,6 @@
     - role: nginx
       nginx_sites:
       - certs
+    - role: newrelic
+      when: COMMON_ENABLE_NEWRELIC
+

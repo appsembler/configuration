@@ -1,0 +1,61 @@
+---
+
+badgr_debian_pkgs:
+  # - git  in common_debian_pkgs
+  # - python-pip in common_debian_pkgs
+  # - git-core
+  - python-virtualenv
+  - gcc
+  - python-devel  # check for security if in production
+  - libjpeg-turbo
+  - libjpeg-turbo-devel  # check for security if in production
+  - zlib-devel  # check for security if in production
+  - mariadb-devel  # check for security if in production
+  - openldap-devel  # check for security if in production
+  - cyrus-sasl-devel  # check for security if in production
+  - swig
+  - libxslt-devel  # check for security if in production
+  - automake
+  - autoconf
+  - libtool
+  - libffi-devel  # check for security if in production
+  - software-properties-common
+  - python-software-properties
+  - nodejs
+  - grunt
+  - grunt-cli
+
+badgr_debian_devel_pkgs:
+  - python-devel
+  - libjpeg-turbo-devel
+  - zlib-devel
+  - mariadb-devel
+  - openldap-devel
+  - cyrus-sasl-devel
+  - libxslt-devel
+  - libffi-devel
+
+BADGR_DEVELOPER_OPTIONS: false
+BADGR_APP_SETTINGS: "mainsite.settings_local"
+BADGR_RUN_MIGRATIONS: true
+
+badgr_source_repo: "https://github.com/concentricsky/badgr-server.git"
+badgr_version: "master"
+badgr_user: "badgr"
+badgr_app_dir: "{{ COMMON_APP_DIR }}/badgr"
+badgr_code_dir: "{{ badgr_app_dir }}/badgr-server"
+badgr_venvs_dir: "{{ badgr_app_dir }}/venvs"
+badgr_venv_bin: "{{ badgr_app_dir }}/venvs/badgr/bin"
+badgr_ruby_version: "1.9.3-p551"
+badgr_node_version: "{{ common_node_version }}"
+badgr_nodeenv_dir: "{{ badgr_app_dir }}/nodeenvs/badgr"
+badgr_nodeenv_bin: "{{ badgr_nodeenv_dir }}/bin"
+badgr_node_bin: "{{ badgr_code_dir }}/node_modules/.bin"
+badgr_deploy_path: "{{ badgr_venv_bin }}:{{ badgr_code_dir }}/bin:{{ badgr_node_bin }}:{{ badgr_nodeenv_bin }}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+badgr_environment:
+  PATH: "{{ badgr_deploy_path }}"
+  BADGR_SETTINGS: "{{ BADGR_APP_SETTINGS }}"
+  # CONFIG_ROOT: "{{ badgr_app_dir }}"
+  # BOTO_CONFIG: "{{ badgr_app_dir }}/.boto"
+

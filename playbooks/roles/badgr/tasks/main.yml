@@ -1,0 +1,134 @@
+---
+
+- name: Create Badgr application user
+  user:
+    name: "{{ badgr_user }}"
+    home: "{{ badgr_app_dir }}"
+    createhome: no
+    shell: /bin/false
+  tags: badgr_app
+
+- name: Create Badgr app and venv dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ badgr_user }}"
+    group: "{{ common_web_group }}"
+  with_items:
+    - "{{ badgr_app_dir }}"
+    - "{{ badgr_venvs_dir }}"
+  tags: badgr_app    
+    
+- name: Install base system packages on which Badgr relies
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items: "{{ badgr_debian_pkgs }}"
+  tags: badgr_app
+
+- name: Install devel packages for Badgr
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items: "{{ badgr_debian_devel_pkgs }}"
+  when: BADGR_DEVELOPER_OPTIONS
+  tags: badgr_app
+
+- name: Install standard Badgr requirements
+  pip:
+    requirements: "{{ badgr_app_dir }}/requirements.txt"
+    virtualenv: "{{ badgr_venv_dir }}"
+    state: present
+  tags: badgr_app
+
+- name: Install Badgr development requirements
+  pip:
+    requirements: "{{ badgr_app_dir }}/requirements-dev.txt"
+    virtualenv: "{{ badgr_venv_dir }}"
+    state: present
+  when: BADGR_DEVELOPER_OPTIONS
+  tags: badgr_app
+
+# this may not work
+- name: Initialize database for Badgr
+  hosts: "{{ BADGR_SQL_DATA_HOSTNAME | default('badgr-sql-data-server') }}"
+  roles:
+    - role: mysql_init
+      mysql_databases: ["{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}"]
+      mysql_database_users: 
+        - { "db": "{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}", 
+            "user": "{{ BADGR_APP_MYSQL_DB_USER | default('badgr001') }}", 
+            "pass": "{{ BADGR_APP_MYSQL_DB_PWD | default('NOTASECRET') }}"
+          }
+  tags: badgr_sql
+
+- name: install nodenv
+  pip:
+    name: "nodeenv"
+    version: "1.1.1"
+    # NOTE (CCB): Using the "virtualenv" option here doesn't seem to work.
+    executable: "{{ badgr_venv_dir }}/bin/pip"
+  become_user: "{{ badgr_user }}"
+  tags: badgr_app
+
+- name: create Badgr nodeenv
+  shell: "{{ badgr_venv_dir }}/bin/nodeenv {{ badgr_nodeenv_dir }} --node={{ badgr_node_version }} --prebuilt --force"
+  tags: badgr_app
+
+# Set the npm registry
+# This needs to be done as root since npm is weird about
+# chown - https://github.com/npm/npm/issues/3565
+- name: Set the Badgr npm registry
+  shell: "npm config set registry '{{ COMMON_NPM_MIRROR_URL }}'"
+  args:
+    creates: "{{ badgr_app_dir }}/.npmrc"
+  tags: badgr_app
+  environment: "{{ badgr_environment }}"
+
+# Set the npm registry permissions
+- name: Set the Badgr npm registry permissions
+  file:
+    path: "{{ badgr_app_dir }}/.npmrc"
+    owner: "{{ badgr_user }}"
+    group: "{{ badgr_user }}"
+  tags: badgr_app
+
+- name: install Badgr node dependencies
+  npm:
+    executable: "{{ badgr_nodeenv_bin }}/npm"
+    path: "{{ badgr_code_dir }}"
+    production: "{{ BADGR_DEVELOPER_OPTIONS and 'no' or 'yes'}}"
+    state: latest
+  environment: "{{ badgr_environment }}"
+  become_user: "{{ badgr_user }}"
+  tags: badgr_app
+
+- name: create Badgr env bash script
+  template:
+    src: "badgr_env.j2"
+    dest: "{{ badgr_app_dir }}/badgr_env"
+    owner: "{{ badgr_user }}"
+    group: "{{ common_web_user }}"
+    mode: "0644"
+  
+- name: create helper scripts for managing badgr
+  template:
+    src: "badgr-migrate.j2"
+    dest: "{{ COMMON_BIN_DIR }}/badgr-migrate"
+    owner: "{{ badgr_user }}"
+    mode: 0755
+  tags: badgr_app
+
+- name: run Badgr migration
+  shell: "{COMMON_BIN_DIR}/badgr-migrate"
+  when: "{{ BADGR_RUN_MIGRATIONS | default(True)}}" 
+
+# - name: create Badgr app admin user
+#   shell: "{COMMON_BIN_DIR}/badgr-superuser"
+#   when: "{{ BADGR_MAKE_SUPERUSER | default(True) }}"   
+
+# - name: run Grunt dist
+
+

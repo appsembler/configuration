@@ -1,0 +1,34 @@
+---
+
+##
+## Set up to allow a stateless app server and a stateful data server
+## Can also be all on one server
+## We might also want to have a single Badgr server that handles multiple clients, but 
+## stores data separately
+## 
+
+
+
+- name: Configure Badgr app
+  hosts: "badgr-app-server"
+  sudo: True
+  gather_facts: True
+  roles:
+    - { role: ../roles/virtualenv, virtualenv_user: "badgr", virtualenv_name: "badgr" }
+    - { role: ../roles/badgr, tags: ["badgr_app"] }
+    - { role: ../roles/rbenv, rbenv_user: "{{ badgr_user }}", rbenv_dir: "{{ badgr_app_dir }}", rbenv_ruby_version: "{{ badgr_ruby_version }}" }
+    - ../roles/memcached
+    - { role: ../roles/rabbitmq, rabbitmq_ip: '127.0.0.1' }
+
+# - name: Configure Badgr data storage
+#   hosts: "badgr-data-server"
+#   sudo: True
+#   gather_facts: True
+#   roles:
+    # - role: mysql_init
+    #   mysql_databases: ["{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}"]
+    #   mysql_database_users: 
+    #     - { db: "{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}", 
+    #         user: "{{ BADGR_APP_MYSQL_DB_USER | default('badgr001') }}", 
+    #         pass: "{{ BADGR_APP_MYSQL_DB_PWD | default('NOTASECRET') }}"
+    #       }

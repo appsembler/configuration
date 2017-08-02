@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Error out when any command fails.  For the migration scripts migrating multiple
+# databases this ensure migration errors for any database will be seen by Ansible.
+set -euo pipefail
+
+cd {{ badgr_code_dir }}
+source {{ badgr_app_dir }}/badgr_env
+
+{{ badgr_venv_bin }}/python manage.py createsuperuser --username {{ BADGR_APP_DB_ADMIN_USER }} --password {{ BADGR_APP_DB_ADMIN_PWD }} --database {{ BADGR_APP_DB_NAME }} --noinput --settings {{ BADGR_APP_SETTINGS}} $@

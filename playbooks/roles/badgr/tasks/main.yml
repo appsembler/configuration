@@ -51,19 +51,6 @@
   when: BADGR_DEVELOPER_OPTIONS
   tags: badgr_app
 
-# this may not work
-- name: Initialize database for Badgr
-  hosts: "{{ BADGR_SQL_DATA_HOSTNAME | default('badgr-sql-data-server') }}"
-  roles:
-    - role: mysql_init
-      mysql_databases: ["{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}"]
-      mysql_database_users: 
-        - { "db": "{{ BADGR_APP_MYSQL_DB_NAME | default('badgr_app') }}", 
-            "user": "{{ BADGR_APP_MYSQL_DB_USER | default('badgr001') }}", 
-            "pass": "{{ BADGR_APP_MYSQL_DB_PWD | default('NOTASECRET') }}"
-          }
-  tags: badgr_sql
-
 - name: install nodenv
   pip:
     name: "nodeenv"

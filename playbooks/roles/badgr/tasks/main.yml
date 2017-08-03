@@ -1,23 +1,5 @@
 ---
 
-- name: Create Badgr application user
-  user:
-    name: "{{ badgr_user }}"
-    home: "{{ badgr_app_dir }}"
-    createhome: no
-    shell: /bin/false
-  tags: badgr_app
-
-- name: Create Badgr app and venv dir
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ badgr_user }}"
-    group: "{{ common_web_group }}"
-  with_items:
-    - "{{ badgr_app_dir }}"
-    - "{{ badgr_venvs_dir }}"
-  tags: badgr_app    
     
 - name: Install base system packages on which Badgr relies
   apt:
@@ -36,18 +18,43 @@
   when: BADGR_DEVELOPER_OPTIONS
   tags: badgr_app
 
+- name: Create Badgr application user
+  user:
+    name: "{{ badgr_user }}"
+    home: "{{ badgr_app_dir }}"
+    createhome: no
+    shell: /bin/false
+  tags: badgr_app
+
+- name: Create Badgr app and venv dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ badgr_user }}"
+    group: "{{ common_web_group }}"
+  with_items:
+    - "{{ badgr_app_dir }}"
+    - "{{ badgr_venvs }}"
+  tags: badgr_app
+
+- name: Install Badgr server
+  git: repo={{ badgr_source_repo }} version={{ badgr_version }} dest={{ badgr_code_dir }} accept_hostkey=yes
+  become_user: "{{ badgr_user }}"
+
 - name: Install standard Badgr requirements
   pip:
-    requirements: "{{ badgr_app_dir }}/requirements.txt"
-    virtualenv: "{{ badgr_venv_dir }}"
+    requirements: "{{ badgr_code_dir }}/requirements.txt"
+    virtualenv: "{{ badgr_venv }}"
     state: present
+  become_user: "{{ badgr_user }}"    
   tags: badgr_app
 
 - name: Install Badgr development requirements
   pip:
-    requirements: "{{ badgr_app_dir }}/requirements-dev.txt"
-    virtualenv: "{{ badgr_venv_dir }}"
+    requirements: "{{ badgr_code_dir }}/requirements-dev.txt"
+    virtualenv: "{{ badgr_venv }}"
     state: present
+  become_user: "{{ badgr_user }}"    
   when: BADGR_DEVELOPER_OPTIONS
   tags: badgr_app
 
@@ -56,12 +63,13 @@
     name: "nodeenv"
     version: "1.1.1"
     # NOTE (CCB): Using the "virtualenv" option here doesn't seem to work.
-    executable: "{{ badgr_venv_dir }}/bin/pip"
+    executable: "{{ badgr_venv }}/bin/pip"
   become_user: "{{ badgr_user }}"
   tags: badgr_app
 
 - name: create Badgr nodeenv
-  shell: "{{ badgr_venv_dir }}/bin/nodeenv {{ badgr_nodeenv_dir }} --node={{ badgr_node_version }} --prebuilt --force"
+  shell: "{{ badgr_venv }}/bin/nodeenv {{ badgr_nodeenv_dir }} --node={{ badgr_node_version }} --prebuilt --force"
+  become_user: "{{ badgr_user }}"
   tags: badgr_app
 
 # Set the npm registry
@@ -71,6 +79,7 @@
   shell: "npm config set registry '{{ COMMON_NPM_MIRROR_URL }}'"
   args:
     creates: "{{ badgr_app_dir }}/.npmrc"
+  become_user: "{{ badgr_user }}"    
   tags: badgr_app
   environment: "{{ badgr_environment }}"
 
@@ -80,6 +89,16 @@
     path: "{{ badgr_app_dir }}/.npmrc"
     owner: "{{ badgr_user }}"
     group: "{{ badgr_user }}"
+  tags: badgr_app
+
+- name: install grunt-cli for Badgr
+  npm:
+    name: grunt-cli
+    executable: "{{ badgr_nodeenv_bin }}/npm"
+    path: "{{ badgr_code_dir }}"
+    state: latest
+  environment: "{{ badgr_environment }}"
+  become_user: "{{ badgr_user }}"
   tags: badgr_app
 
 - name: install Badgr node dependencies
@@ -109,7 +128,8 @@
   tags: badgr_app
 
 - name: run Badgr migration
-  shell: "{COMMON_BIN_DIR}/badgr-migrate"
+  shell: "{{COMMON_BIN_DIR}}/badgr-migrate"
+  become_user: "{{ badgr_user }}"
   when: "{{ BADGR_RUN_MIGRATIONS | default(True)}}" 
 
 # - name: create Badgr app admin user

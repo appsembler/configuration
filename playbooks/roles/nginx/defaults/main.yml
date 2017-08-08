@@ -166,3 +166,24 @@ NGINX_CREATE_HTPASSWD_FILE: >
     XQUEUE_ENABLE_BASIC_AUTH|bool or
     XSERVER_ENABLE_BASIC_AUTH|bool
   }}
+
+
+nginx_base_extra_locations: ""
+nginx_base_extra_http: ""
+nginx_lms_specific_extra_locations: ""
+nginx_cms_specific_extra_locations: ""
+nginx_lms_specific_extra_http: ""
+nginx_cms_specific_extra_http: ""
+
+nginx_lms_extra_locations: |
+  {{ nginx_lms_specific_extra_locations }}
+  {{ nginx_base_extra_locations }}
+nginx_cms_extra_locations: |
+  {{ nginx_cms_specific_extra_locations }}
+  {{ nginx_base_extra_locations }}
+nginx_lms_extra_http: |
+  {{ nginx_lms_specific_extra_http }}
+  {{ nginx_base_extra_http }}
+nginx_cms_extra_http: |
+  {{ nginx_cms_specific_extra_http }}
+  {{ nginx_base_extra_http }}

@@ -1,0 +1,8 @@
+{% do badgr_auth_config.update(BADGR_AUTH_EXTRA) %}
+{% for key, value in badgr_auth_config.iteritems() -%}
+  {% if value == 'None' -%}
+    {% do badgr_auth_config.update({key: None }) %} 
+  {%- endif %}
+{%- endfor %}
+
+{{ badgr_auth_config | to_nice_json }}

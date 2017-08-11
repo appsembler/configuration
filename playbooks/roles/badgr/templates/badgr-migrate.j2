@@ -7,4 +7,4 @@ set -euo pipefail
 cd {{ badgr_code_dir }}
 source {{ badgr_app_dir }}/badgr_env
 
-{{ badgr_venv_bin }}/python manage.py migrate --database {{ BADGR_APP_DB_NAME }} --noinput --settings {{ BADGR_APP_SETTINGS}} $@
+{{ badgr_venv_bin }}/python manage.py migrate --database {{ BADGR_APP_MYSQL_DB_NAME }} --noinput --settings {{ BADGR_APP_SETTINGS}} $@

@@ -118,7 +118,18 @@
     owner: "{{ badgr_user }}"
     group: "{{ common_web_user }}"
     mode: "0644"
+  tags: badgr_app    
   
+- name: create Badgr app config
+  template:
+    src: "{{item}}.json.j2"
+    dest: "{{ badgr_app_dir }}/{{item}}.json"
+  become_user: "{{ badgr_user }}"
+  with_items:
+    - env
+    - auth
+  tags: badgr_app
+
 - name: create helper scripts for managing badgr
   template:
     src: "badgr-migrate.j2"

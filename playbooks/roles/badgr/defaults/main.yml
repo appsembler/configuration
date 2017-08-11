@@ -34,7 +34,11 @@ badgr_debian_devel_pkgs:
 BADGR_DEVELOPER_OPTIONS: false
 BADGR_APP_SETTINGS: "mainsite.settings_local"
 BADGR_RUN_MIGRATIONS: true
-BADGR_APP_DB_NAME: "badgr"
+
+BADGR_APP_MYSQL_DB_NAME: "badgr_app"
+BADGR_APP_MYSQL_DB_USER: "badgr001"
+BADGR_APP_MYSQL_DB_HOST: "localhost"
+
 
 badgr_source_repo: "https://github.com/concentricsky/badgr-server.git"
 badgr_version: "master"
@@ -57,3 +61,8 @@ badgr_environment:
   # CONFIG_ROOT: "{{ badgr_app_dir }}"
   # BOTO_CONFIG: "{{ badgr_app_dir }}/.boto"
 
+CONFIG_ROOT: "{{ badgr_app_dir }}"
+badgr_env_config: {}
+badgr_auth_config: {}
+BADGR_ENV_EXTRA: {}
+BADGR_AUTH_EXTRA: {}

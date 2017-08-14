@@ -130,6 +130,16 @@
     - auth
   tags: badgr_app
 
+# TODO: use syslog
+- name: create edxapp log dir
+  file:
+    path: "{{ badgr_log_dir }}"
+    state: directory
+    owner: "{{ badgr_user }}"
+    group: "{{ common_web_user }}"
+    mode: 0770  # TODO: 660 wouldn't work with wsgi, why?
+  tags: badgr_app
+
 - name: create helper scripts for managing badgr
   template:
     src: "badgr-migrate.j2"
@@ -148,5 +158,38 @@
 #   when: "{{ BADGR_MAKE_SUPERUSER | default(True) }}"   
 
 # - name: run Grunt dist
+- name: write badgr gunicorn script
+  template:
+    src: "badgr_gunicorn.py.j2"
+    dest: "{{ badgr_app_dir }}/badgr_gunicorn.py"
+  become_user: "{{ badgr_user }}"
+  tags: badgr_app
 
+# write the supervisor script for edxapp and celery workers
+- name: write badgr supervisor configuration 
+  template:
+    src: "badgr.conf.j2"
+    dest: "{{ supervisor_available_dir }}/badgr.conf"
+    owner: "{{ supervisor_user }}"
+    group: "{{ supervisor_user }}"
+  become_user: "{{ supervisor_user }}"
+  tags: badgr_app
+
+- name: enable badgr supervisor script
+  file:
+    src: "{{ supervisor_available_dir }}/badgr.conf"
+    dest: "{{ supervisor_cfg_dir }}/badgr.conf"
+    state: link
+    force: yes
+  become_user: "{{ supervisor_user }}"
+  when: not disable_edx_services
+  tags: badgr_app
+
+- name: update supervisor configuration
+  shell:  "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
+  register: supervisor_update
+  become_user: "{{ supervisor_service_user }}"
+  changed_when: supervisor_update.stdout is defined and supervisor_update.stdout != ""
+  when: not disable_edx_services
+  tags: badgr_app
 

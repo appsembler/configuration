@@ -1,0 +1,17 @@
+[program:badgr]
+
+{% if COMMON_ENABLE_NEWRELIC_APP -%}
+{% set executable = badgr_venv + '/bin/newrelic-admin run-program ' + badgr_venv + '/bin/gunicorn' -%}
+{% else -%}
+{% set executable = badgr_venv + '/bin/gunicorn' -%}
+{% endif -%}
+
+command={{ executable }} -c {{ badgr_app_dir }}/badgr_gunicorn.py {{ BADGR_GUNICORN_EXTRA_CONF }} wsgi
+
+user={{ common_web_user }}
+directory={{ badgr_code_dir }}
+environment={% if COMMON_ENABLE_NEWRELIC_APP %}NEW_RELIC_APP_NAME={{ BADGR_NEWRELIC_APPNAME }},NEW_RELIC_LICENSE_KEY={{ NEWRELIC_LICENSE_KEY }},{% endif -%}PORT={{ badgr_gunicorn_port }},ADDRESS={{ badgr_gunicorn_host }},LANG={{ BADGR_LANG }},DJANGO_SETTINGS_MODULE={{ BADGR_APP_SETTINGS }}
+stdout_logfile={{ supervisor_log_dir }}/%(program_name)s-stdout.log
+stderr_logfile={{ supervisor_log_dir }}/%(program_name)s-stderr.log
+killasgroup=true
+stopasgroup=true

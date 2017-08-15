@@ -128,7 +128,9 @@
   with_items:
     - env
     - auth
-  tags: badgr_app
+  tags: 
+    - badgr_app
+    - badgr_app_config
 
 # TODO: use syslog
 - name: create edxapp log dir

@@ -46,6 +46,7 @@ badgr_user: "badgr"
 badgr_app_dir: "{{ COMMON_APP_DIR }}/badgr"
 badgr_code_dir: "{{ badgr_app_dir }}/badgr-server"
 badgr_log_dir: "{{ COMMON_LOG_DIR }}/badgr"
+badgr_data_dir: "{{ badgr_code_dir }}"  # for now, but move to common data dir
 badgr_venvs_dir: "{{ badgr_app_dir }}/venvs"
 badgr_venv: "{{ badgr_venvs_dir }}/badgr"
 badgr_venv_bin: "{{ badgr_venv }}/bin"
@@ -73,7 +74,9 @@ BADGR_AUTH_EXTRA: {}
 BADGR_LANG: "en"
 BADGR_NEWRELIC_APPNAME: "Badgr Server"
 BADGR_GUNICORN_EXTRA_CONF: !!null
+BADGR_ENABLE_BASIC_AUTH: false
 
 badgr_gunicorn_host: "127.0.0.1"
 badgr_gunicorn_port: "8160"
+BADGR_NGINX_PORT: "18160"
 BADGR_MAX_REQ: 0

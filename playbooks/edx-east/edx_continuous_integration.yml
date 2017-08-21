@@ -13,10 +13,8 @@
       - lms
       - xqueue
       - xserver
-      - certs
       - analytics_api
       - ecommerce
-      - programs
       - credentials
       nginx_default_sites:
       - lms
@@ -36,11 +34,9 @@
     - { role: "xqueue", update_users: True }
     - role: xserver
       when: XSERVER_GIT_IDENTITY|length > 0
-    - certs
     - edx_ansible
     - analytics_api
     - ecommerce
-    - programs
     - credentials
     - oauth_client_setup
     - role: datadog

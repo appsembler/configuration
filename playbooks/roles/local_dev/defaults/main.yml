@@ -56,17 +56,17 @@ localdev_accounts:
       }
 
     - {
-        user: "{{ programs_user|default('None') }}",
-        home: "{{ programs_home|default('None') }}",
-        env: "programs_env",
-        repo: "programs"
-      }
-
-    - {
         user: "{{ credentials_user|default('None') }}",
         home: "{{ credentials_home|default('None') }}",
         env: "credentials_env",
         repo: "credentials"
+      }
+
+    - {
+        user: "{{ discovery_user|default('None') }}",
+        home: "{{ discovery_home|default('None') }}",
+        env: "discovery_env",
+        repo: "discovery"
       }
 
 # Helpful system packages for local dev

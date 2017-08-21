@@ -1,3 +1,13 @@
+# We install at least one package from the multiverse (ubuntu-restricted-extras)
+# Ensure that we have it enabled for machines that run the browser role.
+multiverse_urls:
+    - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+    - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}} multiverse'
+    - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+    - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-updates multiverse'
+    - 'deb http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-security multiverse'
+    - 'deb-src http://archive.ubuntu.com/ubuntu {{ansible_distribution_release}}-security multiverse'
+
 browser_deb_pkgs:
     - dbus-x11
     - gdebi
@@ -20,6 +30,12 @@ browser_s3_deb_pkgs:
     url: https://s3.amazonaws.com/vagrant.testeng.edx.org/firefox_45.0.2%2Bbuild1-0ubuntu1_amd64.deb
   - name: google-chrome-stable_55.0.2883.87-1_amd64.deb
     url: https://s3.amazonaws.com/vagrant.testeng.edx.org/google-chrome-stable_55.0.2883.87-1_amd64.deb
+
+trusty_browser_s3_deb_pkgs:
+  - name: google-chrome-stable_30.0.1599.114-1_amd64.deb
+    url: https://s3.amazonaws.com/vagrant.testeng.edx.org/google-chrome-stable_30.0.1599.114-1_amd64.deb
+  - name: firefox-mozilla-build_42.0-0ubuntu1_amd64.deb
+    url: https://s3.amazonaws.com/vagrant.testeng.edx.org/firefox-mozilla-build_42.0-0ubuntu1_amd64.deb
 
 # ChromeDriver
 chromedriver_version: 2.27

@@ -29,7 +29,8 @@ FORUM_NGINX_PORT: "18080"
 FORUM_API_KEY: "password"
 FORUM_ELASTICSEARCH_HOST: "localhost"
 FORUM_ELASTICSEARCH_PORT: "9200"
-FORUM_ELASTICSEARCH_URL: "http://{{ FORUM_ELASTICSEARCH_HOST }}:{{ FORUM_ELASTICSEARCH_PORT }}"
+FORUM_ELASTICSEARCH_PROTOCOL: "http"
+FORUM_ELASTICSEARCH_URL: "{{ FORUM_ELASTICSEARCH_PROTOCOL }}://{{ FORUM_ELASTICSEARCH_HOST }}:{{ FORUM_ELASTICSEARCH_PORT }}"
 
 # This needs to be a string, set to 'false' to disable
 FORUM_NEW_RELIC_ENABLE: '{{ COMMON_ENABLE_NEWRELIC_APP }}'
@@ -40,6 +41,13 @@ FORUM_WORKER_PROCESSES: "4"
 FORUM_LISTEN_HOST: "0.0.0.0"
 FORUM_LISTEN_PORT: "4567"
 FORUM_USE_TCP: false
+
+# If forums fails to start because rake search:validate_index failed,
+# wait this long before attempting to restart it
+FORUM_RESTART_DELAY: 60
+
+# Set to rebuild the forum ElasticSearch index from the database.
+FORUM_REBUILD_INDEX: false
 
 forum_environment:
   RBENV_ROOT: "{{ forum_rbenv_root }}"

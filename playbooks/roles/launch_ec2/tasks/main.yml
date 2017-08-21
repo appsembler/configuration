@@ -18,7 +18,7 @@
 
 - name: terminating single instance
   local_action:
-    module: ec2_2_1_1_0
+    module: ec2
     state: 'absent'
     region: "{{ region }}"
     instance_ids: "{{tag_lookup.instance_ids}}"
@@ -36,7 +36,7 @@
 
 - name: Launch ec2 instance
   local_action:
-    module: ec2_2_1_1_0
+    module: ec2
     keypair: "{{ keypair }}"
     group: "{{ security_group }}"
     instance_type: "{{ instance_type }}"
@@ -50,6 +50,7 @@
       - device_name: /dev/sda1
         volume_size: "{{ root_ebs_size }}"
         delete_on_termination: true
+        volume_type: "gp2"
     zone: "{{ zone }}"
     instance_profile_name: "{{ instance_profile_name }}"
     user_data: "{{ user_data }}"
@@ -57,7 +58,7 @@
 
 - name: Add DNS name
   local_action:
-    module: route53_2_1_1_0
+    module: route53
     overwrite: yes
     command: create
     zone: "{{ dns_zone }}"
@@ -69,7 +70,7 @@
 
 - name: Add DNS names for services
   local_action:
-    module: route53_2_1_1_0
+    module: route53
     overwrite: yes
     command: create
     zone: "{{ dns_zone }}"
@@ -79,7 +80,7 @@
     value: "{{ item[0].public_dns_name }}"
   with_nested:
     - "{{ ec2.instances }}"
-    - ['studio', 'ecommerce', 'preview', 'programs', 'discovery', 'credentials']
+    - ['studio', 'ecommerce', 'preview', 'discovery', 'credentials']
 
 - name: Add new instance to host group
   local_action:

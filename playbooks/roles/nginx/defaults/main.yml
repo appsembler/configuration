@@ -49,6 +49,9 @@ NGINX_SSL_CIPHERS: "'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:E
 # Location from where nginx will load cert and key
 NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }}'
 NGINX_SSL_KEY_PATH: '/etc/ssl/private/{{ NGINX_SSL_KEY|basename }}'
+NGINX_SSL_PROTOCOLS: "TLSv1 TLSv1.1 TLSv1.2"
+NGINX_DH_PARAMS_PATH: "/etc/ssl/private/dhparams.pem"
+NGINX_DH_KEYSIZE: 2048
 
 # This is only for renaming from the old domain names to the new brand name
 OLD_NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/old_domain_cert.crt'
@@ -107,7 +110,6 @@ NGINX_EDXAPP_ERROR_PAGES:
 CMS_HOSTNAME: '~^((stage|prod)-)?studio.*'
 ECOMMERCE_HOSTNAME: '~^((stage|prod)-)?ecommerce.*'
 NOTES_HOSTNAME: '~^((stage|prod)-)?notes.*'
-PROGRAMS_HOSTNAME: '~^((stage|prod)-)?programs.*'
 CREDENTIALS_HOSTNAME: '~^((stage|prod)-)?credentials.*'
 
 nginx_template_dir: "edx/app/nginx/sites-available"
@@ -132,8 +134,6 @@ nginx_edx_notes_api_gunicorn_hosts:
   - 127.0.0.1
 nginx_ecommerce_gunicorn_hosts:
   - 127.0.0.1
-nginx_programs_gunicorn_hosts:
-  - 127.0.0.1
 nginx_credentails_gunicorn_hosts:
   - 127.0.0.1
 
@@ -154,13 +154,15 @@ NGINX_P3P_MESSAGE: 'CP="Open edX does not have a P3P policy."'
 
 COMMON_ENABLE_BASIC_AUTH: False
 
+REDIRECT_NGINX_PORT: "{{ EDXAPP_LMS_NGINX_PORT }}"
+REDIRECT_SSL_NGINX_PORT: "{{ EDXAPP_LMS_SSL_NGINX_PORT }}"
+
 CERTS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 ECOMMERCE_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 EDXAPP_CMS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 EDXAPP_LMS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 EDXAPP_LMS_PREVIEW_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 KIBANA_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
-PROGRAMS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 XQUEUE_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 XSERVER_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 
@@ -172,7 +174,6 @@ NGINX_CREATE_HTPASSWD_FILE: >
     EDXAPP_LMS_ENABLE_BASIC_AUTH|bool or
     EDXAPP_LMS_PREVIEW_ENABLE_BASIC_AUTH|bool or
     KIBANA_ENABLE_BASIC_AUTH|bool or
-    PROGRAMS_ENABLE_BASIC_AUTH|bool or
     XQUEUE_ENABLE_BASIC_AUTH|bool or
     XSERVER_ENABLE_BASIC_AUTH|bool
   }}

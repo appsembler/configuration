@@ -24,6 +24,7 @@
     - elasticsearch
     - memcached
     - {role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: ""}
+    - {role: "{{ appsembler_roles }}/cert_agent"}   # -- TODO: We should override the few secrets this role has right here
 
 
 - name: Configure app server instance(s)

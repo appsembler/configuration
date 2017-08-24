@@ -27,7 +27,6 @@
   sudo: True
   gather_facts: True
   roles:
-    # - { role: ../roles/virtualenv, virtualenv_user: "badgr", virtualenv_name: "badgr" }
     - badgr
     - { role: nginx, nginx_sites: ["badgr"], vars_files: ["roles/badgr/defaults/main.yml"]}
     - { role: rbenv, rbenv_user: "{{ badgr_user }}", rbenv_dir: "{{ badgr_app_dir }}", rbenv_ruby_version: "{{ badgr_ruby_version }}" }

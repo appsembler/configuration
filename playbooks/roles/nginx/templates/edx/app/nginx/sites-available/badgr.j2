@@ -26,6 +26,12 @@ server {
     expires epoch;
   }
 
+  location ~ ^media/uploads/(?P<file>.*) {
+      root {{ badgr_media_dir }}/uploads;
+      try_files /$file =404;
+  }
+
+
   {% include "robots.j2" %}
 
 

@@ -2,4 +2,7 @@
 dependencies:
   - common
   - supervisor
+  # - role: virtualenv
+  #   virtualenv_user: "badgr"
+  #   virtualenv_name: "badgr"
 

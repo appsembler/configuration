@@ -6,7 +6,7 @@
 {% set executable = badgr_venv + '/bin/gunicorn' -%}
 {% endif -%}
 
-command={{ executable }} -c {{ badgr_app_dir }}/badgr_gunicorn.py {{ BADGR_GUNICORN_EXTRA_CONF }} wsgi
+command={{ executable }} -c {{ badgr_app_dir }}/badgr_gunicorn.py wsgi
 
 user={{ common_web_user }}
 directory={{ badgr_code_dir }}

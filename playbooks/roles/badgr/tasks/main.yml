@@ -118,7 +118,7 @@
     owner: "{{ badgr_user }}"
     group: "{{ common_web_user }}"
     mode: "0644"
-  tags: badgr_app    
+  tags: ['badgr_app', 'badgr_test']
   
 - name: create Badgr app config
   template:
@@ -144,11 +144,14 @@
 
 - name: create helper scripts for managing badgr
   template:
-    src: "badgr-migrate.j2"
-    dest: "{{ COMMON_BIN_DIR }}/badgr-migrate"
+    src: "{{ item }}.j2"
+    dest: "{{ COMMON_BIN_DIR }}/{{ item }}"
     owner: "{{ badgr_user }}"
     mode: 0755
-  tags: badgr_app
+  with_items:
+    - badgr-migrate
+    - badgr-grunt-dist
+  tags: ['badgr_app', 'badgr_test']
 
 - name: run Badgr migration
   shell: "{{COMMON_BIN_DIR}}/badgr-migrate"
@@ -159,7 +162,22 @@
 #   shell: "{COMMON_BIN_DIR}/badgr-superuser"
 #   when: "{{ BADGR_MAKE_SUPERUSER | default(True) }}"   
 
-# - name: run Grunt dist
+# NOT WORKING
+# - name: install up-to-date Sass gem to ruby env
+#   shell: "gem install sass -v {{ badgr_sass_version }}"
+#   become_user: "{{ badgr_user }}"  
+#   environment:
+#     RBENV_ROOT: "{{ badgr_app_dir }}/.rbenv"
+#     GEM_ROOT: "{{ RBENV_ROOT }}/.gem"
+#     GEM_HOME: "{{ GEM_ROOT }}"
+#   tags: ['badgr_app', 'badgr_test']
+
+- name: run Grunt dist
+  shell: "{{COMMON_BIN_DIR}}/badgr-grunt-dist"
+  become_user: "{{ badgr_user }}"
+  when: "{{ BADGR_RUN_GRUNT_DIST | default(True)}}"  
+  tags: ['badgr_app', 'badgr_test']
+
 - name: write badgr gunicorn script
   template:
     src: "badgr_gunicorn.py.j2"

@@ -5,8 +5,8 @@ server {
   {% if NGINX_ENABLE_SSL %}
   listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} ssl;
 
-  ssl_certificate {{ item.ssl_certificate_path }};
-  ssl_certificate_key {{ item.ssl_key_path }};
+  ssl_certificate /etc/letsencrypt/live/{{ item }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ item }}/privkey.pem;
   # request the browser to use SSL for all connections
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
   {% endif %}

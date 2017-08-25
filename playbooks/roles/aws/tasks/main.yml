@@ -26,12 +26,12 @@
 #
 #- name: Gather ec2 facts for use in other roles
 #  action: ec2_facts
-  no_log: True
-  tags:
-    - deploy
-
-- name: Set the MTU to 1500 temporarily
-  shell: "/sbin/ifconfig {{ ansible_default_ipv4.interface }} mtu 1500 up"
+#  no_log: True
+#  tags:
+#    - deploy
+#
+#- name: Set the MTU to 1500 temporarily
+#  shell: "/sbin/ifconfig {{ ansible_default_ipv4.interface }} mtu 1500 up"
 #  when: ansible_distribution in common_debian_variants
 #
 #- name: Check for eth0.cfg

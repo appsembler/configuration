@@ -57,6 +57,18 @@
     - install
     - install:configuration
 
+- name: Copy over redacted server-vars.yml
+  template:
+    dest: "{{ edx_ansible_app_dir}}/server-vars.yml"
+    src: "server_vars.j2"
+    owner: "{{ edx_ansible_user }}"
+    group: "{{ edx_ansible_user }}"
+    mode: "0755"
+  when: devstack is not defined or not devstack
+  tags:
+    - install
+    - install:configuration
+
 - name: Create symlinks for update script
   file:
     src: "{{ edx_ansible_app_dir }}/update"

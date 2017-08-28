@@ -1,0 +1,28 @@
+- name: "Fetch custom domains list"
+  become_user: "{{ cert_agent_app_user }}"
+  shell: "echo '[{\"domains\": [\"staging-openedx.initeq.net\"]}]'"
+  # django_manage: >
+  #     command="custom_domains_list"
+  #     app_path={{cert_agent_django_project_dir}}
+  #     settings={{cert_agent_django_settings_module}}
+  #     pythonpath={{cert_agent_django_project_dir}}
+  #     virtualenv={{cert_agent_venv_dir}}
+  register: custom_domains_cmd
+  environment: "{{cert_agent_django_env_vars}}"
+  run_once: True
+  delegate_to: "{{ groups['services'][0] }}"
+  tags:
+    - custom_domains:get_domains
+
+- name: Set fact letsencrypt_certs
+  set_fact:
+    letsencrypt_certs: "{{ custom_domains_cmd.stdout|from_json }}"
+  tags:
+    - custom_domains:get_domains
+
+- name: Dinamo
+  debug:
+    var: letsencrypt_certs
+  tags:
+    - custom_domains:debug
+

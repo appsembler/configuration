@@ -18,6 +18,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
+    - custom_domains # This gets the list of domains
     - edx_ansible
     - role: "{{ appsembler_roles  }}/gcsfuse"
     - oraclejdk
@@ -45,6 +46,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
+    - custom_domains # This gets a lits of custom domains
     - role: "{{ appsembler_roles  }}/gcsfuse"
     - mysql_init
     - role: nginx

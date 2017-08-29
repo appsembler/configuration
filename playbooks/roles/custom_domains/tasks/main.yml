@@ -29,7 +29,7 @@
 
 - name: Set fact letsencrypt_certs
   set_fact:
-    letsencrypt_certs: "{{ custom_domains_cmd.stdout|from_json }}"
+    letsencrypt_certs: "{{ custom_domains_cmd.out|from_json }}"
   tags:
     - custom_domains
     - custom_domains:get_domains

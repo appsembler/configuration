@@ -1,4 +1,4 @@
-- name: Include vars of stuff.yml into the 'stuff' variable (2.2).
+- name: Include edxapp vars
   include_vars:
     file: ../../edxapp/defaults/main.yml
   tags:

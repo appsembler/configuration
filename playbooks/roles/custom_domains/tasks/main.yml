@@ -1,28 +1,43 @@
+- name: Include vars of stuff.yml into the 'stuff' variable (2.2).
+  include_vars:
+    file: ../../edxapp/defaults/main.yml
+  tags:
+    - custom_domains
+    - custom_domains:get_domains
+
+- name: Print user
+  debug:
+    var: edxapp_user
+  tags:
+    - custom_domains
+    - custom_domains:debug
+
 - name: "Fetch custom domains list"
   become_user: "{{ edxapp_user }}"
-  shell: "echo '[{\"domains\": [\"staging-openedx.initeq.net\"]}]'"
-  # django_manage: >
-  #   command="lms custom_domains_list"
-  #   app_path="{{ edxapp_code_dir }}"
-  #   settings=amc
-  #   pythonpath="{{ edxapp_code_dir }}"
-  #   virtualenv="{{ edxapp_venv_dir }}"
+  django_manage: >
+    command="lms custom_domains_list"
+    app_path="{{ edxapp_code_dir }}"
+    settings=amc
+    pythonpath="{{ edxapp_code_dir }}"
+    virtualenv="{{ edxapp_venv_dir }}"
   register: custom_domains_cmd
-  environment: "{{cert_agent_django_env_vars}}"
   run_once: True
   delegate_to: "{{ groups['edx'][0] }}"
   tags:
+    - custom_domains
     - custom_domains:get_domains
 
 - name: Set fact letsencrypt_certs
   set_fact:
     letsencrypt_certs: "{{ custom_domains_cmd.stdout|from_json }}"
   tags:
+    - custom_domains
     - custom_domains:get_domains
 
-- name: Dinamo
+- name: Print letsencrypt_certs
   debug:
     var: letsencrypt_certs
   tags:
+    - custom_domains
     - custom_domains:debug
 

@@ -234,37 +234,39 @@
     - install:configuration
 
 # Custom domains
-- name: Copy common settings for the LMS and CMS
-  template:
-    src: "edx/app/nginx/{{ item }}"
-    dest: "{{ nginx_sites_available_dir }}/{{ item | rstrip('.j2') }}"
-    owner: root
-    group: "{{ common_web_user }}"
-    mode: 0640
-  with_items:
-    - "lms-common-settings.j2"
-  notify: reload nginx
-  tags:
-    - install
-    - install:configuration
-    - nginx:custom_domains
+# - name: Copy common settings for the LMS and CMS
+#   template:
+#     src: "edx/app/nginx/lms-common-settings.j2"
+#     dest: "{{ nginx_sites_available_dir }}/lms-common-settings"
+#     owner: root
+#     group: "{{ common_web_user }}"
+#     mode: 0640
+#   notify: reload nginx
+#   when: inventory_hostname in groups['edx']
+#   tags:
+#     - install
+#     - install:configuration
+#     - nginx:custom_domains
 
 # I thin this will be useful in the beginning so I'm leaving it here.
 # Remove when not necessary anymore.
 - name: Debug custom domains structure
   debug: var=item
-  with_items: "{{ NGINX_LMS_CUSTOM_DOMAINS }}"
+  with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
+  when: inventory_hostname in groups['edx']
   tags:
+    - nginx:custom_domains
     - nginx:custom_domains:debug
 
 - name: Copy configs for LMS custom domains
   template:
-    src: "edx/app/nginx/lms-custom.j2"
+    src: "edx/app/nginx/sites-available/lms-custom.j2"
     dest: "{{ nginx_sites_available_dir }}/{{ item }}"
     owner: root
     group: "{{ common_web_user }}"
     mode: 0640
-  with_items: NGINX_LMS_CUSTOM_DOMAINS
+  with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
+  when: inventory_hostname in groups['edx']
   notify: reload nginx
   tags:
     - install
@@ -278,7 +280,8 @@
     state: link
     owner: root
     group: root
-  with_items: NGINX_LMS_CUSTOM_DOMAINS
+  with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
+  when: inventory_hostname in groups['edx']
   notify: reload nginx
   tags:
     - install

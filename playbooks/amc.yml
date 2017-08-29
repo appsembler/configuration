@@ -77,7 +77,7 @@
       when: COMMON_ENABLE_SPLUNKFORWARDER
     - role: newrelic
       when: COMMON_ENABLE_NEWRELIC
-    - role: "{{ appsembler_roles }}/letsencrypt"
+    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
 
 - name: Install xqueue, notifier and rabbitmq on services node
   hosts: "services"

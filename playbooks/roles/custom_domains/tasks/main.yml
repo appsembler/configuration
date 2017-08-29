@@ -5,13 +5,6 @@
     - custom_domains
     - custom_domains:get_domains
 
-- name: Print user
-  debug:
-    var: edxapp_user
-  tags:
-    - custom_domains
-    - custom_domains:debug
-
 - name: "Fetch custom domains list"
   become_user: "{{ edxapp_user }}"
   django_manage: >

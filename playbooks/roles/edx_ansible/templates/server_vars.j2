@@ -15,9 +15,6 @@ letsencrypt_webserver_sites_available: "{{ letsencrypt_webserver_sites_available
 # TODO
 
 # NGINX stuff
-{% raw %}
-NGINX_LMS_CUSTOM_DOMAINS:  "{{ letsencrypt_certs|json_query('[*].domains') }}"
-{% endraw %}
 EDXAPP_LMS_NGINX_PORT: "{{ EDXAPP_LMS_NGINX_PORT }}"
 NGINX_ENABLE_SSL: "{{ NGINX_ENABLE_SSL }}"
 EDXAPP_LMS_SSL_NGINX_PORT: "{{ EDXAPP_LMS_SSL_NGINX_PORT }}"

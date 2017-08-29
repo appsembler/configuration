@@ -442,16 +442,16 @@
     - manage
     - manage:db
 
-- name: create service worker users
-  shell: "{{ edxapp_venv_bin }}/python ./manage.py lms --settings={{ edxapp_settings }} --service-variant lms manage_user {{ item.username}} {{ item.email }} --unusable-password {% if item.is_staff %} --staff{% endif %}"
-  args:
-    chdir: "{{ edxapp_code_dir }}"
-  become_user: "{{ common_web_user }}"
-  with_items: "{{ service_worker_users }}"
-  when: CREATE_SERVICE_WORKER_USERS
-  tags:
-    - manage
-    - manage:db
+# JLB- name: create service worker users
+# JLB  shell: "{{ edxapp_venv_bin }}/python ./manage.py lms --settings={{ edxapp_settings }} # JLB--service-variant lms manage_user {{ item.username}} {{ item.email }} --unusable-password # JLB{% if item.is_staff %} --staff{% endif %}"
+# JLB  args:
+# JLB    chdir: "{{ edxapp_code_dir }}"
+# JLB  become_user: "{{ edxapp_user }}"
+# JLB  with_items: "{{ service_worker_users }}"
+# JLB  when: CREATE_SERVICE_WORKER_USERS
+# JLB  tags:
+# JLB    - manage
+# JLB    - manage:db
 
 - name: Create OAuth credentials
   shell: >

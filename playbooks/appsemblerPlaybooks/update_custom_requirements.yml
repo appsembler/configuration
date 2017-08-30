@@ -1,5 +1,5 @@
 - hosts: "edxapp-server"
-  sudo: true
+  become: true
 
   # Update extra requirements, private requirements, 
   # collect static assets, and restart edx app and workers
@@ -18,8 +18,6 @@
     - name: set git fetch.prune to ignore deleted remote refs
       shell: git config --global fetch.prune true
       sudo_user: "{{ edxapp_user }}"
-
-
 
     - name: install python private requirements
       shell: >

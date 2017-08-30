@@ -8,5 +8,11 @@ server {
   # request the browser to use SSL for all connections
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
 
+  location '/.well-known/acme-challenge' {
+    default_type "text/plain";
+    root {{ letsencrypt_webroot }};
+  }
+
+
   {% include "lms-common-settings.j2" %}
 }

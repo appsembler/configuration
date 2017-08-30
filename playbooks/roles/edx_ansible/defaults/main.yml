@@ -33,7 +33,7 @@ edx_ansible_debian_pkgs:
   - python-yaml
   - python-mysqldb
 
-appsembler_roles_version: "master"
+appsembler_roles_version: "develop"
 appsembler_roles_source_repo: "https://github.com/appsembler/roles.git"
 appsembler_roles_code_dir: "{{ edx_ansible_app_dir }}/appsembler-roles"
 edx_ansible_app_dir: "{{ COMMON_APP_DIR }}/edx_ansible"

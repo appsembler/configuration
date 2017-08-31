@@ -288,6 +288,10 @@
     - install:configuration
     - nginx:custom_domains
 
+- name: Reload nginx for custom domains to take effect
+  service: name=nginx state=reloaded
+  tags: ['nginx:custom_domains']
+
   # These are static pages that can be used
   # for nginx rate limiting, 500 errors, etc.
 

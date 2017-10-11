@@ -1,0 +1,46 @@
+---
+- hosts: dogwood
+  vars: 
+    user: tj
+    dogwood_server: "104.196.60.47"
+    eucalyptus_server: "104.197.19.109"
+  tasks: 
+
+  - name: Generate ssh key
+    shell: ssh-keygen -b 2048 -t rsa -f /home/{{ user }}/.ssh/id_rsa -q -N ""
+    args:
+      creates: /home/{{ user }}/.ssh/id_rsa
+
+#  - name: Grab public key
+#    fetch: 
+#      src: /home/{{ user }}/.ssh/id_rsa.pub 
+#      dest: /tmp/id_rsa.tmp 
+#      flat: yes
+#
+#  - name: Coping public key to Eucalyptus server
+#    local_action: shell cat /tmp/id_rsa.tmp | ssh {{ user }}@{{ eucalyptus_server }} "cat >> /home/{{ user }}/.ssh/authorized_keys"
+#
+#  - name: Delete local copy of public key
+#    local_action: command rm -f /tmp/id_rsa.tmp 
+  - name: Copy public key from Dogwood to Eucalyptus server
+    local_action: shell scp -3 {{ user }}@{{ dogwood_server }}:/home/{{ user }}/.ssh/id_rsa.pub {{ user }}@{{ eucalyptus_server }}:/tmp/id_rsa.pub.tmp
+
+  - name: Stop edxapp LMS and CMS processes
+    shell: "sudo /edx/bin/supervisorctl stop edxapp:"
+  
+  - name: Create directory for db backups
+    file: 
+      path: /edx/backups
+      state: directory
+      owner: edxapp
+    sudo: true
+
+  - name: Dump MySQL edxapp table
+    shell: mysqldump -u root --all-databases --single-transaction > dogwoodDb.mysql
+
+- hosts: eucalyptus
+  tasks: 
+  #this task will copy the public key into authorized_keys multiple times
+  #should look into using line_in_file
+  - name: Copy Dogwood public ssh key to Eucalyptus server    
+    shell: "cat /tmp/id_rsa.pub.tmp >> /home/tj/.ssh/authorized_keys"

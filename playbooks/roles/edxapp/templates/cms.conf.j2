@@ -15,3 +15,6 @@ stdout_logfile={{ supervisor_log_dir }}/%(program_name)s-stdout.log
 stderr_logfile={{ supervisor_log_dir }}/%(program_name)s-stderr.log
 killasgroup=true
 stopasgroup=true
+autorestart={{ common_supervisor_program_autorestart }}
+startsecs={{ common_supervisor_program_startsecs }}
+startretries={{ common_supervisor_program_startretries }}

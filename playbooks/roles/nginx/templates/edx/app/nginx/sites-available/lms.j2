@@ -4,6 +4,13 @@
   {%- set default_site = "" -%}
 {%- endif -%}
 
+{% if NGINX_HEALTH_CHECK_ENABLED %}
+map $http_user_agent $healthcheck {
+ default 0;
+ "{{ NGINX_HEALTH_CHECK_USER_AGENT }}" 1;
+}
+{% endif %}
+
 upstream lms-backend {
     {% for host in nginx_lms_gunicorn_hosts %}
         server {{ host }}:{{ edxapp_lms_gunicorn_port }} fail_timeout=0;
@@ -65,6 +72,12 @@ error_page {{ k }} {{ v }};
   # Prevent invalid display courseware in IE 10+ with high privacy settings
   add_header P3P '{{ NGINX_P3P_MESSAGE }}';
 
+  {% if NGINX_HEALTH_CHECK_ENABLED %}
+  if ($healthcheck) {
+  return 200;
+  }
+  {% endif %}
+
 
   # Nginx does not support nested condition or or conditions so
   # there is an unfortunate mix of conditonals here.
@@ -84,6 +97,13 @@ error_page {{ k }} {{ v }};
    set $do_redirect_to_https "true";
   }
      {% endif %}
+
+  # DO NOT force redirect to HTTPS if we're just accessing the status endpoint
+  # This is needed to properly do the GCP health checks
+  if ($request_uri = "/status/")
+  {
+   set $do_redirect_to_https "false";
+  }
 
   # Execute the actual redirect
   if ($do_redirect_to_https = "true")
@@ -224,7 +244,9 @@ location ~ ^{{ EDXAPP_MEDIA_URL }}/(?P<file>.*) {
   {% include "robots.j2" %}
   {% include "static-files.j2" %}
 
-  {% include "extra_locations_lms.j2" ignore missing %}
+  {% if nginx_lms_extra_locations != "" %}
+    {{ nginx_lms_extra_locations }}
+  {% endif %}
 
   {% if EDXAPP_XBLOCK_SETTINGS.get('ScormXBlock', False) %}
     # asterisk needed so it doesn't break if the file doesn't exist
@@ -233,4 +255,6 @@ location ~ ^{{ EDXAPP_MEDIA_URL }}/(?P<file>.*) {
 
 }
 
-{% include "extra_http_lms.j2" ignore missing %}
+{% if nginx_lms_extra_http != "" %}
+  {{ nginx_lms_extra_http }}
+{% endif %}

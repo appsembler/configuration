@@ -18,3 +18,6 @@ stderr_logfile={{ xqwatcher_supervisor_log_dir }}/%(program_name)s-stderr.log
 environment={% if COMMON_ENABLE_NEWRELIC_APP %}NEW_RELIC_APP_NAME={{ XQWATCHER_NEWRELIC_APPNAME }},NEW_RELIC_LICENSE_KEY={{ NEWRELIC_LICENSE_KEY }},{% endif -%}
 killasgroup=true
 stopasgroup=true
+autorestart={{ common_supervisor_program_autorestart }}
+startsecs={{ common_supervisor_program_startsecs }}
+startretries= {{ common_supervisor_program_startretries }}

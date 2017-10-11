@@ -1,0 +1,11 @@
+---
+# for single server community
+# This file based on `edx_sandbox.yml`
+
+- name: Configure instance(s)
+  hosts: edxapp-server
+  sudo: True
+  gather_facts: True
+  roles:
+    - sudo
+    - tracking_logs_sync

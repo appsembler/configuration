@@ -170,7 +170,9 @@
   cron: >
     user={{ hadoop_common_user }}
     name="Sync tracking log to HDFS"
-    job="{{ HADOOP_COMMON_HOME }}/bin/hdfs dfs -put -f {{ COMMON_LOG_DIR }}/tracking/tracking.log {{ ANALYTICS_PIPELINE_HDFS_DATA_DIR }}/tracking.log"
+    job="{{ HADOOP_COMMON_HOME }}/bin/hdfs dfs -put -f {{ COMMON_LOG_DIR }}/tracking/tracking.log* {{ ANALYTICS_PIPELINE_HDFS_DATA_DIR }}/"
+    minute=00
+    hour=01
   tags:
     - install
     - install:configuration
@@ -180,16 +182,6 @@
     src=acceptance.json
     dest=/var/tmp/acceptance.json
     mode=644
-  tags:
-    - install
-    - install:configuration
-
-- name: grant access to table storing test data in output database
-  mysql_user: >
-    user={{ ANALYTICS_PIPELINE_OUTPUT_DATABASE.username }}
-    password={{ ANALYTICS_PIPELINE_OUTPUT_DATABASE.password }}
-    priv=acceptance%.*:ALL
-    append_privs=yes
   tags:
     - install
     - install:configuration

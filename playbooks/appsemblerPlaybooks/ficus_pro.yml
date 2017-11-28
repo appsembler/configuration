@@ -45,6 +45,7 @@
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - sudo
     - edxapp_common
+    - scorm    
     - mysql_init
     - role: nginx
       nginx_sites: []

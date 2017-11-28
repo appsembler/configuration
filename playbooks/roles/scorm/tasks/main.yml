@@ -9,6 +9,10 @@
     - install
     - install:base
 
+# - name: debug scorm
+#   debug: 
+#     msg: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS.keys() }}"
+
 - name: create all service directories
   file: >
     path="{{ item.value.path }}"
@@ -16,7 +20,7 @@
     owner="{{ item.value.owner }}"
     group="{{ item.value.group }}"
     mode="{{ item.value.mode }}"
-  with_dict: scorm_dirs
+  with_dict: "{{ scorm_dirs }}"
   when: EDXAPP_XBLOCK_SETTINGS.ScormXBlock
 
 - name: create missing scrormplayes dir
@@ -32,8 +36,8 @@
   copy: >
     content="{{ EDXAPP_AUTH_EXTRA.SCORMPLAYER_GIT_IDENTITIES[item] }}" dest=/tmp/scormplayer_{{ item }}_identity
     force=yes owner={{ scorm_player_dir.owner }} mode=0600
-  with_items: EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS.keys()
-  when: EDXAPP_AUTH_EXTRA.SCORMPLAYER_GIT_IDENTITIES[item]|default(False)
+  with_items: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS.keys() }}"
+  when: "{{ EDXAPP_AUTH_EXTRA['SCORMPLAYER_GIT_IDENTITIES'][item] is defined|default(False) }}"
 
 - name: checkout player repo
   git: >
@@ -42,13 +46,13 @@
     ssh_opts="-o StrictHostKeyChecking=no"
   sudo_user: "{{ scorm_player_dir.owner }}"
   register: "{{item.key}}_scormplayer_checkout"
-  with_dict: EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS
+  with_dict: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS }}"
   when: (item.value.repo|default(False))
 
 - name: remove read-only ssh key for the scormplayer repo
   file: path=/tmp/scormplayer_{{ item }}_identity state=absent
   when: EDXAPP_AUTH_EXTRA.SCORMPLAYER_GIT_IDENTITIES[item]|default(False)
-  with_items: EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS.keys()
+  with_items: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock.SCORM_PLAYER_BACKENDS.keys() }}"
 
 
 - name: install uuencode for emailing errors
@@ -88,7 +92,7 @@
   when: SCORM_S3_BACKUP
 
 # you must still run the Nginx role after this.
-- name: copy Nginx templates to nginx role
+- name: copy Nginx templates to includes dir
   template: >
     src=nginx_extra_templates/{{item}}.j2
     dest={{ nginx_includes_dir}}/{{item}}

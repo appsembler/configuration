@@ -10,7 +10,6 @@
   become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
-  notify: recompile SASS
   register: edxapp_theme_checkout
   tags:
     - install
@@ -27,7 +26,6 @@
   become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
-  notify: recompile SASS
   register: edxapp_theme_override_checkout
   tags:
     - install
@@ -44,7 +42,6 @@
   become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
-  notify: recompile SASS
   register: edxapp_theme_checkout
   tags:
     - install
@@ -62,7 +59,6 @@
   become_user: "{{ edxapp_user }}"
   environment:
     GIT_SSH: "{{ edxapp_git_ssh }}"
-  notify: recompile SASS
   register: edxapp_theme_override_checkout
   tags:
     - install

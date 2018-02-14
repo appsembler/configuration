@@ -426,6 +426,10 @@
 
 - set_fact:
     edxapp_installed: true
+  tags:
+    - manage
+    - deploy:platform
+    - edxapp_cfg
 
 ## Appsembler custom:
 ## compile i18n messages each time
@@ -445,6 +449,7 @@
   tags:
     - manage
     - deploy:platform
+    - edxapp_cfg
 
 - name: restart edxapp_workers
   supervisorctl:
@@ -457,6 +462,7 @@
   tags:
     - manage
     - deploy:platform
+    - edxapp_cfg
 
 - name: Create OAuth credentials
   shell: >

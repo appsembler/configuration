@@ -19,16 +19,33 @@
       shell: git config --global fetch.prune true
       sudo_user: "{{ edxapp_user }}"
 
+    # this is meant to create a new private requirements file, not
+    # the base in edx-platform/requirements/edx-private.txt
+    # if you are running this playbook you should be overriding 
+    # private_requirements_file
+    - name: Create private requirements file
+      template:
+        src: ../roles/edxapp/templates/private_requirements.txt.j2
+        dest: "{{ private_requirements_file }}"
+        owner: "{{ edxapp_user }}"
+        group: "{{ edxapp_user }}"
+      become_user: "{{ edxapp_user }}"
+      when:
+        - EDXAPP_INSTALL_PRIVATE_REQUIREMENTS is defined and EDXAPP_INSTALL_PRIVATE_REQUIREMENTS
+        - EDXAPP_PRIVATE_REQUIREMENTS is defined and EDXAPP_PRIVATE_REQUIREMENTS
+      tags:
+        - install
+        - install:app-requirements
+
     - name: install python private requirements
       shell: >
         {{ edxapp_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r {{ item }}
         chdir={{ edxapp_code_dir }}
-      with_items:
-      - "{{ private_requirements_file }}"
+      with_items: "{{ private_requirements_file }}"
       become_user: "{{ edxapp_user }}"
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
-      when: EDXAPP_INSTALL_PRIVATE_REQUIREMENTS
+      when: "{{ EDXAPP_INSTALL_PRIVATE_REQUIREMENTS }}"
       tags:
         - install
         - install:app-requirements     
@@ -40,10 +57,8 @@
         extra_args="--exists-action w {{ item.extra_args|default('') }}"
         virtualenv="{{ edxapp_venv_dir }}"
         state=present
-      with_items: EDXAPP_EXTRA_REQUIREMENTS
+      with_items: "{{ EDXAPP_EXTRA_REQUIREMENTS }}"
       sudo_user: "{{ edxapp_user }}"
-
-
 
     - name: remove read-only ssh key
       file: path={{ edxapp_git_identity }} state=absent
@@ -58,8 +73,6 @@
       with_items: "{{ service_variants_enabled }}"
       tags:
         - migrate
-
-
 
     - name: Remove and recreate the staticfiles directory so nothing stale can exist
       file:
@@ -80,8 +93,6 @@
       with_items: "{{ service_variants_enabled }}"
       tags:
         - gather_static_assets
-
-
 
     - name: restart edxapp
       supervisorctl: >

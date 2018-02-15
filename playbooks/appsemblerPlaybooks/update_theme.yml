@@ -10,6 +10,8 @@
   - roles/common_vars/defaults/main.yml
   - roles/supervisor/defaults/main.yml
   - roles/edxapp/defaults/main.yml
+  handlers:
+    - include: roles/edxapp/handlers/main.yml
   vars:
     tmp: none
   tasks:
@@ -68,7 +70,7 @@
       tags:
         - install
         - install:code
-        - update_lms_theme    
+        - update_lms_theme
 
     - name: remove read-only ssh key
       file:

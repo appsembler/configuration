@@ -39,6 +39,12 @@ security:
 
 {% endif %}
 net:
+  ssl:
+    mode: {{ MONGO_SSL_MODE }}
+{% if MONGO_SSL_MODE != "disabled" %}
+    PEMKeyFile: {{ mongo_data_dir }}/server.pem
+    CAFile: {{ mongo_data_dir }}/ca.pem
+{% endif %}
 {% if not MONGO_CLUSTERED %}
   {# Bind to all ips(default) if in clustered mode, 
      otherwise only to the specified local ip. #}   
@@ -46,5 +52,9 @@ net:
 {% endif %}
   port: {{ mongo_port }}
 
+{% if not MONGO_CLUSTERED and _enable_standalone_auth %}
+security:
+  authorization: {{ MONGO_AUTH | ternary("enabled", "disabled") }}
+{% endif %}
 
 {{ mongo_extra_conf }}

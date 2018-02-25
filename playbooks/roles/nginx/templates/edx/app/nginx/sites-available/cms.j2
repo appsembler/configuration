@@ -10,19 +10,39 @@ upstream cms-backend {
     {% endfor %}
 }
 
+{% if NGINX_REDIRECT_OLD_DOMAIN %}
+server {
+  listen 80;
+  server_name studio.{{ OLD_EDXAPP_SITE_NAME }};
+
+  return 302 https://studio.{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name studio.{{ OLD_EDXAPP_SITE_NAME}};
+
+  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
+
+  return 302 https://studio.{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+{% endif %}
+
+
 server {
   # CMS configuration file for nginx, templated by ansible
-      
+
   # Proxy to a remote maintanence page
   {% if NGINX_EDXAPP_ENABLE_S3_MAINTENANCE %}
 
-  # Do not include a 502 error in NGINX_ERROR_PAGES when 
+  # Do not include a 502 error in NGINX_ERROR_PAGES when
   # NGINX_EDXAPP_ENABLE_S3_MAINTENANCE is enabled.
 
   error_page 502 @maintenance;
 
     {% include "s3_maintenance.j2" %}
-  
+
   {% endif %}
 
   # error pages
@@ -36,8 +56,8 @@ error_page {{ k }} {{ v }};
 
   listen {{ EDXAPP_CMS_SSL_NGINX_PORT }} ssl;
 
-  ssl_certificate /etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }};
-  ssl_certificate_key /etc/ssl/private/{{ NGINX_SSL_KEY|basename }};
+  ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
   # request the browser to use SSL for all connections
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
   {% endif %}
@@ -50,15 +70,15 @@ error_page {{ k }} {{ v }};
   {% if NGINX_REDIRECT_TO_HTTPS %}
      {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
   # Redirect http to https over single instance
-  if ($scheme != "https") 
-  { 
+  if ($scheme != "https")
+  {
    set $do_redirect_to_https "true";
   }
 
      {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
 
-  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB 
-  if ($http_x_forwarded_proto = "http") 
+  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
+  if ($http_x_forwarded_proto = "http")
   {
    set $do_redirect_to_https "true";
   }
@@ -76,11 +96,12 @@ error_page {{ k }} {{ v }};
   access_log {{ nginx_log_dir }}/access.log {{ NGINX_LOG_FORMAT_NAME }};
   error_log {{ nginx_log_dir }}/error.log error;
 
-  # CS184 requires uploads of up to 4MB for submitting screenshots. 
-  # CMS requires larger value for course assest, values provided 
+  # CS184 requires uploads of up to 4MB for submitting screenshots.
+  # CMS requires larger value for course assest, values provided
   # via hiera.
-  client_max_body_size 100M;
-  
+  client_max_body_size {{ nginx_cms_client_max_body_size }};
+  proxy_read_timeout {{ nginx_cms_proxy_read_timeout }};
+
   rewrite ^(.*)/favicon.ico$ /static/images/favicon.ico last;
 
   {% include "python_lib.zip.j2" %}
@@ -133,4 +154,11 @@ error_page {{ k }} {{ v }};
   {% include "robots.j2" %}
   {% include "static-files.j2" %}
 
+  {% if nginx_cms_extra_locations != "" %}
+    {{ nginx_cms_extra_locations }}
+  {% endif %}
 }
+
+{% if nginx_cms_extra_http != "" %}
+  {{ nginx_cms_extra_http }}
+{% endif %}

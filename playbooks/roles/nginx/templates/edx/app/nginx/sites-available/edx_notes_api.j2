@@ -1,3 +1,5 @@
+{% if INSTALL_EDX_NOTES is defined and INSTALL_EDX_NOTES %}
+
 upstream {{ edx_notes_api_service_name }}_app_server {
     {% for host in nginx_edx_notes_api_gunicorn_hosts %}
         server {{ host }}:{{ edx_notes_api_gunicorn_port }} fail_timeout=0;
@@ -5,7 +7,8 @@ upstream {{ edx_notes_api_service_name }}_app_server {
 }
 
 server {
-  listen {{ edx_notes_api_nginx_port }} default_server;
+  listen {{ edx_notes_api_nginx_port }};
+  server_name {{ NOTES_HOSTNAME }};
 
   {% if NGINX_ENABLE_SSL %}
 
@@ -69,3 +72,4 @@ location @proxy_to_app {
   }
 }
 
+{% endif %}

@@ -1,4 +1,31 @@
 ---
+
+- name: copy Mongo CA certificate
+  copy: >
+    content="{{ EDXAPP_MONGO_SSL_CA_CERT }}"
+    dest="{{ EDXAPP_MONGO_SSL_CA_CERT_PATH }}"
+    mode=0440
+    owner=edxapp
+    group=www-data
+  when: EDXAPP_MONGO_SSL_CA_CERT_PATH != None
+  tags:
+    - install
+    - install:configuration
+    - edxapp_cfg
+
+- name: copy Mongo client key and certificate
+  copy: >
+    content="{{ EDXAPP_MONGO_SSL_CLIENT_KEY ~ EDXAPP_MONGO_SSL_CLIENT_CERT }}"
+    dest="{{ EDXAPP_MONGO_SSL_CLIENT_CERT_PATH }}"
+    mode=0440
+    owner=edxapp
+    group=www-data
+  when: EDXAPP_MONGO_SSL_CLIENT_CERT_PATH != None
+  tags:
+    - install
+    - install:configuration
+    - edxapp_cfg
+
 - name: create application and auth config
   template:
     src: "{{ item[0] }}.{{ item[1] }}.json.j2"
@@ -63,6 +90,20 @@
     - install
     - install:configuration
 
+- name: writing celerybeat supervisor scripts
+  template:
+    src: "celerybeat.conf.j2"
+    dest: "{{ supervisor_available_dir }}/celerybeat.conf"
+    owner: "{{ supervisor_user }}"
+    group: "{{ supervisor_user }}"
+    mode: 0644
+  become_user: "{{ supervisor_user }}"
+  tags:
+    - install
+    - install:configuration
+    - install:celerybeat
+  when: EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED
+
 - name: add gunicorn configuration files
   template:
     src: "{{ item }}_gunicorn.py.j2"
@@ -87,6 +128,20 @@
   tags:
     - install
     - install:configuration
+
+- name: "enable celerybeat supervisor script"
+  file:
+    src: "{{ supervisor_available_dir }}/celerybeat.conf"
+    dest: "{{ supervisor_cfg_dir }}/celerybeat.conf"
+    state: link
+    force: yes
+  become_user: "{{ supervisor_user }}"
+  when: celery_worker is not defined and not disable_edx_services and
+        (EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED)
+  tags:
+    - install
+    - install:configuration
+    - install:celerybeat
 
 - name: enable edxapp supervisor script
   file:
@@ -133,6 +188,7 @@
     DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
     DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"
   with_items: "{{ service_variants_enabled }}"
+  run_once: true
   tags:
     - migrate
 

@@ -1,3 +1,9 @@
+{% if "insights" in nginx_default_sites %}
+  {% set default_site = "default" %}
+{% else %}
+  {% set default_site = "" %}
+{% endif %}
+
 upstream insights_app_server {
     {% for host in nginx_insights_gunicorn_hosts %}
         server {{ host }}:{{ insights_gunicorn_port }} fail_timeout=0;
@@ -18,15 +24,16 @@ map $http_origin $cors_origin {
 }
 
 server {
-  listen {{ INSIGHTS_NGINX_PORT }} default_server;
+  listen {{ INSIGHTS_NGINX_PORT }} {{ default_site }};
+  server_name {{ INSIGHTS_HOSTNAME }};
 
   {% if NGINX_ENABLE_SSL %}
   listen {{ INSIGHTS_NGINX_SSL_PORT }} ssl;
 
   {% include "common-settings.j2" %}
 
-  ssl_certificate /etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }};
-  ssl_certificate_key /etc/ssl/private/{{ NGINX_SSL_KEY|basename }};
+  ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
   # request the browser to use SSL for all connections
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
   {% endif %}
@@ -76,15 +83,15 @@ location @proxy_to_app {
   {% if NGINX_REDIRECT_TO_HTTPS %}
      {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
   # Redirect http to https over single instance
-  if ($scheme != "https") 
-  { 
+  if ($scheme != "https")
+  {
    set $do_redirect_to_https "true";
   }
 
      {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
 
-  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB 
-  if ($http_x_forwarded_proto = "http") 
+  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
+  if ($http_x_forwarded_proto = "http")
   {
    set $do_redirect_to_https "true";
   }

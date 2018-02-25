@@ -42,5 +42,6 @@
     # Leaving out browsers and browsermob-proxy, relative to devstack.
     - local_dev
     - demo
+    # adding this in, relative to devstack.
     - analytics_pipeline
     - oauth_client_setup

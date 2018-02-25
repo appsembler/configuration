@@ -6,6 +6,18 @@ nginx_sites: []
 nginx_redirects: {}
 nginx_extra_sites: []
 nginx_extra_configs: []
+
+# Appsembler custom
+ALLOW_BASIC_AUTH: false
+nginx_cms_client_max_body_size: 100M
+nginx_lms_client_max_body_size: 4M
+nginx_cms_proxy_read_timeout: 60s
+nginx_lms_proxy_read_timeout: 60s
+
+nginx_enable_custom_domains: false
+NGINX_LMS_CUSTOM_DOMAINS: []
+NGINX_CMS_CUSTOM_DOMAINS: []
+
 NGINX_EDXAPP_EXTRA_SITES: []
 NGINX_EDXAPP_EXTRA_CONFIGS: []
 NGINX_EDXAPP_CUSTOM_REDIRECTS: {}
@@ -15,6 +27,9 @@ NGINX_USERS:
   - name: "{{ COMMON_HTPASSWD_USER }}"
     password: "{{ COMMON_HTPASSWD_PASS }}"
     state: present
+
+NGINX_HEALTH_CHECK_ENABLED: False
+NGINX_HEALTH_CHECK_USER_AGENT: ""
 
 NGINX_ENABLE_SSL: False
 NGINX_REDIRECT_TO_HTTPS: False
@@ -38,6 +53,18 @@ NGINX_SSL_PROTOCOLS: "TLSv1 TLSv1.1 TLSv1.2"
 NGINX_DH_PARAMS_PATH: "/etc/ssl/private/dhparams.pem"
 NGINX_DH_KEYSIZE: 2048
 
+# Location from where nginx will load cert and key
+NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }}'
+NGINX_SSL_KEY_PATH: '/etc/ssl/private/{{ NGINX_SSL_KEY|basename }}'
+
+# This is only for renaming from the old domain names to the new brand name
+OLD_NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/old_domain_cert.crt'
+OLD_NGINX_SSL_KEY_PATH: '/etc/ssl/private/old_domain_key.key'
+
+# This is only for renaming from the old domain names to the new brand name
+OLD_NGINX_SSL_CERTIFICATE_CONTENT: ''
+OLD_NGINX_SSL_KEY_CONTENT: ''
+
 NGINX_LOG_FORMAT_NAME: 'p_combined'
 # When set to False, nginx will pass X-Forwarded-For, X-Forwarded-Port,
 # and X-Forwarded-Proto headers through to the backend unmodified.
@@ -48,7 +75,7 @@ NGINX_LOG_FORMAT_NAME: 'p_combined'
 # headers to reflect the properties of the incoming request.
 NGINX_SET_X_FORWARDED_HEADERS: False
 
-NGINX_SERVER_ERROR_IMG: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Pendleton_Sinking_Ship.jpg/640px-Pendleton_Sinking_Ship.jpg'
+NGINX_SERVER_ERROR_IMG: 'http://www.appsembler.com/wp-content/themes/appsembler-v2/images/appsembler-logo-positive.svg'
 NGINX_SERVER_HTML_FILES:
   - file: rate-limit.html
     title: 'Rate limit exceeded'
@@ -86,6 +113,7 @@ NGINX_EDXAPP_ERROR_PAGES:
 
 CMS_HOSTNAME: '~^((stage|prod)-)?studio.*'
 ECOMMERCE_HOSTNAME: '~^((stage|prod)-)?ecommerce.*'
+NOTES_HOSTNAME: '~^((stage|prod)-)?notes.*'
 CREDENTIALS_HOSTNAME: '~^((stage|prod)-)?credentials.*'
 
 nginx_template_dir: "edx/app/nginx/sites-available"
@@ -153,3 +181,26 @@ NGINX_CREATE_HTPASSWD_FILE: >
     XQUEUE_ENABLE_BASIC_AUTH|bool or
     XSERVER_ENABLE_BASIC_AUTH|bool
   }}
+
+NGINX_REDIRECT_OLD_DOMAIN: False
+OLD_EDXAPP_SITE_NAME: "example.com"
+
+nginx_base_extra_locations: ""
+nginx_base_extra_http: ""
+nginx_lms_specific_extra_locations: ""
+nginx_cms_specific_extra_locations: ""
+nginx_lms_specific_extra_http: ""
+nginx_cms_specific_extra_http: ""
+
+nginx_lms_extra_locations: |
+  {{ nginx_lms_specific_extra_locations }}
+  {{ nginx_base_extra_locations }}
+nginx_cms_extra_locations: |
+  {{ nginx_cms_specific_extra_locations }}
+  {{ nginx_base_extra_locations }}
+nginx_lms_extra_http: |
+  {{ nginx_lms_specific_extra_http }}
+  {{ nginx_base_extra_http }}
+nginx_cms_extra_http: |
+  {{ nginx_cms_specific_extra_http }}
+  {{ nginx_base_extra_http }}

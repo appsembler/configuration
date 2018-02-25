@@ -1,8 +1,21 @@
-{%- if "lms" in nginx_default_sites -%}
+{%- if "lms" in nginx_default_sites and not nginx_enable_custom_domains -%}
   {%- set default_site = "default_server" -%}
 {%- else -%}
   {%- set default_site = "" -%}
 {%- endif -%}
+
+{%- if "lms" in nginx_default_sites -%}
+  {%- set default_ssl_site = "default_server" -%}
+{%- else -%}
+  {%- set default_ssl_site = "" -%}
+{%- endif -%}
+
+{% if NGINX_HEALTH_CHECK_ENABLED %}
+map $http_user_agent $healthcheck {
+ default 0;
+ "{{ NGINX_HEALTH_CHECK_USER_AGENT }}" 1;
+}
+{% endif %}
 
 upstream lms-backend {
     {% for host in nginx_lms_gunicorn_hosts %}
@@ -10,6 +23,43 @@ upstream lms-backend {
     {% endfor %}
 
 }
+
+{% if NGINX_REDIRECT_OLD_DOMAIN %}
+server {
+  listen 80;
+  server_name ~^([\w-]+)\.{{ OLD_EDXAPP_SITE_NAME| regex_escape() }};
+
+  return 302 https://$1.{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+
+server {
+  listen 80;
+  server_name {{ OLD_EDXAPP_SITE_NAME }};
+
+  return 302 https://{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name ~^([\w-]+)\.{{ OLD_EDXAPP_SITE_NAME| regex_escape() }};
+
+  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
+
+  return 302 https://$1.{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name {{ OLD_EDXAPP_SITE_NAME }};
+
+  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
+
+  return 302 https://{{ EDXAPP_SITE_NAME }}$request_uri;
+}
+{% endif %}
+
 
 {%- if EDXAPP_ENABLE_RATE_LIMITING -%}
 # Make Zone
@@ -48,13 +98,13 @@ server {
 
   {% if NGINX_EDXAPP_ENABLE_S3_MAINTENANCE %}
 
-  # Do not include a 502 error in NGINX_ERROR_PAGES when 
+  # Do not include a 502 error in NGINX_ERROR_PAGES when
   # NGINX_EDXAPP_ENABLE_MAINTENANCE is enabled.
 
   error_page 502 @maintenance;
 
     {% include "s3_maintenance.j2" %}
-  
+
   {% endif %}
 
   # error pages
@@ -65,10 +115,10 @@ error_page {{ k }} {{ v }};
   listen {{ EDXAPP_LMS_NGINX_PORT }} {{ default_site }};
 
   {% if NGINX_ENABLE_SSL %}
-  listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} {{ default_site }} ssl;
+  listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} {{ default_ssl_site }} ssl;
 
-  ssl_certificate /etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }};
-  ssl_certificate_key /etc/ssl/private/{{ NGINX_SSL_KEY|basename }};
+  ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
+  ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
   # request the browser to use SSL for all connections
   add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
   {% endif %}
@@ -76,21 +126,27 @@ error_page {{ k }} {{ v }};
   # Prevent invalid display courseware in IE 10+ with high privacy settings
   add_header P3P '{{ NGINX_P3P_MESSAGE }}';
 
+  {% if NGINX_HEALTH_CHECK_ENABLED %}
+  if ($healthcheck) {
+  return 200;
+  }
+  {% endif %}
+
 
   # Nginx does not support nested condition or or conditions so
   # there is an unfortunate mix of conditonals here.
   {% if NGINX_REDIRECT_TO_HTTPS %}
      {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
   # Redirect http to https over single instance
-  if ($scheme != "https") 
-  { 
+  if ($scheme != "https")
+  {
    set $do_redirect_to_https "true";
   }
 
      {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
 
-  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB 
-  if ($http_x_forwarded_proto = "http") 
+  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
+  if ($http_x_forwarded_proto = "http")
   {
    set $do_redirect_to_https "true";
   }
@@ -102,14 +158,15 @@ error_page {{ k }} {{ v }};
   return 301 https://$host$request_uri;
   }
   {% endif %}
-  
+
   access_log {{ nginx_log_dir }}/access.log {{ NGINX_LOG_FORMAT_NAME }};
   error_log {{ nginx_log_dir }}/error.log error;
 
   # CS184 requires uploads of up to 4MB for submitting screenshots.
   # CMS requires larger value for course assest, values provided
   # via hiera.
-  client_max_body_size 4M;
+  client_max_body_size {{ nginx_lms_client_max_body_size }};
+  proxy_read_timeout {{ nginx_lms_proxy_read_timeout }};
 
   rewrite ^(.*)/favicon.ico$ /static/images/favicon.ico last;
 
@@ -276,4 +333,17 @@ location ~ ^{{ EDXAPP_MEDIA_URL }}/(?P<file>.*) {
   {% include "robots.j2" %}
   {% include "static-files.j2" %}
 
+  {% if nginx_lms_extra_locations != "" %}
+    {{ nginx_lms_extra_locations }}
+  {% endif %}
+
+  {% if EDXAPP_XBLOCK_SETTINGS.get('ScormXBlock', False) %}
+    # asterisk needed so it doesn't break if the file doesn't exist
+    include {{nginx_app_dir}}/includes/scorm_extra_locations_lms*;
+  {% endif %}
+
 }
+
+{% if nginx_lms_extra_http != "" %}
+  {{ nginx_lms_extra_http }}
+{% endif %}

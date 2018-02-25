@@ -15,6 +15,11 @@
 # Variables set to "None" will be converted to None
 # when the edxapp config is written to disk.
 
+#stub for appsembler specific vals
+EDXAPP_APPSEMBLER_FEATURES: {
+  TMP: None
+}
+
 # Bucket used for xblock file storage
 EDXAPP_XBLOCK_FS_STORAGE_BUCKET: "None"
 EDXAPP_XBLOCK_FS_STORAGE_PREFIX: "None"
@@ -71,6 +76,15 @@ EDXAPP_MONGO_PORT: 27017
 EDXAPP_MONGO_USER: 'edxapp'
 EDXAPP_MONGO_DB_NAME: 'edxapp'
 EDXAPP_MONGO_USE_SSL: False
+EDXAPP_MONGO_SSL_CLIENT_KEY: ""
+EDXAPP_MONGO_SSL_CLIENT_CERT: ""
+EDXAPP_MONGO_SSL_CA_CERT: ""
+EDXAPP_MONGO_SSL_CLIENT_CERT_PATH: !!null
+EDXAPP_MONGO_SSL_CA_CERT_PATH: !!null
+
+# When `EDXAPP_MONGO_USE_SSL: True`, set
+# EDXAPP_MONGO_SSL_CLIENT_CERT_PATH: "{{ EDXAPP_CFG_DIR }}/mongodb.pem"
+# EDXAPP_MONGO_SSL_CA_CERT_PATH: "{{ EDXAPP_CFG_DIR }}/ca.pem"
 
 EDXAPP_MYSQL_DB_NAME: 'edxapp'
 EDXAPP_MYSQL_USER: 'edxapp001'
@@ -92,6 +106,8 @@ EDXAPP_MYSQL_CSMH_PASSWORD: "{{ EDXAPP_MYSQL_PASSWORD }}"
 EDXAPP_MYSQL_CSMH_HOST: "{{ EDXAPP_MYSQL_HOST }}"
 EDXAPP_MYSQL_CSMH_PORT: "{{ EDXAPP_MYSQL_PORT }}"
 EDXAPP_MYSQL_CSMH_OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
+# This is Django's default https://docs.djangoproject.com/en/1.8/ref/settings/#conn-max-age
+EDXAPP_MYSQL_CONN_MAX_AGE: 0
 
 # This is Django's default https://docs.djangoproject.com/en/1.8/ref/settings/#conn-max-age
 EDXAPP_MYSQL_CONN_MAX_AGE: 0
@@ -102,6 +118,14 @@ EDXAPP_MYSQL_PORT: '3306'
 EDXAPP_SEARCH_HOST: 'localhost'
 EDXAPP_SEARCH_PORT: 9200
 EDXAPP_SEARCH_USE_SSL: false
+
+EDXAPP_POSTGRESQL_AGGREGATION_HOST: "localhost"
+EDXAPP_POSTGRESQL_AGGREGATION_DATABASE: ""
+EDXAPP_POSTGRESQL_AGGREGATION_USER: "aggregation_user"
+EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD: "password"
+EDXAPP_POSTGRESQL_AGGREGATION_USER_ROLE: "boxes"
+EDXAPP_POSTGRESQL_AGGREGATION_PORT: 5432
+EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS: {}
 
 # list of dictionaries of the format
 # { 'host': 'hostname', 'port': 'portnumber', 'otherconfigsuchas use_ssl': 'True' }
@@ -151,6 +175,23 @@ EDXAPP_CELERY_PASSWORD: 'celery'
 EDXAPP_CELERY_BROKER_VHOST: ""
 EDXAPP_CELERY_BROKER_USE_SSL: false
 EDXAPP_CELERY_EVENT_QUEUE_TTL: "None"
+
+EDXAPP_CELERY_BEAT_LMS_ENABLED: false
+EDXAPP_CELERY_BEAT_CMS_ENABLED: false
+
+EDXAPP_CELERY_BEAT_LMS_CONFIG:
+  enabled: "{{ EDXAPP_CELERY_BEAT_LMS_ENABLED }}"
+  monitor: False
+  schedule_file: "/tmp/celerybeat-schedule"
+  process_id: "/tmp/celerybeat_lms.pid"
+  stopwaitsecs: "{{ EDXAPP_WORKER_DEFAULT_STOPWAITSECS }}"
+
+EDXAPP_CELERY_BEAT_CMS_CONFIG:
+  enabled: "{{ EDXAPP_CELERY_BEAT_CMS_ENABLED }}"
+  monitor: False
+  schedule_file: "/tmp/celerybeat-schedule"
+  process_id: "/tmp/celerybeat_cms.pid"
+  stopwaitsecs: "{{ EDXAPP_WORKER_DEFAULT_STOPWAITSECS }}"
 
 EDXAPP_VIDEO_CDN_URLS:
   EXAMPLE_COUNTRY_CODE: "http://example.com/edx/video?s3_url="
@@ -537,6 +578,7 @@ EDXAPP_DEFAULT_CACHE_VERSION: "1"
 EDXAPP_OAUTH_ENFORCE_SECURE: True
 EDXAPP_OAUTH_EXPIRE_CONFIDENTIAL_CLIENT_DAYS: 365
 EDXAPP_OAUTH_EXPIRE_PUBLIC_CLIENT_DAYS: 30
+EDXAPP_OAUTH_CREDENTIALS: []
 
 # Directory for edxapp application configuration files
 EDXAPP_CFG_DIR: "{{ COMMON_CFG_DIR }}/edxapp"
@@ -656,6 +698,22 @@ EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO: ""
 # Git branch, tag, or revision to check out from
 # EDXAPP_COMPREHENSIVE_THEME_SOURCE_REPO
 EDXAPP_COMPREHENSIVE_THEME_VERSION: ""
+
+# supply a default site theme keyed to the main LMS domain
+# only works with EDXAPP_ENABLE_COMPREHENSIVE_THEMING set to true,
+# otherwise, ignored -
+# have to use this way of defining dict in string format
+# so the variable is interpolated in the key, but if not
+# using variable key names a more standard format can be used
+EDXAPP_SITE_THEMES: "{
+    '{{ EDXAPP_LMS_SITE_NAME }}': {
+      'theme_name': '{{ EDXAPP_DEFAULT_SITE_THEME | default(\"edx-theme-codebase\", true) }}',
+      'theme_source_repo': '{{ edxapp_theme_source_repo | default(\"git@github.com:appsembler/edx-theme-codebase.git\", true) }}',
+      'theme_version': '{{ edxapp_theme_version | default(\"master\", true) }}',
+      'customer_theme_source_repo': '{{ edxapp_customer_theme_source_repo | default(\"https://github.com/appsembler/edx-theme-customers.git\", true) }}',
+      'customer_theme_version': '{{ edxapp_customer_theme_version | default(\"\", true) }}'
+    }
+  }"
 
 # SAML KEYS
 EDXAPP_SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: ''
@@ -778,6 +836,7 @@ edxapp_environment_default:
   # be updated to /edx/etc/edxapp when the switch to
   # yaml based configs is complete
   CONFIG_ROOT: "{{ edxapp_app_dir }}"
+  BOTO_CONFIG: "{{ edxapp_app_dir }}/.boto"
 
 edxapp_environment_extra: {}
 
@@ -791,6 +850,8 @@ edxapp_generic_doc_store_config: &edxapp_generic_default_docstore
   user: "{{ EDXAPP_MONGO_USER }}"
   collection:  'modulestore'
   ssl: "{{ EDXAPP_MONGO_USE_SSL }}"
+  ssl_certfile: "{{ EDXAPP_MONGO_SSL_CLIENT_CERT_PATH }}"
+  ssl_ca_certs: "{{ EDXAPP_MONGO_SSL_CA_CERT_PATH }}"
   # https://api.mongodb.com/python/2.9.1/api/pymongo/mongo_client.html#module-pymongo.mongo_client
   socketTimeoutMS: 3000 # default is never timeout while the connection is open, this means it needs to explicitly close raising pymongo.errors.NetworkTimeout
   connectTimeoutMS: 2000 # default is 20000, I believe raises pymongo.errors.ConnectionFailure
@@ -817,6 +878,7 @@ edxapp_databases:
     PASSWORD: "{{ EDXAPP_MYSQL_REPLICA_PASSWORD }}"
     HOST: "{{ EDXAPP_MYSQL_REPLICA_HOST }}"
     PORT: "{{ EDXAPP_MYSQL_REPLICA_PORT }}"
+    OPTIONS: "{{ EDXAPP_MYSQL_REPLICA_OPTIONS }}"
     CONN_MAX_AGE: "{{ EDXAPP_MYSQL_CONN_MAX_AGE }}"
     OPTIONS: "{{ EDXAPP_MYSQL_REPLICA_OPTIONS }}"
   default:
@@ -826,6 +888,7 @@ edxapp_databases:
     PASSWORD: "{{ EDXAPP_MYSQL_PASSWORD }}"
     HOST: "{{ EDXAPP_MYSQL_HOST }}"
     PORT: "{{ EDXAPP_MYSQL_PORT }}"
+    OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
     ATOMIC_REQUESTS: "{{ EDXAPP_MYSQL_ATOMIC_REQUESTS }}"
     CONN_MAX_AGE: "{{ EDXAPP_MYSQL_CONN_MAX_AGE }}"
     OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
@@ -836,8 +899,18 @@ edxapp_databases:
     PASSWORD: "{{ EDXAPP_MYSQL_CSMH_PASSWORD }}"
     HOST: "{{ EDXAPP_MYSQL_CSMH_HOST }}"
     PORT: "{{ EDXAPP_MYSQL_CSMH_PORT }}"
+    OPTIONS: "{{ EDXAPP_MYSQL_CSMH_OPTIONS }}"
     CONN_MAX_AGE: "{{ EDXAPP_MYSQL_CONN_MAX_AGE }}"
     OPTIONS: "{{ EDXAPP_MYSQL_CSMH_OPTIONS }}"
+
+  appsembler_usage:
+    ENGINE: 'django.db.backends.postgresql_psycopg2'
+    NAME: "{{ EDXAPP_POSTGRESQL_AGGREGATION_DATABASE }}"
+    USER: "{{ EDXAPP_POSTGRESQL_AGGREGATION_USER }}"
+    PASSWORD: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD }}"
+    HOST: "{{ EDXAPP_POSTGRESQL_AGGREGATION_HOST }}"
+    PORT: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PORT }}"
+    OPTIONS: "{{ EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS }}"
 
 edxapp_generic_auth_config:  &edxapp_generic_auth
   EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST: "{{ EDXAPP_EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST }}"
@@ -878,6 +951,8 @@ edxapp_generic_auth_config:  &edxapp_generic_auth
       port: "{{ EDXAPP_MONGO_PORT }}"
       user: "{{ EDXAPP_MONGO_USER }}"
       ssl: "{{ EDXAPP_MONGO_USE_SSL }}"
+      ssl_certfile: "{{ EDXAPP_MONGO_SSL_CLIENT_CERT_PATH }}"
+      ssl_ca_certs: "{{ EDXAPP_MONGO_SSL_CA_CERT_PATH }}"
     ADDITIONAL_OPTIONS: "{{ EDXAPP_CONTENTSTORE_ADDITIONAL_OPTS }}"
     DOC_STORE_CONFIG: *edxapp_generic_default_docstore
   DATABASES: "{{ edxapp_databases }}"
@@ -1072,6 +1147,7 @@ generic_env_config:  &edxapp_generic_env
   SESSION_SAVE_EVERY_REQUEST: "{{ EDXAPP_SESSION_SAVE_EVERY_REQUEST }}"
   SOCIAL_SHARING_SETTINGS: "{{ EDXAPP_SOCIAL_SHARING_SETTINGS }}"
   SESSION_COOKIE_SECURE: "{{ EDXAPP_SESSION_COOKIE_SECURE }}"
+  APPSEMBLER_FEATURES: "{{ EDXAPP_APPSEMBLER_FEATURES }}"
   CODE_JAIL:
     # from https://github.com/edx/codejail/blob/master/codejail/django_integration.py#L24, '' should be same as None
     python_bin: '{% if EDXAPP_PYTHON_SANDBOX %}{{ edxapp_sandbox_venv_dir }}/bin/python{% endif %}'

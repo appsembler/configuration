@@ -111,6 +111,7 @@ APPSEMBLER_VARS="-e edx_platform_repo="https://github.com/appsembler/edx-platfor
   -e configuration_version="appsembler/ginkgo/master" \
 "
 
+sudo chown -R edx-ansible:edx-ansible /edx/app/edx_ansible/venvs/edx_ansible/
 ansible-playbook -i localhost, -c local run_role.yml --tags=deploy -e role=edx_ansible -e configuration_version=$CONFIG_VER $EXTRA_VARS $APPSEMBLER_VARS
 ansible-playbook -i localhost, -c local vagrant-devstack.yml --tags=deploy -e configuration_version=$CONFIG_VER $EXTRA_VARS $APPSEMBLER_VARS
 

@@ -48,7 +48,7 @@ done
 
 # If there are any errors from this point
 # send mail to {{ SCORM_S3_LOGS_NOTIFY_EMAIL }}
-
+{% if SCORM_S3_LOGS_NOTIFY %}
 onerror() {
   if [[ -z $noop ]]; then
     subj="Error syncing SCORM content to S3 bucket $bucket_name"
@@ -61,5 +61,11 @@ onerror() {
 }
 
 trap onerror ERR SIGHUP SIGINT SIGTERM
+{% endif %}
 
-s3cmd sync -c {{ scorm_dirs.home.path }}/.s3cfg $noop {{ scorm_asset_local_storage_path }}/ "s3://{{ EDXAPP_AWS_STORAGE_BUCKET_NAME }}/scorms/" >>{{scorm_s3_sync_logfile}} 2>&1
+
+# trying to sync an entire large directory structure can use too much memory:
+# note that this won't sync folders on s3 but not in local storage back to local storage
+for SCORM_DIR in $(ls -d {{ scorm_asset_local_storage_path }}/*); do
+  s3cmd sync -c {{ scorm_dirs.home.path }}/.s3cfg $noop $SCORM_DIR/ "s3://{{ EDXAPP_AWS_STORAGE_BUCKET_NAME }}/scorms/`basedir $SCORM_DIR`/" >>{{scorm_s3_sync_logfile}} 2>&1
+done

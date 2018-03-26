@@ -46,9 +46,9 @@ while getopts "vhnb:d:" opt; do
   esac
 done
 
+{% if SCORM_S3_LOGS_NOTIFY %}
 # If there are any errors from this point
 # send mail to {{ SCORM_S3_LOGS_NOTIFY_EMAIL }}
-{% if SCORM_S3_LOGS_NOTIFY %}
 onerror() {
   if [[ -z $noop ]]; then
     subj="Error syncing SCORM content to S3 bucket $bucket_name"

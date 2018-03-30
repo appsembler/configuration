@@ -61,14 +61,44 @@
   copy: src=backup.py dest=/usr/local/bin/edx_restore owner=root group=root mode=0700
   tags: ['backups']
 
+- name: Copy database monitor script
+  copy: src=backup.py dest=/usr/local/bin/edx_backups_monitor owner=root group=root mode=0700
+  tags: ['backups']
+
 - name: Create cron job for Mongo backups
   cron: name="Backup Mongo" cron_file=edx_backup_mongo user=root job="/usr/local/bin/edx_backup mongodb" special_time=daily
+  when: BACKUPS_MONGO
+  tags: ['backups']
+
+- name: Create cron job for Mongo backups monitor
+  cron: name="Backup Mongo" cron_file=edx_backup_monitor_mongo user=root job="/usr/local/bin/edx_backups_monitor mongodb" special_time=daily
   when: BACKUPS_MONGO
   tags: ['backups']
 
 - name: Configure backup settings for Mongo
   lineinfile: >
     dest=/etc/cron.d/edx_backup_mongo
+    regexp="^{{ item.key }}="
+    line="{{ item.key }}={{ item.value }}"
+    state=present
+    insertbefore=BOF
+  with_dict:
+    BACKUP_DIR: '{{ BACKUPS_DIR }}'
+    BACKUP_BUCKET: '{{ BACKUPS_BUCKET }}'
+    BACKUP_USER: '{{ BACKUPS_MONGO_USER }}'
+    BACKUP_PASSWORD: '{{ BACKUPS_MONGO_PASSWORD }}'
+    BACKUP_PROVIDER: '{{ BACKUPS_PROVIDER }}'
+    BACKUP_AWS_ACCESS_KEY_ID: '{{ BACKUPS_AWS_ACCESS_KEY_ID }}'
+    BACKUP_AWS_SECRET_ACCESS_KEY: '{{ BACKUPS_AWS_SECRET_ACCESS_KEY }}'
+    BACKUP_AZURE_STORAGE_ACCOUNT: '{{ BACKUPS_AZURE_STORAGE_ACCOUNT }}'
+    BACKUP_AZURE_STORAGE_KEY: '{{ BACKUPS_AZURE_STORAGE_KEY }}'
+    BACKUP_SENTRY_DSN: '{{ BACKUPS_SENTRY_DSN }}'
+  when: BACKUPS_MONGO and "{{ item.value }}" != ""
+  tags: ['backups']
+
+- name: Configure backup settings for Mongo Backups Monitor
+  lineinfile: >
+    dest=/etc/cron.d/edx_backup_monitor_mongo
     regexp="^{{ item.key }}="
     line="{{ item.key }}={{ item.value }}"
     state=present

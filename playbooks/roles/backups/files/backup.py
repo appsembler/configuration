@@ -16,15 +16,19 @@ import time
 import raven
 
 
+def make_file_prefix(base_name):
+    hostname = socket.gethostname()
+    return '{0}_{1}'.format(hostname, base_name)
+
+
 def make_file_name(base_name):
     """
     Create a file name based on the hostname, a base_name, and date
         e.g. openedxlite12345_mysql_20140102
     """
 
-    hostname = socket.gethostname()
-    return '{0}_{1}_{2}'.format(hostname, base_name, datetime.datetime.now().
-                                strftime("%Y%m%d"))
+    return '{0}_{1}'.format(make_file_prefix(base_name), datetime.datetime.now().
+                            strftime("%Y%m%d"))
 
 
 def upload_to_s3(file_path, bucket, aws_access_key_id, aws_secret_access_key):
@@ -116,7 +120,7 @@ class NoBackupsFound(Exception):
     pass
 
 
-def monitor_gcloud_backups(bucket, sentry):
+def monitor_gcloud_backups(bucket, service, sentry):
     """
     Double check the backups in the Google Cloud Storage Bucket
 
@@ -130,6 +134,7 @@ def monitor_gcloud_backups(bucket, sentry):
     a metric there and we can alert off that separately.
 
         bucket: The name of a Google Cloud Storage bucket.
+        service: the service name (really only supports 'mongodb' currently)
         sentry: The sentry client
     """
 
@@ -145,10 +150,12 @@ def monitor_gcloud_backups(bucket, sentry):
     try:
         gcloud_uri = boto.storage_uri(bucket, 'gs')
         keys = gcloud_uri.get_all_keys()
-        if len(keys) < 1:
+        prefix = make_file_prefix(service)
+        backups = [k for k in keys if k.key.startswith(prefix)]
+        if len(backups) < 1:
             raise NoBackupsFound("There are no backup files in the bucket")
-        keys.sort(key=lambda x: x.last_modified)
-        most_recent = keys[-1]
+        backups.sort(key=lambda x: x.last_modified)
+        most_recent = backups[-1]
 
         sentry.extra_context({'most_recent': most_recent})
         last_modified = datetime.datetime.strptime(most_recent.last_modified,
@@ -451,7 +458,7 @@ def _main():
 
     elif program_name == 'edx_backups_monitor':
         if provider == 'gs':
-            monitor_gcloud_backups(bucket, sentry)
+            monitor_gcloud_backups(bucket, service, sentry)
         else:
             # other providers not supported yet
             logging.warning("no backup monitoring available for this provider")

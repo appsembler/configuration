@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from datetime import timedelta
+
 import argparse
 import datetime
 import logging
@@ -14,15 +16,19 @@ import time
 import raven
 
 
+def make_file_prefix(base_name):
+    hostname = socket.gethostname()
+    return '{0}_{1}'.format(hostname, base_name)
+
+
 def make_file_name(base_name):
     """
     Create a file name based on the hostname, a base_name, and date
         e.g. openedxlite12345_mysql_20140102
     """
 
-    hostname = socket.gethostname()
-    return '{0}_{1}_{2}'.format(hostname, base_name, datetime.datetime.now().
-                                strftime("%Y%m%d"))
+    return '{0}_{1}'.format(make_file_prefix(base_name), datetime.datetime.now().
+                            strftime("%Y%m%d"))
 
 
 def upload_to_s3(file_path, bucket, aws_access_key_id, aws_secret_access_key):
@@ -104,6 +110,62 @@ def upload_to_azure_storage(file_path, bucket, account, key):
     blob_service = BlockBlobService(account_name=account, account_key=key)
     blob_service.create_blob_from_path(bucket, file_name, file_path)
     logging.info('Upload successful')
+
+
+class StaleBackups(Exception):
+    pass
+
+
+class NoBackupsFound(Exception):
+    pass
+
+
+def monitor_gcloud_backups(bucket, service, sentry):
+    """
+    Double check the backups in the Google Cloud Storage Bucket
+
+    Finds the most recent backup file and checks that it is less than
+    25 hours old. This gives us something of a "dead man's switch"
+    to alert us if the previous day's backups failed silently.
+
+    For now, we just directly raise a Sentry error. In the future,
+    when we have a decent monitoring system in place, this will
+    instead simply log the time since the most recent backup as
+    a metric there and we can alert off that separately.
+
+        bucket: The name of a Google Cloud Storage bucket.
+        service: the service name (really only supports 'mongodb' currently)
+        sentry: The sentry client
+    """
+
+    import boto
+    import gcs_oauth2_boto_plugin
+
+    logging.info('checking backups in Google Cloud Storage bucket '
+                 '"{}"'.format(bucket))
+
+    ALLOWED_WINDOW = 25  # hours
+    sentry.extra_context({'bucket': bucket})
+
+    try:
+        gcloud_uri = boto.storage_uri(bucket, 'gs')
+        keys = gcloud_uri.get_all_keys()
+        prefix = make_file_prefix(service)
+        backups = [k for k in keys if k.key.startswith(prefix)]
+        if len(backups) < 1:
+            raise NoBackupsFound("There are no backup files in the bucket")
+        backups.sort(key=lambda x: x.last_modified)
+        most_recent = backups[-1]
+
+        sentry.extra_context({'most_recent': most_recent})
+        last_modified = datetime.datetime.strptime(most_recent.last_modified,
+                                                   '%Y-%m-%dT%H:%M:%S.%fZ')
+        now = datetime.datetime.now()
+        if (now - last_modified) > timedelta(hours=ALLOWED_WINDOW):
+            raise StaleBackups('Most recent backup is older than our allowed window.')
+        logging.info('Monitoring successful')
+    except Exception:
+        sentry.CaptureException()
 
 
 def compress_backup(backup_path):
@@ -393,6 +455,14 @@ def _main():
 
     elif program_name == 'edx_restore':
         restore(service, restore_path, compressed, settings=settings)
+
+    elif program_name == 'edx_backups_monitor':
+        if provider == 'gs':
+            monitor_gcloud_backups(bucket, service, sentry)
+        else:
+            # other providers not supported yet
+            logging.warning("no backup monitoring available for this provider")
+
 
 if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)

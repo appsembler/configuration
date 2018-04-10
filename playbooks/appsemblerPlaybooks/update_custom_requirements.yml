@@ -6,8 +6,13 @@
 
   tasks:
     - include_vars: roles/common_vars/defaults/main.yml
+      tags:
+        - migrate
+        - gather_static_assets
     - include_vars: roles/edxapp/defaults/main.yml
-
+      tags:
+        - migrate
+        - gather_static_assets
 
     - name: install read-only ssh key
       copy: >
@@ -33,9 +38,6 @@
       when:
         - EDXAPP_INSTALL_PRIVATE_REQUIREMENTS is defined and EDXAPP_INSTALL_PRIVATE_REQUIREMENTS
         - EDXAPP_PRIVATE_REQUIREMENTS is defined and EDXAPP_PRIVATE_REQUIREMENTS
-      tags:
-        - install
-        - install:app-requirements
 
     - name: install python private requirements
       shell: >
@@ -46,9 +48,6 @@
       environment:
         GIT_SSH: "{{ edxapp_git_ssh }}"
       when: "{{ EDXAPP_INSTALL_PRIVATE_REQUIREMENTS }}"
-      tags:
-        - install
-        - install:app-requirements     
 
     - name: install python extra requirements
       pip: >
@@ -85,7 +84,6 @@
       with_items: ['absent', 'directory']
       tags:
         - gather_static_assets
-        - assets
 
     - name: "gather {{ item }} static assets with paver"
       command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-{{ item }}"
@@ -103,6 +101,9 @@
       when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
       sudo_user: "{{ supervisor_service_user }}"
       with_items: service_variants_enabled
+      tags:
+        - migrate
+        - gather_static_assets
 
     - name: restart edxapp_workers
       supervisorctl: >
@@ -113,3 +114,5 @@
       when: edxapp_installed is defined and celery_worker is defined and not disable_edx_services
       with_items: edxapp_workers
       sudo_user: "{{ common_web_user }}"
+      tags:
+        - migrate

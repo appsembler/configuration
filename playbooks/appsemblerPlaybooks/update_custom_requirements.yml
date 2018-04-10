@@ -1,18 +1,13 @@
 - hosts: "edxapp-server"
   become: true
+  vars_files:
+    - roles/common_vars/defaults/main.yml
+    - roles/supervisor/defaults/main.yml
+    - roles/edxapp/defaults/main.yml
 
   # Update extra requirements, private requirements, 
-  # collect static assets, and restart edx app and workers
-
+  # migrate (if indicated), collect static assets, and restart edx app and workers
   tasks:
-    - include_vars: roles/common_vars/defaults/main.yml
-      tags:
-        - migrate
-        - gather_static_assets
-    - include_vars: roles/edxapp/defaults/main.yml
-      tags:
-        - migrate
-        - gather_static_assets
 
     - name: install read-only ssh key
       copy: >
@@ -98,9 +93,8 @@
         supervisorctl_path={{ supervisor_ctl }}
         config={{ supervisor_cfg }}
         name="edxapp:{{ item }}"
-      when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
       sudo_user: "{{ supervisor_service_user }}"
-      with_items: service_variants_enabled
+      with_items: "{{ service_variants_enabled }}"
       tags:
         - migrate
         - gather_static_assets
@@ -111,8 +105,7 @@
         supervisorctl_path={{ supervisor_ctl }}
         config={{ supervisor_cfg }}
         state=restarted
-      when: edxapp_installed is defined and celery_worker is defined and not disable_edx_services
-      with_items: edxapp_workers
-      sudo_user: "{{ common_web_user }}"
+      with_items: "{{ edxapp_workers }}"
+      sudo_user: "{{ supervisor_service_user }}"
       tags:
         - migrate

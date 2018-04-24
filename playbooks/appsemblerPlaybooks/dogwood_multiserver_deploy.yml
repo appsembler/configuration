@@ -4,6 +4,8 @@
 # for single server community
 # installs
 
+- include: monitoring.yml
+
 - name: Configure mongo
   hosts: "mongo-server"
   sudo: True

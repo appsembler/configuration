@@ -137,11 +137,11 @@
     - install
     - install:configuration
 
-- name: enable and start xvfb systemd service
-  systemd:
-    name: xvfb
-    enabled: yes
-    state: started
-  tags:
-    - install
-    - install:configuration
+# - name: enable and start xvfb systemd service
+#   systemd:
+#     name: xvfb
+#     enabled: yes
+#     state: started
+#   tags:
+#     - install
+#     - install:configuration

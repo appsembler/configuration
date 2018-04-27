@@ -72,26 +72,26 @@
     - install:app-requirements
     - mongo_packages
 
-- name: Add mongod systemd configuration on 16.04
-  template:
-    src:  "etc/systemd/system/mongod.service.j2"
-    dest: "/etc/systemd/system/mongod.service"
-  when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:app-requirements
-    - mongo_packages
+# - name: Add mongod systemd configuration on 16.04
+#   template:
+#     src:  "etc/systemd/system/mongod.service.j2"
+#     dest: "/etc/systemd/system/mongod.service"
+#   when: ansible_distribution_release == 'xenial'
+#   tags:
+#     - install
+#     - install:app-requirements
+#     - mongo_packages
 
-- name: enable mongod systemd unit on 16.04
-  systemd:
-    name: mongod
-    enabled: yes
-    daemon_reload: yes
-  when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:app-requirements
-    - mongo_packages
+# - name: enable mongod systemd unit on 16.04
+#   systemd:
+#     name: mongod
+#     enabled: yes
+#     daemon_reload: yes
+#   when: ansible_distribution_release == 'xenial'
+#   tags:
+#     - install
+#     - install:app-requirements
+#     - mongo_packages
 
 - name: create mongo dirs
   file:

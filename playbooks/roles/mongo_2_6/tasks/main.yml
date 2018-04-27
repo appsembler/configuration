@@ -79,26 +79,26 @@
     - install
     - install:base
 
-- name: Add mongod systemd configuration on 16.04
-  template:
-    src:  "etc/systemd/system/mongod.service.j2"
-    dest: "/etc/systemd/system/mongod.service"
-  notify:
-    - restart mongo
-  when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:configuration
+# - name: Add mongod systemd configuration on 16.04
+#   template:
+#     src:  "etc/systemd/system/mongod.service.j2"
+#     dest: "/etc/systemd/system/mongod.service"
+#   notify:
+#     - restart mongo
+#   when: ansible_distribution_release == 'xenial'
+#   tags:
+#     - install
+#     - install:configuration
 
-- name: enable mongod systemd unit on 16.04
-  systemd:
-    name: mongod
-    enabled: yes
-    daemon_reload: yes
-  when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:configuration
+# - name: enable mongod systemd unit on 16.04
+#   systemd:
+#     name: mongod
+#     enabled: yes
+#     daemon_reload: yes
+#   when: ansible_distribution_release == 'xenial'
+#   tags:
+#     - install
+#     - install:configuration
 
 - name: Stop mongod service
   service:

@@ -54,7 +54,6 @@
       when: "{{ EDXAPP_XBLOCK_SETTINGS }}.get('ScormXBlock', False)"
     - role: nginx
       nginx_sites:
-      - certs
       - cms
       - lms
       - forum
@@ -78,9 +77,7 @@
     - role: elasticsearch
       when: "'localhost' in EDXAPP_ELASTIC_SEARCH_CONFIG|map(attribute='host')"
     - forum
-    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
-    - certs
     - edx_ansible
     - role: datadog
       when: COMMON_ENABLE_DATADOG
@@ -88,3 +85,4 @@
       when: COMMON_ENABLE_SPLUNKFORWARDER
     - role: newrelic
       when: COMMON_ENABLE_NEWRELIC
+    - { role: backups, BACKUPS_MONGO: True, BACKUPS_MYSQL: True, when: COMMON_ENABLE_BACKUPS }    

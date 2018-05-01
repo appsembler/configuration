@@ -1,7 +1,10 @@
+# For production deployments: 
 # Set up a user and SFTP-only group
 # Create directories for download of reports
 # SFTP_user_password must be set in server-vars.yml
 # set up cronjobs for custom ISC reports
+
+- include: dogwood_multiserver_deploy.yml
 
 - hosts: "edxapp-server"
   sudo: true
@@ -14,15 +17,18 @@
 
     - name: create SFTP group
       group: name={{ sftp_group }} state=present
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - name: create SFTP user
       user: "name={{ sftp_user}} password={{SFTP_user_password}} groups={{ sftp_group }} shell=/sbin/nologin createhome=yes"
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - name: change owner of SFTP user home dir to root
       file: >
         path="/home/{{ sftp_user }}"
         owner="root"
         state="directory"
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - name: make reports subdirectories
       file: >
@@ -33,6 +39,7 @@
         mode=0755
       with_items:
         - "{{ course_participation_dir }}"
+      when: COMMON_ENVIRONMENT == 'prod'
 
   # would rather use blockinfile here but not present < ansible 2.0
   # these aren't working on GCloud VM and will kill your sshd and you will be locked out.
@@ -51,18 +58,21 @@
         -   X11Forwarding no
         -   AllowTcpForwarding no
         -   ForceCommand internal-sftp
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - name: check sshd config
       sudo: True
       shell: sshd -t
       register: sshd_check
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - debug: msg="This output of sshd -t should be empty... {{ sshd_check }}"
+      when: COMMON_ENVIRONMENT == 'prod'
 
     - name: restart ssh
       service: name=ssh state=restarted
       sudo: True
-      when: sshd_check.stdout == ""
+      when: COMMON_ENVIRONMENT == 'prod' and sshd_check.stdout == ""
 
 
     - name: cron job for generating reports
@@ -72,6 +82,7 @@
         job="{{ item.value.cmd }}"
         minute="{{ item.value.minute }}"
         hour="{{ item.value.hour }}"
+      when: COMMON_ENVIRONMENT == 'prod'
       with_dict: {
         "cmc": {
           "name": "ISC CMC course completion and access report every morning 8:00PM GMT",

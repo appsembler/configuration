@@ -31,7 +31,7 @@
   roles:
   - { role: swapfile, SWAPFILE_SIZE: "2GB" }
   - mysql
-  - edxlocal
+  - mysql_init
   - backups
 
 - name: Configure instance(s)
@@ -41,8 +41,6 @@
   vars:
     migrate_db: "yes"
     openid_workaround: True
-    #EDXAPP_LMS_NGINX_PORT: '80'
-    #edx_platform_version: 'master'
     # Set to false if deployed behind another proxy/load balancer.
     #NGINX_SET_X_FORWARDED_HEADERS: True
     # These should stay false for the public AMI
@@ -50,8 +48,6 @@
     #COMMON_ENABLE_SPLUNKFORWARDER: False
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
-    - role: scorm
-      when: "{{ EDXAPP_XBLOCK_SETTINGS }}.get('ScormXBlock', False)"
     - role: nginx
       nginx_sites:
       - cms
@@ -60,17 +56,14 @@
       - xqueue
       nginx_default_sites:
       - lms
-#    - role: mysql
-#      when: EDXAPP_MYSQL_HOST == 'localhost'
-#    - edxlocal
-#    - role: mongo
-#      when: "'localhost' in EDXAPP_MONGO_HOSTS"
     - { role: 'edxapp', celery_worker: True }
     - edxapp
     - notifier
     - analytics_api
     - edx_notes_api
-    - demo
+    - role: demo
+      when: INSTALL_DEMO_DATA
+      tags: ['demo_role']    
     - oauth_client_setup
     - { role: 'rabbitmq', rabbitmq_ip: '127.0.0.1' }
     - oraclejdk

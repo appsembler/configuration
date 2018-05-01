@@ -1,0 +1,8 @@
+---
+
+- name: Run letsencrypt role
+  hosts: "edxapp-server"
+  sudo: True
+  gather_facts: True
+  roles:
+    - ../../../appsembler-roles/letsencrypt

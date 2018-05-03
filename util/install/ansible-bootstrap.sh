@@ -50,6 +50,7 @@ CONFIGURATION_DIR="/tmp/configuration"
 EDX_PPA="deb http://ppa.edx.org precise main"
 EDX_PPA_KEY_SERVER="keyserver.ubuntu.com"
 EDX_PPA_KEY_ID="B41E5E3969464050"
+PIP_INDEX_URL="https://pypi.python.org/simple/"
 
 cat << EOF
 ******************************************************************************

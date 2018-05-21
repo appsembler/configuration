@@ -15,6 +15,9 @@
   set_fact: 
     scorm_config: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock|default('{}') }}"
 
+- include_vars: ../../edxapp/defaults/main.yml
+- include_vars: ../../nginx/defaults/main.yml    
+
 - include: scorm_base.yml
   when: EDXAPP_XBLOCK_SETTINGS.ScormXBlock is defined
 

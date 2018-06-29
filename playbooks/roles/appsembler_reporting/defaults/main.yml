@@ -1,0 +1,12 @@
+---
+
+appsembler_reporting_jobs:
+  grades:
+    cron_h: 0
+    cron_m: 0
+  course_metrics:
+    cron_h: 1
+    cron_m: 0
+  learners:
+    cron_h: 2
+    cron_m: 0

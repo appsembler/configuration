@@ -137,3 +137,12 @@
     - role: postgresql_aggregation
       when: COMMON_ENVIRONMENT == "prod"
       tags: ['postgresql_aggregation_role']
+
+- name: Install Appsembler Reporting
+  hosts: "edxapp-server-1"
+  sudo: True
+  gather_facts: True
+  when: 
+    - "EDXAPP_APPSEMBLER_FEATURES is defined and EDXAPP_APPSEMBLER_FEATURES.get('ENABLE_APPSEMBLER_REPORTING', False)"
+    - "COMMON_ENVIRONMENT == 'prod'"
+  tags: ['appsembler_reporting_role']

@@ -1,0 +1,27 @@
+---
+
+- name: make logs directory for appsembler_reporting
+  file:
+    path: "/edx/var/log/appsembler_reporting"
+    state: "directory"
+    owner: "{{ edxapp_user }}"
+    group: "{{ edxapp_user }}"
+    mode: 0755
+
+- name: make appsembler_reporting shell scripts
+  template:
+    src: "appsembler_reporting_job.sh.j2"
+    dest: "{{ edxapp_app_dir }}/appsembler_reporting_{{ item.key }}.sh"
+    owner: "{{ edxapp_user }}"
+    group: "{{ edxapp_user }}"
+    mode: 0740
+  with_dict: "{{ appsembler_reporting_jobs }}"
+
+- name: cron jobs for appsembler_reporting tasks
+  cron:
+    name: "run appsembler_reporting {{ item.key }} job"
+    user: "{{ edxapp_user }}"
+    hour: "{{ item.value.cron_h }}"
+    minute: "{{ item.value.cron_m }}"
+    job: "{{ edxapp_app_dir }}/appsembler_reporting_{{ item.key }}.sh >> /edx/var/log/appsembler_reporting/{{ item.key }}_report.log 2>&1"
+  with_dict: "{{ appsembler_reporting_jobs }}"

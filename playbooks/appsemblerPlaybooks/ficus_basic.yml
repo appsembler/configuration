@@ -81,3 +81,9 @@
     - role: ecommerce_theme
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_theme_role']
+    - role: appsembler_reporting
+      when: 
+        - "EDXAPP_APPSEMBLER_FEATURES is defined and EDXAPP_APPSEMBLER_FEATURES.get('ENABLE_APPSEMBLER_REPORTING', False)"
+        - "COMMON_ENVIRONMENT == 'prod'"
+      tags: ['appsembler_reporting_role']
+

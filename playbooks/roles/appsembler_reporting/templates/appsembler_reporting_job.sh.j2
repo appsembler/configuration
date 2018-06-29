@@ -1,0 +1,3 @@
+#!/bin/bash
+source {{ edxapp_app_dir }}/edxapp_env
+python {{ edxapp_app_dir}}/edx-platform/manage.py lms --settings=aws_appsembler generate_appsembler_report {{ item.key }} --no-delay

@@ -1,10 +1,12 @@
 ---
 
+appsembler_reporting_log_dir: /edx/var/log/appsembler_reporting
+appsembler_reporting_scripts_dir: "{{ edxapp_app_dir }}/appsembler_reporting"
 appsembler_reporting_jobs:
   grades:
     cron_h: 0
     cron_m: 0
-  course_metrics:
+  courses:
     cron_h: 1
     cron_m: 0
   learners:

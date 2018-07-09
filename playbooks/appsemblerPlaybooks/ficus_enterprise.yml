@@ -142,7 +142,9 @@
   hosts: "edxapp-server-1"
   sudo: True
   gather_facts: True
-  when: 
-    - "EDXAPP_APPSEMBLER_FEATURES is defined and EDXAPP_APPSEMBLER_FEATURES.get('ENABLE_APPSEMBLER_REPORTING', False)"
-    - "COMMON_ENVIRONMENT == 'prod'"
-  tags: ['appsembler_reporting_role']
+  roles: 
+    - role: appsembler_reporting
+      when: 
+        - "EDXAPP_APPSEMBLER_FEATURES.ENABLE_APPSEMBLER_REPORTING|default(false)"
+        - "COMMON_ENVIRONMENT == 'prod'"
+      tags: ['appsembler_reporting_role']

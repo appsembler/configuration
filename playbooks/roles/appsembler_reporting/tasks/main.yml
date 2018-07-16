@@ -1,0 +1,40 @@
+---
+
+- name: make logs directory for appsembler_reporting
+  file:
+    path: "{{ appsembler_reporting_log_dir }}"
+    state: "directory"
+    owner: "{{ edxapp_user }}"
+    group: syslog
+    mode: 0755
+
+- name: Create the reporting scripts directory
+  file:
+    path: "{{ appsembler_reporting_scripts_dir }}"
+    state: directory
+    owner: edxapp
+    group: edxapp
+    mode: 0755
+
+- name: Create the reporting scripts
+  copy:
+    content: >
+      source {{ edxapp_app_dir}}/edxapp_env;
+      /edx/bin/python.edxapp /edx/bin/manage.edxapp lms --settings=aws_appsembler  \
+        generate_appsembler_report {{ item.name }} --no-delay  \
+        2>&1 | tee -a {{ appsembler_reporting_log_dir }}/{{ item.name }}_report.log
+    dest: "{{ appsembler_reporting_scripts_dir }}/{{ item.name }}_report.sh"
+    owner: edxapp
+    group: edxapp
+    mode: 770
+  with_items: "{{ appsembler_reporting_jobs }}"  
+
+- name: cron jobs for appsembler_reporting tasks
+  cron:
+    name: "run appsembler_reporting {{ item.name }} job"
+    user: "{{ edxapp_user }}"
+    # Set to "minute hour * * *" for example "0 2 * * *"
+    hour: "{{ item.cron_h }}" # Hour of the day
+    minute: "{{ item.cron_m }}" # Minute of the hour
+    job: "bash -e {{ appsembler_reporting_scripts_dir }}/{{ item.name }}_report.sh"
+  with_dict: "{{ appsembler_reporting_jobs }}"

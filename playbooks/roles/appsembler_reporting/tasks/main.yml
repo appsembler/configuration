@@ -27,7 +27,7 @@
     owner: edxapp
     group: edxapp
     mode: 770
-  with_items: "{{ appsembler_reporting_jobs }}"  
+  with_items: "{{ appsembler_reporting_jobs }}"
 
 - name: cron jobs for appsembler_reporting tasks
   cron:
@@ -37,4 +37,4 @@
     hour: "{{ item.cron_h }}" # Hour of the day
     minute: "{{ item.cron_m }}" # Minute of the hour
     job: "bash -e {{ appsembler_reporting_scripts_dir }}/{{ item.name }}_report.sh"
-  with_dict: "{{ appsembler_reporting_jobs }}"
+  with_items: "{{ appsembler_reporting_jobs }}"

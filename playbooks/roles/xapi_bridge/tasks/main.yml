@@ -1,0 +1,61 @@
+---
+# Tasks for role xapi_bridge
+#
+# Overview:
+#
+# Install a Python process to watch the edxapp tracking.log and send xAPI events to an LRS
+#
+
+- include_vars: ../../common_vars/defaults/main.yml
+
+- name: ensure group exists
+  group:
+    name: "{{ xapi_bridge_user_group }}"
+    system: yes
+    state: present
+
+- name: ensure user exists
+  user:
+    name: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
+    home: "{{ xapi_bridge_user_home }}"
+    createhome: yes
+    shell: /bin/bash
+    system: yes
+    generate_ssh_key: no
+    state: present
+
+- name: create xapi_bridge app dirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
+    mode: "{{ item.mode | default(0755) }}"
+  with_items:
+    - { path: "{{ xapi_bridge_venv_dir }}" }
+
+- name: checkout xapi-bridge repo into {{ xapi_bridge_code_dir }}
+  git:
+    dest: "{{ xapi_bridge_code_dir }}"
+    repo: "{{ xapi_bridge_repo }}"
+    version: "{{ xapi_bridge_version }}"
+    accept_hostkey: yes
+  become_user: "{{ xapi_bridge_user }}"
+
+- name: git clean after checking out edx-platform
+  shell: cd {{ xapi_bridge_code_dir }} && git clean -xdf
+  become_user: "{{ xapi_bridge_user }}"
+
+- name: Create the virtualenv to install the Python requirements
+  command: "virtualenv {{ xapi_bridge_venv_dir }}"
+  args:
+    chdir: "{{ xapi_bridge_code_dir }}"
+    creates: "{{ xapi_bridge_venv_dir }}/bin/pip"
+  become_user: "{{ xapi_bridge_user }}"
+
+- name: install python requirements
+  command: "{{ xapi_bridge_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r requirements.txt"
+  args:
+    chdir: "{{ xapi_bridge_code_dir }}"
+  become_user: "{{ xapi_bridge_user }}"

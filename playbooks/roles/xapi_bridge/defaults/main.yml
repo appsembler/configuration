@@ -1,0 +1,14 @@
+---
+##
+# Defaults for role xapi_bridge
+#
+
+xapi_bridge_user: xapi
+xapi_bridge_user_group: adm  #perms on tracking.log
+xapi_bridge_app_dir: "{{ COMMON_APP_DIR }}/xapi"
+xapi_bridge_user_home: "{{ xapi_bridge_app_dir }}"
+
+xapi_bridge_repo: "https://github.com/appsembler/edx-xapi-bridge"
+xapi_bridge_venv_dir: "{{ xapi_bridge_app_dir }}/venvs/xapi"
+xapi_bridge_code_dir: "{{ xapi_bridge_app_dir }}/edx-xapi-bridge"
+xapi_bridge_version: "master"

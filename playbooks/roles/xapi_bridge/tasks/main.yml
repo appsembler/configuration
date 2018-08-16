@@ -13,6 +13,7 @@
     name: "{{ xapi_bridge_user_group }}"
     system: yes
     state: present
+  tags: ["xapi_bridge"]
 
 - name: ensure user exists
   user:
@@ -24,6 +25,7 @@
     system: yes
     generate_ssh_key: no
     state: present
+  tags: ["xapi_bridge"]
 
 - name: create xapi_bridge app dirs
   file:
@@ -34,6 +36,7 @@
     mode: "{{ item.mode | default(0755) }}"
   with_items:
     - { path: "{{ xapi_bridge_venv_dir }}" }
+  tags: ["xapi_bridge"]
 
 - name: checkout xapi-bridge repo into {{ xapi_bridge_code_dir }}
   git:
@@ -42,6 +45,7 @@
     version: "{{ xapi_bridge_version }}"
     accept_hostkey: yes
   become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
 
 - name: git clean after checking out edx-platform
   shell: cd {{ xapi_bridge_code_dir }} && git clean -xdf
@@ -53,9 +57,11 @@
     chdir: "{{ xapi_bridge_code_dir }}"
     creates: "{{ xapi_bridge_venv_dir }}/bin/pip"
   become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
 
 - name: install python requirements
   command: "{{ xapi_bridge_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r requirements.txt"
   args:
     chdir: "{{ xapi_bridge_code_dir }}"
   become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]

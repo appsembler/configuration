@@ -47,21 +47,16 @@
   become_user: "{{ xapi_bridge_user }}"
   tags: ["xapi_bridge"]
 
-- name: git clean after checking out edx-platform
+- name: git clean after checking out xapi_bridge code
   shell: cd {{ xapi_bridge_code_dir }} && git clean -xdf
-  become_user: "{{ xapi_bridge_user }}"
-
-- name: Create the virtualenv to install the Python requirements
-  command: "virtualenv {{ xapi_bridge_venv_dir }}"
-  args:
-    chdir: "{{ xapi_bridge_code_dir }}"
-    creates: "{{ xapi_bridge_venv_dir }}/bin/pip"
   become_user: "{{ xapi_bridge_user }}"
   tags: ["xapi_bridge"]
 
-- name: install python requirements
-  command: "{{ xapi_bridge_venv_dir }}/bin/pip install {{ COMMON_PIP_VERBOSITY }} -i {{ COMMON_PYPI_MIRROR_URL }} --exists-action w -r requirements.txt"
-  args:
-    chdir: "{{ xapi_bridge_code_dir }}"
+- name: install python requirements xapi_bridge into virtualenv
+  pip:
+    requirements: "{{ xapi_bridge_code_dir }}/requirements.txt"
+    virtualenv: "{{ xapi_bridge_venv_dir }}"
+    virtualenv_python: python2.7.12
+    state: present
   become_user: "{{ xapi_bridge_user }}"
   tags: ["xapi_bridge"]

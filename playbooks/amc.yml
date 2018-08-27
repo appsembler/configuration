@@ -19,7 +19,7 @@
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
 #    - custom_domains # This gets the list of domains
-#    - edx_ansible
+    - edx_ansible
     - role: "{{ appsembler_roles }}/gcsfuse"
     - oraclejdk
     - elasticsearch
@@ -68,7 +68,7 @@
     #- insights
     - edx_notes_api
     #- demo
-#    - oauth_client_setup
+    - oauth_client_setup
     - oraclejdk
     - forum
     - role: datadog
@@ -91,8 +91,8 @@
       nginx_sites:
       - xqueue
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
-    - notifier
-    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
+#    - notifier
+#    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
 
 # must come after xqueue running

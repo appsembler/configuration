@@ -11,6 +11,8 @@ nginx_redirects: {}
 nginx_extra_sites: []
 nginx_extra_configs: []
 
+nginx_server_names_hash_bucket_size: 64
+
 # Appsembler custom
 ALLOW_BASIC_AUTH: false
 nginx_cms_client_max_body_size: 100M

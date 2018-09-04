@@ -8,6 +8,8 @@ nginx_extra_sites: []
 nginx_extra_configs: []
 
 nginx_server_names_hash_bucket_size: 64
+nginx_map_hash_bucket_size: 128
+nginx_map_hash_max_size: 2048
 
 # Appsembler custom
 ALLOW_BASIC_AUTH: false

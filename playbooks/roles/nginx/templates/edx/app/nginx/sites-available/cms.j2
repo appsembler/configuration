@@ -108,6 +108,11 @@ error_page {{ k }} {{ v }};
   {% include "common-settings.j2" %}
 
   location @proxy_to_cms_app {
+    {% if NGINX_EDXAPP_ENABLE_LOCAL_MAINTENANCE %}
+    return 503;
+    {% endif %}
+
+
     {% if NGINX_SET_X_FORWARDED_HEADERS %}
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Forwarded-Port $server_port;
@@ -131,6 +136,7 @@ error_page {{ k }} {{ v }};
     {% if EDXAPP_CMS_ENABLE_BASIC_AUTH|bool %}
       {% include "basic-auth.j2" %}
     {% endif %}
+
     try_files $uri @proxy_to_cms_app;
   }
 

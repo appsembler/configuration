@@ -154,6 +154,7 @@
   tags:
     - install
     - install:configuration
+    - nginx:maintenance
 
 - name: Creating nginx config links for {{ nginx_sites }}
   file:
@@ -307,6 +308,7 @@
   tags:
     - install
     - install:configuration
+    - nginx:maintenance
 
 # appsembler mod ..when ALLOW_BASIC_AUTH
 - name: Write out htpasswd file

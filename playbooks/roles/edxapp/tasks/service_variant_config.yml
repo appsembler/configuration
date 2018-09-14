@@ -192,29 +192,69 @@
   tags:
     - migrate
 
-# There are problems with django collectstatic copying files.  It doesn't retain
-# last modified timestamps, but relies on those same timestamps to know if a new file
-# should be recopied.  While collectstatic --clear exists, it only clears some of the
-# files in edxapp_staticfile_dir, it leaves postprocessed or otherwise hashed files.
-# This ensures we have a totally clean directory.
-- name: Remove and recreate the staticfiles directory so nothing stale can exist
-  file:
-      path: "{{ edxapp_staticfile_dir }}"
-      state: "{{ item }}"
-      owner: "{{ edxapp_user }}"
-      group: "{{ common_web_group }}"
-      mode:  "0755"
-  when: celery_worker is not defined and not devstack
-  with_items: ['absent', 'directory']
+# to avoid the running site breaking while collectstatic runs, we
+# generate a temp dir, make a new temporary configuration that points
+# STATIC_ROOT at that temp dir, runs the collectstatic to populate it,
+# then swaps in that temp dir in place of the actual staticfiles
+# directory in one quick step
+
+- name: Create temporary staticfiles directory
+  tempfile:
+    state: directory
+    suffix: staticfiles
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+  register: staticfiles_tmpdir
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
   tags:
     - gather_static_assets
     - assets
 
-# Gather assets using paver if possible
+- name: "generate new {{ item }} override config"
+  template:
+    src: staticfiles_override.py.j2
+    dest: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: 0640
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+
+# Gather assets using paver
 - name: "gather {{ item }} static assets with paver"
   command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-{{ item }}"
+  environment:
+    EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
   when: celery_worker is not defined and not devstack and item != "lms-preview"
   with_items: "{{ service_variants_enabled }}"
+  tags:
+    - gather_static_assets
+    - assets
+
+# Replace staticfiles dirs
+- name: Move staticfiles out of the way
+  command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+
+- name: Replace with new version of staticfiles
+  command: "mv {{ staticfiles_tmpdir.path }} {{ edxapp_staticfile_dir}}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+
+- name: "Remove {{ item }} temporary staticfiles config"
+  file:
+    path: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    state: absent
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
   tags:
     - gather_static_assets
     - assets

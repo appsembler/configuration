@@ -73,6 +73,7 @@
       - cms
       - lms
       - forum
+      - edx_notes_api
       nginx_default_sites:
       - lms
       tags: ['nginx_role']

@@ -1,5 +1,8 @@
 - Use Ansible 2.3.1.0 so that we can do shallow clones of tags.
 
+- Role: edxapp
+  - `EDXAPP_EDXAPP_SECRET_KEY` no longer has a default value
+
 - git_clone:
   - The working tree is explicitly checked for modified files, to prevent mysterious failures.
 

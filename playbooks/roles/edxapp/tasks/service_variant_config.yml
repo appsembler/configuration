@@ -209,6 +209,7 @@
   tags:
     - gather_static_assets
     - assets
+    - update_lms_theme
 
 # Gather assets using paver if possible
 - name: "gather {{ item }} static assets with paver"
@@ -218,3 +219,4 @@
   tags:
     - gather_static_assets
     - assets
+    - update_lms_theme

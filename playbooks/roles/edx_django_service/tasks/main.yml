@@ -227,12 +227,25 @@
 
 - name: Copying nginx configs for the service
   template:
+    src: "edx/app/nginx/sites-available/discovery.j2"
+    dest: "{{ nginx_sites_available_dir }}/{{ edx_django_service_name }}"
+    owner: root
+    group: "{{ common_web_user }}"
+    mode: 0640
+  when: nginx_app_dir is defined and SANDBOX_ENABLE_DISCOVERY == True
+  notify: reload nginx
+  tags:
+    - install
+    - install:vhosts
+
+- name: Copying nginx configs for the service
+  template:
     src: "edx/app/nginx/sites-available/app.j2"
     dest: "{{ nginx_sites_available_dir }}/{{ edx_django_service_name }}"
     owner: root
     group: "{{ common_web_user }}"
     mode: 0640
-  when: nginx_app_dir is defined
+  when: nginx_app_dir is defined and SANDBOX_ENABLE_DISCOVERY == False
   notify: reload nginx
   tags:
     - install

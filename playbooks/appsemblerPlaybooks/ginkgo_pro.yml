@@ -90,6 +90,8 @@
     - role: ecommerce_theme
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_theme_role']
+    - role: discovery
+      when: SANDBOX_ENABLE_DISCOVERY
 
 - name: Install xqueue, notifier and rabbitmq
   hosts: mongo-server

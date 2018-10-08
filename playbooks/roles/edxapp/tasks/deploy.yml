@@ -38,6 +38,7 @@
     - install:base
     - deploy:platform
     - install:app-requirements
+    - update_lms_theme
 
 - name: set git fetch.prune to ignore deleted remote refs
   shell: git config --global fetch.prune true
@@ -45,6 +46,7 @@
   tags:
     - install
     - install:base
+    - update_lms_theme
 
 # Do A Checkout
 - name: checkout edx-platform repo into {{ edxapp_code_dir }}
@@ -417,6 +419,7 @@
     - install:code
     - deploy:platform
     - install:app-requirements
+    - update_lms_theme
 
 - include: tag_ec2.yml tags=deploy
   when: COMMON_TAG_EC2_INSTANCE

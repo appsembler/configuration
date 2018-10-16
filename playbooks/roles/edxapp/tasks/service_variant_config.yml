@@ -198,13 +198,38 @@
 # then swaps in that temp dir in place of the actual staticfiles
 # directory in one quick step
 
+# this is what we should be using, but it's only available in ansible 2.3+
+# - name: Create temporary staticfiles directory
+#   tempfile:
+#     state: directory
+#     suffix: staticfiles
+#     owner: "{{ edxapp_user }}"
+#     group: "{{ common_web_group }}"
+#   register: staticfiles_tmpdir
+#   when: celery_worker is not defined and not devstack and item != "lms-preview"
+#   tags:
+#     - gather_static_assets
+#     - assets
+#     - update_lms_theme
+
+# instead, for now we have to do this:
+
 - name: Create temporary staticfiles directory
-  tempfile:
-    state: directory
-    suffix: staticfiles
+  command: "mktemp -d"
     owner: "{{ edxapp_user }}"
     group: "{{ common_web_group }}"
   register: staticfiles_tmpdir
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: make sure it has proper ownership
+  file:
+    path: "{{ staticfiles_tmpdir.stdout }}"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
   when: celery_worker is not defined and not devstack and item != "lms-preview"
   tags:
     - gather_static_assets
@@ -247,7 +272,7 @@
     - update_lms_theme
 
 - name: Replace with new version of staticfiles
-  command: "mv {{ staticfiles_tmpdir.path }} {{ edxapp_staticfile_dir}}"
+  command: "mv {{ staticfiles_tmpdir.stdout }} {{ edxapp_staticfile_dir}}"
   when: celery_worker is not defined and not devstack and item != "lms-preview"
   tags:
     - gather_static_assets

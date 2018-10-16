@@ -216,8 +216,6 @@
 
 - name: Create temporary staticfiles directory
   command: "mktemp -d"
-    owner: "{{ edxapp_user }}"
-    group: "{{ common_web_group }}"
   register: staticfiles_tmpdir
   when: celery_worker is not defined and not devstack and item != "lms-preview"
   tags:

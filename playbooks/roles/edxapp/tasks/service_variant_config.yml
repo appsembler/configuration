@@ -228,6 +228,7 @@
     path: "{{ staticfiles_tmpdir.stdout }}"
     owner: "{{ edxapp_user }}"
     group: "{{ common_web_group }}"
+    mode:  "0755"
   when: celery_worker is not defined and not devstack
   tags:
     - gather_static_assets

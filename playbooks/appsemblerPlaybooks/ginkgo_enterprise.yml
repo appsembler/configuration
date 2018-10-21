@@ -1,0 +1,144 @@
+---
+
+# Appsembler enterprise tier deployment
+# Docs: https://github.com/appsembler/openedx-docs/blob/master/openedx/pro_tier_deployment.md
+
+- include: monitoring.yml
+
+- name: Configure Mongo replica set
+  hosts: mongo-server
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    BACKUPS_MONGO: True
+    BACKUPS_MYSQL: False
+    COMMON_ENABLE_BACKUPS: True
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
+    - { role: mongo_3_0, tags: ['mongo_3_0_role'] }
+    - backups
+    - role: githubsshkeys
+      when: "cloud_provider == 'azure'"
+      tags: ['githubsshkeys_role']
+
+- name: Configure instance for stateful services
+  hosts: services-server
+  sudo: True
+  gather_facts: True
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "4GB", tags: ['swapfile_role'] }
+    - sudo
+    - { role: oraclejdk, tags: ['oraclejdk_role'] }
+    - { role: elasticsearch, tags: ['elasticsearch_role'] }
+    - { role: memcached, tags: ['memcached_role'] }
+
+- name: Configure stateless edxapp instances
+  hosts: edxapp-server
+  sudo: True
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../../appsembler-roles"
+    migrate_db: "yes"
+    openid_workaround: True
+    SANDBOX_ENABLE_ECOMMERCE: False
+    COMMON_ENABLE_INSIGHTS: False
+    COMMON_ENABLE_OAUTH_CLIENT: False
+    ENABLE_ECOMMERCE: false
+  pre_tasks:
+    # This is dirty, but better than setting in every server vars file
+    - set_fact:
+        EDXAPP_MONGO_SSL_CLIENT_CERT_PATH: "/edx/etc/edxapp/mongodb.pem"
+        EDXAPP_MONGO_SSL_CA_CERT_PATH: "/edx/etc/edxapp/ca.pem"
+      when: EDXAPP_MONGO_USE_SSL is defined and EDXAPP_MONGO_USE_SSL
+      tags: always
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "4GB", tags: ['swapfile_role'] }
+    - sudo
+    - { role: aws, tags: ['aws_role'] }
+    - { role: mysql_init, tags: ['mysql_init_role'] }
+    - role: nginx
+      nginx_sites: []
+      tags: ['nginx_role']
+    - role: "{{ appsembler_roles }}/gcsfuse"
+      when: "cloud_provider == 'gcp'"
+    - role: "{{ appsembler_roles }}/letsencrypt"
+      when: letsencrypt_certs | length
+    - role: "{{ appsembler_roles }}/sshguard"
+      when:
+        - sshguard_whitelist | length
+      tags: ['sshguard_role']
+    - role: nginx
+      nginx_sites:
+      - cms
+      - lms
+      - forum
+      - edx_notes_api
+      nginx_default_sites:
+      - lms
+      tags: ['nginx_role']
+    - { role: edxapp, celery_worker: True, tags: ['edxapp_role'] }
+    - { role: edxapp, tags: ['edxapp_role'] }
+    - role: edx_notes_api
+      when: "INSTALL_EDX_NOTES is defined and INSTALL_EDX_NOTES"
+      tags: ['edx_notes_api_role']
+    - role: demo
+      when: "INSTALL_DEMO_DATA"
+      tags: ['demo_role']
+    - { role: oauth_client_setup, tags: ['oauth_client_setup_role'] }
+    - { role: forum, tags: ['forum_role'] }
+    - role: githubsshkeys
+      when: "cloud_provider == 'azure'"
+      tags: ['githubsshkeys_role']
+    - role: ecommerce
+      when: ENABLE_ECOMMERCE
+      tags: ['ecommerce_role']
+    - role: ecomworker
+      when: ENABLE_ECOMMERCE
+      tags: ['ecomworker_role']
+    - role: ecommerce_theme
+      when: ENABLE_ECOMMERCE
+      tags: ['ecommerce_theme_role']
+
+- name: Install xqueue, notifier and rabbitmq on services instance
+  hosts: services-server
+  sudo: True
+  gather_facts: True
+  vars:
+    migrate_db: "yes"
+  roles:
+    - { role: edxapp_common, tags: ['edxapp_common_role'] }
+    - { role: mysql_init, tags: ['mysql_init_role'] }
+    - role: nginx
+      nginx_sites:
+      - xqueue
+      tags: ['nginx_role']
+    - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
+    - { role: notifier, tags: ['notifier_role'] }
+    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5", tags: ['notifier_role'] }
+    - { role: xqueue, update_users: True, tags: ['xqueue_role'] }
+    - role: githubsshkeys
+      when: "cloud_provider == 'azure'"
+      tags: ['githubsshkeys_role']
+
+- name: Install Scampersand Reporting
+  hosts: "edxapp-server-0"
+  sudo: True
+  gather_facts: True
+  vars:
+    POSTGRESQL_AGGREGATION_INSTALL_CRON: true
+  roles:
+    - role: postgresql_aggregation
+      when: COMMON_ENVIRONMENT == "prod"
+      tags: ['postgresql_aggregation_role']
+
+- name: Install Scampersand Reporting
+  hosts: "edxapp-server-1"
+  sudo: True
+  gather_facts: True
+  vars:
+    POSTGRESQL_AGGREGATION_INSTALL_CRON: false
+  roles:
+    - role: postgresql_aggregation
+      when: COMMON_ENVIRONMENT == "prod"
+      tags: ['postgresql_aggregation_role']

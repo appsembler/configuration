@@ -9,7 +9,7 @@ logpath={{ mongo_logpath }}
 
 logappend={{ mongo_logappend }}
 
-{# Bind to all ips(default) if in clustered mode, 
+{# Bind to all ips(default) if in clustered mode,
    otherwise only to the specified local ip.
 #}
 {% if not MONGO_CLUSTERED %}
@@ -38,7 +38,9 @@ replSet = {{ mongo_repl_set }}
 # Enables periodic logging of CPU utilization and I/O wait
 #cpu = true
 
-# Turn on/off security.  On is currently the default
+# Turn on/off security.  Off is currently the default
+#noauth = true
+#auth = true
 auth = {{ MONGO_AUTH | ternary("true", "false") }}
 
 # Verbose logging output.

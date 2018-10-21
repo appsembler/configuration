@@ -106,7 +106,6 @@ HDFS_SITE_DEFAULT_CONFIG:
 #   yarn.scheduler.maximum-allocation-mb: 2048
 #   yarn.nodemanager.resource.memory-mb: 2048
 #   yarn.nodemanager.vmem-pmem-ratio: 2.1
-
 #
 # Variables override the stock configuration for entry into
 # the following files. Ensure that you use unambiguous

@@ -99,7 +99,7 @@ COMMON_ENABLE_NEWRELIC_APP: False
 COMMON_ENABLE_MINOS: False
 COMMON_TAG_EC2_INSTANCE: False
 common_boto_version: '2.34.0'
-common_node_version: '6.11.1'
+common_node_version: '6.9.4'
 common_redhat_pkgs:
   - ntp
   - lynx
@@ -221,8 +221,3 @@ COMMON_OIDC_ISSUER: '{{ COMMON_OAUTH_URL_ROOT }}'
 COMMON_JWT_AUDIENCE: 'SET-ME-PLEASE'
 COMMON_JWT_ISSUER: '{{ COMMON_OIDC_ISSUER }}'
 COMMON_JWT_SECRET_KEY: 'SET-ME-PLEASE'
-
-# Set worker user default
-CREATE_SERVICE_WORKER_USERS: True
-
-COMMON_ENABLE_AWS_ROLE: true

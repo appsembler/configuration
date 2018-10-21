@@ -93,7 +93,6 @@ EDXAPP_MYSQL_PASSWORD: 'password'
 EDXAPP_MYSQL_PASSWORD_READ_ONLY: 'password'
 EDXAPP_MYSQL_PASSWORD_ADMIN: 'password'
 EDXAPP_MYSQL_OPTIONS: {}
-EDXAPP_MYSQL_ATOMIC_REQUESTS: True
 EDXAPP_MYSQL_REPLICA_DB_NAME: "{{ EDXAPP_MYSQL_DB_NAME }}"
 EDXAPP_MYSQL_REPLICA_USER: "{{ EDXAPP_MYSQL_USER }}"
 EDXAPP_MYSQL_REPLICA_PASSWORD: "{{ EDXAPP_MYSQL_PASSWORD }}"
@@ -732,10 +731,6 @@ EDXAPP_VIDEO_IMAGE_MAX_AGE: 31536000
 EDXAPP_VIDEO_IMAGE_SETTINGS:
   VIDEO_IMAGE_MAX_BYTES : 2097152
   VIDEO_IMAGE_MIN_BYTES : 2048
-  STORAGE_KWARGS:
-    location: "{{ edxapp_media_dir }}/"
-    base_url: "{{ EDXAPP_MEDIA_URL }}/"
-  DIRECTORY_PREFIX: 'video-images/'
 
 # Course Block Structures
 EDXAPP_BLOCK_STRUCTURES_SETTINGS:
@@ -755,7 +750,6 @@ EDXAPP_BLOCK_STRUCTURES_SETTINGS:
 # Configuration settings needed for the LMS to communicate with the Enterprise service.
 EDXAPP_ENTERPRISE_API_URL: "{{ EDXAPP_LMS_ROOT_URL }}/enterprise/api/v1"
 
-EDXAPP_ENTERPRISE_SERVICE_WORKER_EMAIL: "enterprise_worker@example.com"
 EDXAPP_ENTERPRISE_SERVICE_WORKER_USERNAME: "enterprise_worker"
 
 EDXAPP_ENTERPRISE_COURSE_ENROLLMENT_AUDIT_MODES:
@@ -889,9 +883,8 @@ edxapp_databases:
     HOST: "{{ EDXAPP_MYSQL_HOST }}"
     PORT: "{{ EDXAPP_MYSQL_PORT }}"
     OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
-    ATOMIC_REQUESTS: "{{ EDXAPP_MYSQL_ATOMIC_REQUESTS }}"
+    ATOMIC_REQUESTS: True
     CONN_MAX_AGE: "{{ EDXAPP_MYSQL_CONN_MAX_AGE }}"
-    OPTIONS: "{{ EDXAPP_MYSQL_OPTIONS }}"
   student_module_history:
     ENGINE: 'django.db.backends.mysql'
     NAME: "{{ EDXAPP_MYSQL_CSMH_DB_NAME }}"
@@ -1382,10 +1375,3 @@ edxapp_cms_variant: cms
 
 # Worker Settings
 worker_django_settings_module: '{{ EDXAPP_SETTINGS }}'
-
-# Add default service worker users
-SERVICE_WORKER_USERS:
-  - email: "{{ EDXAPP_ENTERPRISE_SERVICE_WORKER_EMAIL }}"
-    username: "{{ EDXAPP_ENTERPRISE_SERVICE_WORKER_USERNAME }}"
-    is_staff: true
-    is_superuser: false

@@ -54,6 +54,7 @@ VERSION_VARS=(
   ECOMMERCE_WORKER_VERSION
 )
 
+EXTRA_VARS="-e SANDBOX_ENABLE_ECOMMERCE=True $EXTRA_VARS"
 for var in ${VERSION_VARS[@]}; do
   # Each variable can be overridden by a similarly-named environment variable,
   # or OPENEDX_RELEASE, if provided.
@@ -89,4 +90,4 @@ sudo -H pip install -r requirements.txt
 ##
 ## Run the edx_sandbox.yml playbook in the configuration/playbooks directory
 ##
-cd /var/tmp/configuration/playbooks && sudo -E ansible-playbook -c local ./edx_sandbox.yml -i "localhost," $EXTRA_VARS "$@"
+cd /var/tmp/configuration/playbooks && sudo -E ansible-playbook -c local ./edx_sandbox.yml -i "localhost," $EXTRA_VARS

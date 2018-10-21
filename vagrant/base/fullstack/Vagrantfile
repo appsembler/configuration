@@ -2,7 +2,7 @@ Vagrant.require_version ">= 1.8.7"
 
 VAGRANTFILE_API_VERSION = "2"
 
-MEMORY = 6144
+MEMORY = 4096
 CPU_COUNT = 2
 
 vm_guest_ip = "192.168.33.10"
@@ -21,11 +21,8 @@ VERSION_VARS = [
     'xqueue_version',
     'demo_version',
     'NOTIFIER_VERSION',
-    'INSIGHTS_VERSION',
-    'ANALYTICS_API_VERSION',
     'ECOMMERCE_VERSION',
     'ECOMMERCE_WORKER_VERSION',
-    'DISCOVERY_VERSION',
 ]
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|

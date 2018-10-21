@@ -7,8 +7,7 @@
     CLUSTER_NAME: 'edxapp'
   serial: "{{ serial_count }}"
   roles:
-   - role: aws
-     when: COMMON_ENABLE_AWS_ROLE
+   - aws
    - role: scorm
      when: "{{ EDXAPP_XBLOCK_SETTINGS }}.get('ScormXBlock', False)"
    - role: automated

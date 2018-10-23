@@ -54,7 +54,8 @@
 
 - name: install python requirements xapi_bridge into virtualenv
   pip:
-    requirements: "{{ xapi_bridge_code_dir }}/requirements.txt"
+    chdir: "{{ xapi_bridge_code_dir }}"
+    requirements: "requirements.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
     virtualenv_python: python2.7.12
     state: present

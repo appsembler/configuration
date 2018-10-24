@@ -6,7 +6,10 @@
 
 - name: define scorm config from settings if available
   set_fact: 
-    scorm_config: EDXAPP_XBLOCK_SETTINGS.ScormXBlock|default('{}')
+    scorm_config: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock|default('{}') }}"
+
+- name: debug scorm_config
+  debug: msg={{ scorm_config }}
 
 - include: scorm_base.yml
   when: EDXAPP_XBLOCK_SETTINGS.ScormXBlock is defined

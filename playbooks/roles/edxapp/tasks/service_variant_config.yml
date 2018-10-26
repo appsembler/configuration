@@ -261,7 +261,20 @@
     - assets
     - update_lms_theme
 
-# Replace staticfiles dirs
+# make sure the old staticfiles backup dir isn't lingering around.
+- name: Remove old staticfiles backup dir
+  file:
+    path: "/tmp/old_staticfiles_dir"
+    state: absent
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# stash the previous contents of the staticfiles directory
+# to /tmp/old_staticfiles_dir. Eventually this might not be necessary
+# but for now it's useful to have around to debug with
 - name: Move staticfiles out of the way
   command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
   when: celery_worker is not defined and not devstack

@@ -18,7 +18,7 @@
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
     - sudo
     - { role: edxapp_common, tags: ['edxapp_common_role'] }
-    - { role: mongo_3_0, tags: ['mongo_3_0_role'] }
+    - { role: mongo_3_2, tags: ['mongo_3_2_role'] }
     - { role: oraclejdk, tags: ['oraclejdk_role'] }
     - { role: elasticsearch, tags: ['elasticsearch_role'] }
     - { role: memcached, tags: ['memcached_role'] }

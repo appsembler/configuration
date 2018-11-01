@@ -16,7 +16,7 @@
     COMMON_ENABLE_BACKUPS: True
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
-    - { role: mongo_3_0, tags: ['mongo_3_0_role'] }
+    - { role: mongo_3_2, tags: ['mongo_3_2_role'] }
     - backups
     - role: githubsshkeys
       when: "cloud_provider == 'azure'"

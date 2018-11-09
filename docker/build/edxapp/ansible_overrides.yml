@@ -40,3 +40,4 @@ EDXAPP_XQUEUE_URL: 'http://edx.devstack.xqueue:18040'
 
 EDXAPP_ENABLE_EDXNOTES: true
 EDXAPP_EDXNOTES_INTERNAL_API: 'http://edx.devstack.edx_notes_api:18120/api/v1'
+EDXAPP_EDXAPP_SECRET_KEY: "change me"

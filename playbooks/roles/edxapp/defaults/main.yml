@@ -1650,3 +1650,6 @@ SERVICE_WORKER_USERS:
     is_superuser: false
 
 EDXAPP_ENABLE_DJANGO_ADMIN_RESTRICTION: false
+
+# for docker devstack
+private_requirements_file: "{{ edxapp_app_dir }}/customer_private_requirements.txt"

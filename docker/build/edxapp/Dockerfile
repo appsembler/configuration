@@ -20,8 +20,11 @@ COPY docker/build/edxapp/ansible_overrides.yml /
 COPY docker/build/edxapp/devstack.yml /
 COPY docker/build/devstack/ansible_overrides.yml /devstack/ansible_overrides.yml
 
-ARG OPENEDX_RELEASE=master
+ARG OPENEDX_RELEASE=appsembler/tahoe/master
+ARG APPSEMBLER_PLATFORM_REPO=https://github.com/appsembler/edx-platform.git
 ENV OPENEDX_RELEASE=${OPENEDX_RELEASE}
+ENV APPSEMBLER_PLATFORM_REPO=${APPSEMBLER_PLATFORM_REPO}
+
 RUN sudo /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook edxapp.yml \
     -c local -i '127.0.0.1,' \
     -t 'install,assets,devstack' \
@@ -29,6 +32,7 @@ RUN sudo /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook edxapp.yml 
     --extra-vars="@/ansible_overrides.yml" \
     --extra-vars="@/devstack.yml" \
     --extra-vars="@/devstack/ansible_overrides.yml" \
+		--extra-vars="edx_platform_repo=${APPSEMBLER_PLATFORM_REPO}" \
     && rm -rf /edx/app/edxapp/edx-platform
 
 EXPOSE 18000 18010

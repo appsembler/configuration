@@ -1,0 +1,22 @@
+# CONFIGURE NGINX
+# SYNC LOCAL SCORM CONTENT PACKAGES WITH S3 IF NOT STORED THERE TO BEGIN WITH
+
+# do these as includes since Vagrant  < 2.0 doesn't obey
+# conditionals to include the whole scorm role
+
+- name: define scorm config from settings if available
+  set_fact: 
+    scorm_config: "{{ EDXAPP_XBLOCK_SETTINGS.ScormXBlock|default('{}') }}"
+
+- include: scorm_base.yml
+  when: EDXAPP_XBLOCK_SETTINGS.ScormXBlock is defined
+
+- include: scorm_backup.yml
+  when: 
+    - EDXAPP_XBLOCK_SETTINGS.ScormXBlock is defined
+    - SCORM_S3_BACKUP
+
+- include: scorm_players.yml
+  when: 
+    - EDXAPP_XBLOCK_SETTINGS.ScormXBlock is defined
+    - EDXAPP_AUTH_EXTRA.SCORMPLAYER_GIT_IDENTITIES is defined

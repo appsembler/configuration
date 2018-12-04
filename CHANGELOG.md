@@ -1,5 +1,8 @@
 - Use Ansible 2.3.1.0 so that we can do shallow clones of tags.
 
+- Role: edxapp
+  - `EDXAPP_EDXAPP_SECRET_KEY` no longer has a default value
+
 - git_clone:
   - The working tree is explicitly checked for modified files, to prevent mysterious failures.
 
@@ -321,6 +324,10 @@
   - Added `ANALYTICS_API_AGGREGATE_PAGE_SIZE`, default value 10.  Adjust this parameter to increase the number of
     aggregate search results returned by the Analytics API, i.e. in course_metadata: enrollment_modes, cohorts, and
     segments.
+- Role: edxapp
+  - Added a new EDXAPP_MYSQL_CONN_MAX_AGE, default to 0.  Adjust it to change how long a connection is kept open
+  for reuse before it is closed.
+  - Set preload_app to False in gunicorn config for LMS and Studio.
 - Role: programs
   - This role has been removed as this service is no longer supported. The role is still available on the [Ficus branch](https://github.com/edx/configuration/releases/tag/open-release%2Fficus.1).
 - Role: xqueue

@@ -24,9 +24,9 @@ MONGODB_APT_KEYSERVER: "keyserver.ubuntu.com"
 
 mongodb_debian_pkgs:
   - "mongodb-org={{ mongo_version }}"
-  - "mongodb-org-server={{ mongo_version }}" 
+  - "mongodb-org-server={{ mongo_version }}"
   - "mongodb-org-shell={{ mongo_version }}"
-  - "mongodb-org-mongos={{ mongo_version }}" 
+  - "mongodb-org-mongos={{ mongo_version }}"
   - "mongodb-org-tools={{ mongo_version }}"
 
 
@@ -48,12 +48,17 @@ MONGO_BIND_IP: 127.0.0.1
 MONGO_REPL_SET: "rs0"
 MONGO_AUTH: true
 
+MONGO_SSL_MODE: "disabled"
+MONGO_SSL_CA_CERT: ""
+MONGO_SSL_SERVER_KEY: ""
+MONGO_SSL_SERVER_CERT: ""
+
 # Cluster member configuration
 # Fed directly into mongodb_replica_set module
 MONGO_RS_CONFIG:
   members: []
 
-# Storage engine options in 3.0: "mmapv1" or "wiredTiger" 
+# Storage engine options in 3.0: "mmapv1" or "wiredTiger"
 # As 3.2 and 3.4 default to wiredTiger, our 3.0 play will help future-proof
 MONGO_STORAGE_ENGINE: "wiredTiger"
 

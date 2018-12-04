@@ -9,7 +9,7 @@
 #
 ##
 # Defaults for role hive
-# 
+#
 
 HIVE_VERSION: 2.1.1
 # This should match the value for SQOOP_MYSQL_CONNECTOR_VERSION in sqoop role.
@@ -26,7 +26,7 @@ HIVE_METASTORE_DATABASE_PORT: 3306
 
 HIVE_METASTORE_DATABASE:
   user: "{{ HIVE_METASTORE_DATABASE_USER }}"
-  password: "{{ HIVE_METASTORE_DATABASE_PASSWORD }}"
+  password: "{{ HIVE_DATABASES_default_PASSWORD | default(HIVE_METASTORE_DATABASE_PASSWORD) }}"
   name: "{{ HIVE_METASTORE_DATABASE_NAME }}"
   host: "{{ HIVE_METASTORE_DATABASE_HOST }}"
   port: "{{ HIVE_METASTORE_DATABASE_PORT }}"

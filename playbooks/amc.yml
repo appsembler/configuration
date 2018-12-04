@@ -1,0 +1,110 @@
+---
+
+- name: Configure Mongo
+  hosts: mongo
+  become: True
+  become_method: sudo
+  gather_facts: True
+  roles:
+    - mongo_3_0
+
+- name: Configure shared services (es and memcached)
+  hosts: services
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../appsembler-roles"
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "4GB" }
+    - role: sudo
+    - custom_domains # This gets the list of domains
+    - edx_ansible
+    - role: "{{ appsembler_roles }}/gcsfuse"
+    - oraclejdk
+    - elasticsearch
+    - memcached
+    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
+    - role: "{{ appsembler_roles }}/cert_agent"
+
+
+- name: Configure app server instance(s)
+  hosts: edx
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../appsembler-roles"
+    migrate_db: "yes"
+    openid_workaround: True
+    EDXAPP_LMS_NGINX_PORT: '80'
+    # Set to false if deployed behind another proxy/load balancer.
+    NGINX_SET_X_FORWARDED_HEADERS: True
+    # These should stay false for the public AMI
+    COMMON_ENABLE_DATADOG: False
+    COMMON_ENABLE_SPLUNKFORWARDER: False
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "2GB" }
+    - role: sudo
+    - custom_domains # This gets a list of custom domains
+    - role: "{{ appsembler_roles }}/gcsfuse"
+    - mysql_init
+    - role: nginx
+      nginx_sites:
+      - cms
+      - lms
+      - forum
+      nginx_default_sites:
+      - lms
+    - role: mysql
+      when: EDXAPP_MYSQL_HOST == 'localhost'
+    - role: mongo
+      when: "'localhost' in EDXAPP_MONGO_HOSTS"
+    # Do we need need edxapp 2 times here????
+    - { role: 'edxapp', celery_worker: True }
+    - edxapp
+    - amc
+    #- analytics_api
+    #- insights
+    - edx_notes_api
+    #- demo
+    - oauth_client_setup
+    - oraclejdk
+    - forum
+    - role: datadog
+      when: COMMON_ENABLE_DATADOG
+    - role: splunkforwarder
+      when: COMMON_ENABLE_SPLUNKFORWARDER
+    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+
+- name: Install xqueue, notifier and rabbitmq on services node
+  hosts: "services"
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    migrate_db: "yes"
+  roles:
+    - mysql_init
+    - edxapp_common
+    - role: nginx
+      nginx_sites:
+      - xqueue
+    - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
+    - notifier
+    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
+    - { role: "xqueue", update_users: True }
+
+# must come after xqueue running
+- name: Install certs
+  hosts: "edx"
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    migrate_db: "yes"
+  roles:
+    - certs
+    - role: nginx
+      nginx_sites:
+      - certs

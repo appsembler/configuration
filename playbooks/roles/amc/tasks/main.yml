@@ -1,0 +1,32 @@
+- name: Create css directories for microsites
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: "777"
+    recurse: yes
+  with_items:
+    - { path: "{{ amc_customer_themes_dir }}" }
+  tags:
+    - deploy
+
+- name: Make default SiteConfiguration for settings.SITE_ID
+  become_user: "{{ edxapp_user }}"
+  django_manage: >
+      command="lms create_default_site_config"
+      app_path="{{ edxapp_code_dir }}"
+      settings=amc
+      pythonpath="{{ edxapp_code_dir }}"
+      virtualenv="{{ edxapp_venv_dir }}"
+  run_once: True
+  tags:
+    - deploy
+
+- name: Copy over helper (workon like) script
+  copy: src=edx.sh dest=/usr/local/bin/edx mode=0755
+  tags:
+    - install
+    - install:configuration
+    - deploy
+

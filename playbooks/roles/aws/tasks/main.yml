@@ -29,10 +29,11 @@
   no_log: True
   tags:
     - deploy
+  when: cloud_provider == "aws"  # Appsembler-specific
 
 - name: Set the MTU to 1500 temporarily
   shell: "/sbin/ifconfig {{ ansible_default_ipv4.interface }} mtu 1500 up"
-  when: ansible_distribution in common_debian_variants
+  when: ansible_distribution in common_debian_variants and cloud_provider == "aws"
 
 - name: Set the MTU to 1500 permanently
   template:
@@ -41,7 +42,7 @@
     mode: 0755
     owner: root
     group: root
-  when: ansible_distribution in common_debian_variants
+  when: ansible_distribution in common_debian_variants and cloud_provider == "aws"
 #
 # End dealing with Jumbo frames issue in mixed MTU deployements in AWS
 #
@@ -83,7 +84,16 @@
     mode: 0755
     owner: root
     group: root
-  when: COMMON_OBJECT_STORE_LOG_SYNC
+  when: COMMON_OBJECT_STORE_LOG_SYNC and cloud_provider == "aws"
+
+- name: Create s3 log sync script for GCP
+  template:
+    dest: "{{ aws_s3_sync_script }}"
+    src: send-logs-to-s3-gcp.j2
+    mode: 0755
+    owner: root
+    group: root
+  when: COMMON_OBJECT_STORE_LOG_SYNC and cloud_provider == "gcp"
 
 - name: Create symlink for s3 log sync script
   file:
@@ -106,10 +116,13 @@
     - "/usr/share/landscape/landscape-sysinfo.wrapper"
     - "/etc/update-motd.d/51-cloudguest"
     - "/etc/update-motd.d/91-release-upgrade"
+  when: cloud_provider == "aws"
 
 - name: Update the ssh motd on Ubuntu
   file:
     path: "{{ item.item }}"
     mode: "0644"
-  when: vagrant_home_dir.stat.exists == False and ansible_distribution in common_debian_variants and item.stat.exists
   with_items: "{{ motd_files_exist.results }}"
+  when:
+    - vagrant_home_dir.stat.exists == False and ansible_distribution in common_debian_variants and item.stat.exists
+    - cloud_provider == "aws"

@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 {% for name,value in item.items() -%}
-{%- if value -%}
+{%- if value|default(None) != None and value != "" -%}
 export {{ name }}="{{ value }}"
 {% endif %}
 {%- endfor %}

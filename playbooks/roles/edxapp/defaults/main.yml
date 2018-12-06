@@ -1130,7 +1130,6 @@ lms_env_config:
 cms_auth_config:
   <<: *edxapp_generic_auth
   SEGMENT_KEY: "{{ EDXAPP_CMS_SEGMENT_KEY }}"
-  SEGMENT_SITE: "{{ EDXAPP_ENABLE_SEGMENT_SITE }}"
   MODULESTORE:
     default:
         ENGINE: 'xmodule.modulestore.mixed.MixedModuleStore'

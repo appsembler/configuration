@@ -1056,7 +1056,7 @@ generic_env_config:  &edxapp_generic_env
 lms_auth_config:
   <<: *edxapp_generic_auth
   SEGMENT_KEY: "{{ EDXAPP_LMS_SEGMENT_KEY }}"
-  SEGMENT_SITE: "{{ EDXAPP_SEGMENT_SITE }}"
+  SEGMENT_SITE: "{{ EDXAPP_ENABLE_SEGMENT_SITE }}"
   OPTIMIZELY_PROJECT_ID: "{{ EDXAPP_OPTIMIZELY_PROJECT_ID }}"
   EDX_API_KEY: "{{ EDXAPP_EDX_API_KEY }}"
   VERIFY_STUDENT: "{{ EDXAPP_VERIFY_STUDENT }}"

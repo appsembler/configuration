@@ -31,6 +31,7 @@
   vars:
     appsembler_roles: "../../../appsembler-roles"
     migrate_db: "yes"
+    FORUM_REBUILD_INDEX: true
     openid_workaround: True
     POSTGRESQL_AGGREGATION_INSTALL_CRON: true
     ENABLE_ECOMMERCE: false

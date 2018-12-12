@@ -40,6 +40,7 @@
   vars:
     appsembler_roles: "../../../appsembler-roles"
     migrate_db: "yes"
+    FORUM_REBUILD_INDEX: true
     openid_workaround: True
     SANDBOX_ENABLE_ECOMMERCE: False
     COMMON_ENABLE_INSIGHTS: False

@@ -70,5 +70,5 @@
     virtualenv_python: python2.7.12
     state: present
   become_user: "{{ xapi_bridge_user }}"
-  when: "{{ COMMON_ENVIRONMENT }} == 'prod'"
+  when: COMMON_ENVIRONMENT == "prod"
   tags: ["xapi_bridge"]

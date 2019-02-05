@@ -10,7 +10,7 @@
   django_manage: >
     command="lms custom_domains_list"
     app_path="{{ edxapp_code_dir }}"
-    settings=amc
+    settings="{{ EDXAPP_SETTINGS }}"
     pythonpath="{{ edxapp_code_dir }}"
     virtualenv="{{ edxapp_venv_dir }}"
   register: custom_domains_cmd

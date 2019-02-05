@@ -169,7 +169,7 @@ EDXAPP_COMMENTS_SERVICE_URL:  'http://localhost:18080'
 # EDXAPP_COMMENTS_SERVICE_KEY must match FORUM_API_KEY
 EDXAPP_COMMENTS_SERVICE_KEY:  'password'
 
-# EDXAPP_EDXAPP_SECRET_KEY: "DUMMY KEY CHANGE BEFORE GOING TO PRODUCTION"  # Keep it removed to ensure secure defaults
+# EDXAPP_EDXAPP_SECRET_KEY: "DUMMY KEY CHANGE BEFORE GOING TO PRODUCTION"  # Commented out to ensure secure defaults
 
 EDXAPP_FERNET_KEYS:
   - "DUMMY KEY CHANGE BEFORE GOING TO PRODUCTION"
@@ -1648,9 +1648,5 @@ SERVICE_WORKER_USERS:
 
 EDXAPP_ENABLE_DJANGO_ADMIN_RESTRICTION: false
 
-# TODO: cherry pick this in from https://github.com/appsembler/configuration/pull/178
+# for docker devstack
 private_requirements_file: "{{ edxapp_app_dir }}/customer_private_requirements.txt"
-
-## Appsembler custom:
-## enable/skip the i18n step
-ENABLE_COMPILEMESSAGES: true

@@ -46,6 +46,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
+    - role: aws
     - custom_domains # This gets a list of custom domains
     - role: "{{ appsembler_roles }}/gcsfuse"
     - mysql_init

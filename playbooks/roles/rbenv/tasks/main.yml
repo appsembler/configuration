@@ -187,8 +187,11 @@
     - install
     - install:base
 
+# workaround rubygems update bug by forcing the version
+# see: https://github.com/rubygems/rubygems/issues/2534
+# and: https://github.com/colszowka/simplecov/commit/ba423820d1d1164fcc038e7b6163b8a96d1786be
 - name: update rubygems
-  shell: "gem install rubygems-update && update_rubygems"
+  shell: "gem install rubygems-update -v '<3' && update_rubygems"
   become_user: "{{ rbenv_user }}"
   environment: "{{ rbenv_environment }}"
   tags:

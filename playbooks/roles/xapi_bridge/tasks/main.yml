@@ -71,4 +71,41 @@
   tags:
     - install
     - install:app-requirements
-  
+
+
+- name: Add xapi_bridge systemd configuration on 16.04
+  template:
+    src:  "xapi_bridge.service.j2"
+    dest: "/etc/systemd/system/xapi_bridge.service"
+  when: ansible_distribution_release == 'xenial'
+  tags:
+    - install
+    - install:configuration
+
+- name: enable xapi_bridge systemd unit on 16.04
+  systemd:
+    name: xapi_bridge
+    enabled: yes
+    daemon_reload: yes
+  when: ansible_distribution_release == 'xenial'
+  tags:
+    - install
+    - install:configuration
+
+- name: Stop xapi_bridge service
+  service:
+    name: xapi_bridge
+    state: stopped
+  tags:
+    - manage
+    - manage:stop
+
+- name: Start xapi_bridge service
+  service:
+    name: xapi_bridge
+    state: started
+  tags:
+    - manage
+    - manage:start
+
+    

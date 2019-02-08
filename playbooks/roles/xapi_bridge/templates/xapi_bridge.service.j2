@@ -5,7 +5,7 @@ Documentation=https://github.com/adlnet-archive/edx-xapi-bridge
 
 [Service]
 User=xapi
-ExecStart=/edx/app/xapi/venvs/xapi/bin/python xapi_bridge /edx/var/log/tracking/tracking.log
+ExecStart=/edx/app/xapi/venvs/xapi/bin/python /edx/app/xapi/edx-xapi-bridge/xapi_bridge /edx/var/log/tracking/tracking.log
 Restart=always
 
 # Setting Restart interval to be 3 seconds

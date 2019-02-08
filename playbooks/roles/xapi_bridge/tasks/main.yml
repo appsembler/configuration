@@ -72,7 +72,6 @@
     - install
     - install:app-requirements
 
-
 - name: Add xapi_bridge systemd configuration on 16.04
   template:
     src:  "xapi_bridge.service.j2"
@@ -107,5 +106,3 @@
   tags:
     - manage
     - manage:start
-
-    

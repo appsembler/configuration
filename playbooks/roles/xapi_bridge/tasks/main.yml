@@ -68,18 +68,34 @@
     state: link
   with_items:
     - '{{ xapi_bridge_venv_bin }}/python'
-  tags:
-    - install
-    - install:app-requirements
+  tags: ["xapi_bridge"]
+
+- name: create the xapi log directory
+  file:
+    path: "{{ COMMON_LOG_DIR }}/{{ xapi_bridge_user }}"
+    state: directory
+    mode: 0755
+    owner: "{{ xapi_bridge_log_user }}"
+    group: "{{ xapi_bridge_log_user }}"
+
+- name: create the log file
+  file:
+    path: "{{ COMMON_LOG_DIR }}/{{ xapi_bridge_user }}/{{ item }}"
+    state: touch
+    mode: 0644
+    owner: "{{ xapi_bridge_log_user }}"
+    group: "{{ xapi_bridge_log_user }}"
+  with_items:
+    - 'xapi_stderr.log'
+    - 'xapi_stdout.log'
+  tags: ["xapi_bridge"]
 
 - name: Add xapi_bridge systemd configuration on 16.04
   template:
-    src:  "xapi_bridge.service.j2"
+    src:  "etc/systemd/system/xapi_bridge.service.j2"
     dest: "/etc/systemd/system/xapi_bridge.service"
   when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:configuration
+  tags: ["xapi_bridge"]
 
 - name: enable xapi_bridge systemd unit on 16.04
   systemd:
@@ -87,9 +103,7 @@
     enabled: yes
     daemon_reload: yes
   when: ansible_distribution_release == 'xenial'
-  tags:
-    - install
-    - install:configuration
+  tags: ["xapi_bridge"]
 
 - name: Stop xapi_bridge service
   service:

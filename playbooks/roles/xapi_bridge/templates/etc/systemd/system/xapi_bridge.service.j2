@@ -1,11 +1,11 @@
 [Unit]
 Description=edX xAPI Bridge Service
 After=network.target
-Documentation=https://github.com/adlnet-archive/edx-xapi-bridge
+Documentation=https://github.com/appsembler/edx-xapi-bridge
 
 [Service]
 User=xapi
-WorkingDirectory=/edx/app/xapi/edx-xapi-bridge/
+WorkingDirectory={{ xapi_bridge_code_dir }}
 ExecStart=/edx/app/xapi/venvs/xapi/bin/python xapi_bridge /edx/var/log/tracking/tracking.log
 Restart=always
 StandardOutput=file:/edx/var/log/xapi/xapi_stdout.log 

@@ -75,11 +75,11 @@
 
 - name: Create symlinks from the venv bin dir and repo dir
   file:
-    src: "{{ item }}"
-    dest: "{{ COMMON_BIN_DIR }}/{{ item.split('.')[0] }}.xapi_bridge"
+    src: "{{ xapi_bridge_venv_bin }}/{{ item }}"
+    dest: "{{ COMMON_BIN_DIR }}/{{ item }}.xapi_bridge"
     state: link
   with_items:
-    - '{{ xapi_bridge_venv_bin }}/python'
+    - 'python'
   tags: ["xapi_bridge"]
 
 - name: create the xapi log directory

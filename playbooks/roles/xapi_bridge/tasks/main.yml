@@ -54,11 +54,23 @@
 
 - name: install python requirements xapi_bridge into virtualenv
   pip:
-    requirements: "{{ xapi_bridge_code_dir }}/requirements.txt"
+    chdir: "{{ xapi_bridge_code_dir }}"
+    requirements: "requirements/base.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
     virtualenv_python: python2.7.12
     state: present
   become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
+
+- name: install production python requirements xapi_bridge into virtualenv
+  pip:
+    chdir: "{{ xapi_bridge_code_dir }}"
+    requirements: "requirements/production.txt"
+    virtualenv: "{{ xapi_bridge_venv_dir }}"
+    virtualenv_python: python2.7.12
+    state: present
+  become_user: "{{ xapi_bridge_user }}"
+  when: COMMON_ENVIRONMENT in ("prod", "staging")
   tags: ["xapi_bridge"]
 
 - name: Create symlinks from the venv bin dir and repo dir

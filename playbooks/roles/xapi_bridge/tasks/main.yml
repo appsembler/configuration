@@ -110,6 +110,7 @@
     name: xapi_bridge
     state: stopped
   tags:
+    - xapi_bridge
     - manage
     - manage:stop
 
@@ -118,5 +119,6 @@
     name: xapi_bridge
     state: started
   tags:
+    - xapi_bridge
     - manage
     - manage:start

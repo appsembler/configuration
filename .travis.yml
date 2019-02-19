@@ -6,6 +6,7 @@ python:
 branches:
   only:
   - master
+  - appsembler/hawthorn/master
 
 services:
   - docker
@@ -35,3 +36,12 @@ script:
   - docker --version
   - make --version
   - travis_wait 50 make --keep-going $MAKE_TARGET SHARD=$SHARD SHARDS=$SHARDS
+
+# Appsembler addition to automatically push
+# our hawthorn image
+after_success:
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "appsembler/hawthorn/master" ]]; then
+      docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
+      travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:hawthorn ;
+      docker push appsembler/edxapp:hawthorn ;
+    fi

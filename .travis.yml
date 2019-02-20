@@ -43,5 +43,5 @@ after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "appsembler/hawthorn/master" ]]; then
       docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
       travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:latest ;
-      docker push appsembler/edxapp:hawthorn ;
+      docker push appsembler/edxapp:latest ;
     fi

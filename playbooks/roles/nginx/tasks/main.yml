@@ -431,7 +431,7 @@
     - install
     - install:configuration
 
-- name: Set up nginx access log rotation
+- name: Set up nginx error log rotation
   template:
     src: "etc/logrotate.d/edx_logrotate_nginx_error.j2"
     dest: "/etc/logrotate.d/nginx-error"

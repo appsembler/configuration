@@ -1,0 +1,10 @@
+{{ xapi_bridge_log_dir }}/xapi_bridge.log {
+  compress
+  create
+  dateext
+  dateformat -%Y%m%d-%s
+  missingok
+  daily
+  rotate 16000  # the number of rotated files that can exist simultaneously. If it's 0, then the old files will be deleted rather than compressed/rotated
+  nodelaycompress
+}

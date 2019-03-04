@@ -84,7 +84,7 @@
 
 - name: create the xapi log directory
   file:
-    path: "{{ COMMON_LOG_DIR }}/{{ xapi_bridge_user }}"
+    path: "{{ xapi_bridge_log_dir }}"
     state: directory
     mode: 0755
     owner: "{{ xapi_bridge_log_user }}"
@@ -92,7 +92,7 @@
 
 - name: create the log file
   file:
-    path: "{{ COMMON_LOG_DIR }}/{{ xapi_bridge_user }}/{{ item }}"
+    path: "{{ xapi_bridge_log_dir }}/{{ item }}"
     state: touch
     mode: 0644
     owner: "{{ xapi_bridge_log_user }}"
@@ -116,6 +116,14 @@
     daemon_reload: yes
   when: ansible_distribution_release == 'xenial'
   tags: ["xapi_bridge"]
+
+- name: Create xapi_bridge logrotate config
+  template:
+    src: "etc/logrotate.d/xapi_bridge.j2"
+    dest: "/etc/logrotate.d/xapi_bridge"
+  tags:
+    - xapi_bridge
+    - logrotate
 
 - name: Stop xapi_bridge service
   service:

@@ -1,0 +1,9 @@
+---
+##
+# Defaults for figures temp role
+
+figures_parent_dir: "{{ COMMON_BASE_DIR }}/src"
+figures_code_dir: "{{ figures_parent_dir }}/figures"
+
+figures_git_repo: "https://github.com/appsembler/figures"
+figures_version: "0.1.6"

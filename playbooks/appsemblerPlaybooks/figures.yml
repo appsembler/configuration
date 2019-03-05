@@ -1,0 +1,16 @@
+---
+
+# This role is based on a temporary hack
+# This should configure figures in a prod instance but that's not the correct method
+
+
+- name: Install figures on Gingko
+  hosts: edxapp-server
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars_files:
+    - ../roles/common_vars/defaults/main.yml
+    - ../roles/edxapp/defaults/main.yml
+  roles:
+    - figures

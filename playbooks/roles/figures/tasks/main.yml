@@ -78,13 +78,12 @@
 
 # Temp hack just for enterprise customers.
 #[Nishant]: TODO - Add flags to customize colors etc. 
-
 - name: npm build
-  args:
-    chdir: "{{ figures_code_dir }}/frontend"
-  command: "{{ figures_customer_specific_vars | default('') }} {{ edxapp_nodeenv_bin }}/npm run build"
+  shell: bash -c "{{ figures_customer_specific_vars | default('') }} {{ edxapp_nodeenv_bin }}/npm run build"
   become_user: "{{ edxapp_user }}"
   environment: "{{ edxapp_environment }}"
+  args:
+    chdir: "{{ figures_code_dir }}/frontend"
   tags:
     - figures
     - install:figures

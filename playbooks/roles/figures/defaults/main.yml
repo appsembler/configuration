@@ -7,3 +7,6 @@ figures_code_dir: "{{ figures_parent_dir }}/figures"
 
 figures_git_repo: "https://github.com/appsembler/figures"
 figures_version: "0.1.6"
+
+## A space separated list of all customer specific flags
+figures_customer_specific_vars: "REM_BASE=10"

@@ -1,0 +1,10 @@
+{{ xapi_bridge_log_dir }}/xapi_bridge.log {
+  compress
+  create xapi syslog
+  dateext
+  dateformat -%Y%m%d-%s
+  missingok
+  daily
+  rotate 1600
+  nodelaycompress
+}

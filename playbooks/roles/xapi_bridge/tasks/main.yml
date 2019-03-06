@@ -77,6 +77,8 @@
   template:
     src: "settings.py.j2"
     dest: "{{ xapi_bridge_code_dir }}/xapi_bridge/settings.py"
+    owner: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
   tags:
     - xapi_bridge
     - xapi_bridge:config

@@ -73,6 +73,14 @@
   when: COMMON_ENVIRONMENT in ("prod", "staging")
   tags: ["xapi_bridge"]
 
+- name: create the settings file from template
+  template:
+    src: "settings.py.j2"
+    dest: "{{ xapi_bridge_code_dir }}/xapi_bridge/settings.py"
+  tags:
+    - xapi_bridge
+    - xapi_bridge:config
+
 - name: Create symlinks from the venv bin dir and repo dir
   file:
     src: "{{ xapi_bridge_venv_bin }}/{{ item }}"
@@ -90,17 +98,18 @@
     owner: "{{ xapi_bridge_log_user }}"
     group: "{{ xapi_bridge_log_user }}"
 
-- name: create the log file
-  file:
-    path: "{{ xapi_bridge_log_dir }}/{{ item }}"
-    state: touch
-    mode: 0644
-    owner: "{{ xapi_bridge_log_user }}"
-    group: "{{ xapi_bridge_log_user }}"
-  with_items:
-    - 'xapi_stderr.log'
-    - 'xapi_stdout.log'
-  tags: ["xapi_bridge"]
+# This is only needed for systemd version 236 or more
+# - name: create the log file
+#   file:
+#     path: "{{ xapi_bridge_log_dir }}/{{ item }}"
+#     state: touch
+#     mode: 0644
+#     owner: "{{ xapi_bridge_log_user }}"
+#     group: "{{ xapi_bridge_log_user }}"
+#   with_items:
+#     - 'xapi_stderr.log'
+#     - 'xapi_stdout.log'
+#   tags: ["xapi_bridge"]
 
 - name: Add xapi_bridge systemd configuration on 16.04
   template:

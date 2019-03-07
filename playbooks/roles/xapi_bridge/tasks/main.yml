@@ -108,7 +108,7 @@
     path: "{{ xapi_bridge_log_dir }}/xapi_bridge.log"
     state: touch
     mode: 0644
-    owner: "{{ xapi_bridge_log_user }}"
+    owner: "{{ xapi_bridge_user }}"
     group: "{{ common_log_user }}"
   tags:
     - xapi

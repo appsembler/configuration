@@ -46,7 +46,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
-#    - custom_domains # This gets a list of custom domains
+    - custom_domains # This gets a list of custom domains
     - role: "{{ appsembler_roles }}/gcsfuse"
     - mysql_init
     - role: nginx
@@ -68,7 +68,7 @@
     #- insights
     - edx_notes_api
     #- demo
-    - oauth_client_setup
+#    - oauth_client_setup
     - oraclejdk
     - forum
     - role: datadog

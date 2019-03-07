@@ -296,10 +296,10 @@
     - install:configuration
     - nginx:custom_domains
 
-- name: Reload nginx for custom domains to take effect
-  service: name=nginx state=reloaded
-  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
-  tags: ['nginx:custom_domains']
+#- name: Reload nginx for custom domains to take effect
+#  service: name=nginx state=reloaded
+#  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+#  tags: ['nginx:custom_domains']
 
   # These are static pages that can be used
   # for nginx rate limiting, 500 errors, etc.
@@ -361,18 +361,6 @@
     - install
     - install:configuration
 
-- name: copy OLD ssl cert
-  copy:
-    content: "{{ OLD_NGINX_SSL_CERTIFICATE_CONTENT }}"
-    dest: "{{ OLD_NGINX_SSL_CERTIFICATE_PATH }}"
-    owner: root
-    group: root
-    mode: 0644
-  when: NGINX_ENABLE_SSL and OLD_NGINX_SSL_CERTIFICATE_CONTENT != ''
-  tags:
-    - install
-    - install:configuration
-
 - name: copy ssl cert
   copy:
     src: "{{ NGINX_SSL_CERTIFICATE }}"
@@ -381,19 +369,6 @@
     group: root
     mode: 0644
   when: ssl_cert.stat.exists and NGINX_ENABLE_SSL and NGINX_SSL_CERTIFICATE != 'ssl-cert-snakeoil.pem'
-  tags:
-    - install
-    - install:configuration
-
-- name: copy OLD ssl key
-  copy:
-    content: "{{ OLD_NGINX_SSL_KEY_CONTENT }}"
-    dest: "{{ OLD_NGINX_SSL_KEY_PATH }}"
-    owner: root
-    group: root
-    mode: 0640
-  when: NGINX_ENABLE_SSL and OLD_NGINX_SSL_KEY_CONTENT != ''
-  no_log: True
   tags:
     - install
     - install:configuration

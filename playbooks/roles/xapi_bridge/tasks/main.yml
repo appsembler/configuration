@@ -57,7 +57,7 @@
     chdir: "{{ xapi_bridge_code_dir }}"
     requirements: "requirements/base.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
-    virtualenv_python: python2.7.12
+    virtualenv_python: python2.7
     state: present
   become_user: "{{ xapi_bridge_user }}"
   tags: ["xapi_bridge"]
@@ -99,6 +99,20 @@
     mode: 0755
     owner: "{{ xapi_bridge_log_user }}"
     group: "{{ xapi_bridge_log_user }}"
+  tags:
+    - xapi
+    - xapi:log_files
+
+- name: create the xapi log file
+  file:
+    path: "{{ xapi_bridge_log_dir }}/xapi_bridge.log"
+    state: touch
+    mode: 0644
+    owner: "{{ xapi_bridge_log_user }}"
+    group: "{{ common_log_user }}"
+  tags:
+    - xapi
+    - xapi:log_files
 
 # This is only needed for systemd version 236 or more
 # - name: create the log file

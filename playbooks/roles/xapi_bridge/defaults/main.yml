@@ -15,3 +15,31 @@ xapi_bridge_venv_dir: "{{ xapi_bridge_app_dir }}/venvs/xapi"
 xapi_bridge_venv_bin: "{{ xapi_bridge_venv_dir }}/bin"
 xapi_bridge_code_dir: "{{ xapi_bridge_app_dir }}/edx-xapi-bridge"
 xapi_bridge_version: "master"
+
+# application settings defaults
+xapi_PUBLISH_MAX_WAIT_TIME: 5
+xapi_PUBLISH_MAX_PAYLOAD: 100
+xapi_PUBLISH_MAX_RETRIES: 1
+xapi_NOTIFIER_READ_FREQ: 5
+xapi_NOTIFIER_POLL_TIMEOUT: 1000
+xapi_LRS_ENDPOINT: "https://learninglocker.net/data/xAPI/"
+xapi_LRS_USERNAME: "fakeuser"
+xapi_LRS_PASSWORD: "fakepassword"
+xapi_LRS_BASICAUTH_HASH: !!null
+xapi_LRS_BACKEND_TYPE: "learninglocker"
+xapi_OPENEDX_PLATFORM_URI: "http://127.0.0.1"
+xapi_OPENEDX_OAUTH2_CLIENT_ID: "foo"
+xapi_OPENEDX_OAUTH2_CLIENT_SECRET: "notasecret"
+xapi_LMS_API_USE_MEMCACHED: false
+xapi_MEMCACHED_ADDRESS: "127.0.0.1:11211"
+xapi_IGNORED_EVENT_TYPES: []
+xapi_SENTRY_DSN: !!null
+xapi_HTTP_PUBLISH_STATUS: false
+xapi_HTTP_PUBLISH_IP: "0.0.0.0"
+xapi_HTTP_PUBLISH_PORT: 9090
+xapi_DEBUG_MODE: false
+xapi_EXCEPTIONS_NO_CONTINUE: false
+xapi_TEST_LOAD_TRACKING_TOTAL_LOG_WRITES: 20
+xapi_TEST_LOAD_SLEEP_SECS_BETWEEN_WRITES: 1
+xapi_TEST_LOAD_SUCCESSFUL_STATEMENTS_BENCHMARK: 150
+xapi_TEST_LOAD_TRACKING_FILE_SOURCE: "fixtures/test_loadtest_events_0.json"

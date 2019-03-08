@@ -9,6 +9,15 @@ PUBLISH_MAX_PAYLOAD = {{xapi_PUBLISH_MAX_PAYLOAD}}
 # maximum publish retries on LRS connection error
 PUBLISH_MAX_RETRIES = {{xapi_PUBLISH_MAX_RETRIES}}
 
+# sleep time between polls of watched log file, in seconds
+NOTIFIER_READ_FREQ = {{xapi_NOTIFIER_READ_FREQ}}
+
+# how long to wait for activity when polling, in milliseconds
+# https://docs.python.org/2.4/lib/poll-objects.html
+# If timeout is omitted, negative, or None, the call will block until
+# there is an event for this poll object.
+NOTIFIER_POLL_TIMEOUT = {{xapi_NOTIFIER_POLL_TIMEOUT}}
+
 # lrs credentials
 LRS_ENDPOINT = "{{xapi_LRS_ENDPOINT}}"
 LRS_USERNAME = "{{xapi_LRS_USERNAME}}"

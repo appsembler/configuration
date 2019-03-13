@@ -92,7 +92,6 @@
       nginx_sites:
       - xqueue
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
-#    - notifier
 #    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
 

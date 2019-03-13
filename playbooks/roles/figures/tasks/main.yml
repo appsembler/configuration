@@ -75,9 +75,9 @@
   become_user: "{{ edxapp_user }}"
   tags:
     - figures
+    - figures:node_dependencies
 
-# Temp hack just for enterprise customers.
-#[Nishant]: TODO - Add flags to customize colors etc. 
+# To build frontend assets for Enterprise customers
 - name: npm build
   shell: bash -c "{{ figures_customer_specific_vars | default('') }} {{ edxapp_nodeenv_bin }}/npm run build"
   become_user: "{{ edxapp_user }}"
@@ -86,7 +86,7 @@
     chdir: "{{ figures_code_dir }}/frontend"
   tags:
     - figures
-    - install:figures
+    - figures:frontend
 
 - name: "gather lms static assets with paver"
   command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-lms"

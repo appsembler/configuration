@@ -56,7 +56,7 @@
     - figures
     - deploy:figures
 
-- name: install figures from {{ figures_code_dir }}
+- name: install figures {{ figures_version }} from {{ figures_code_dir }}
   args:
     chdir: "{{ figures_code_dir }}"
   command: "{{ edxapp_venv_dir }}/bin/pip install -e ."
@@ -64,7 +64,17 @@
   environment: "{{ edxapp_environment }}"
   tags:
     - figures
-    - install:figures
+    - figures:install
+
+- name: migrate figures
+  command: "{{ edxapp_venv_bin }}/python manage.py lms migrate figures --settings={{ EDXAPP_SETTINGS }}"
+  become_user: "{{ edxapp_user }}"
+  args:
+    chdir: "{{ edxapp_code_dir }}"
+  tags:
+    - figures
+    - figures:install
+    - figures:migrate
 
 - name: install node dependencies
   npm:

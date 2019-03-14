@@ -53,6 +53,8 @@
     - { role: rabbitmq, rabbitmq_ip: '127.0.0.1', tags: ['rabbitmq_role'] }
     - { role: edxapp, celery_worker: True, tags: ['edxapp_role'] }
     - { role: edxapp, tags: ['edxapp_role'] }
+    - role: figures
+      when: ENABLE_FIGURES|default(False)
     - { role: notifier, tags: ['notifier_role'] }
     - role: edx_notes_api
       when: "INSTALL_EDX_NOTES is defined and INSTALL_EDX_NOTES"

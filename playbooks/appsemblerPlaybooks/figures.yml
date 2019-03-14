@@ -1,0 +1,18 @@
+---
+
+# This role is based on a temporary hack
+# This is a standalone playbook that will be removed in the future
+# This role has been added to ginkgo_basic.yml playbook to configure figures
+# This should configure figures in a prod instance but that's not the correct method
+
+
+- name: Install figures on Gingko
+  hosts: edxapp-server
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars_files:
+    - ../roles/common_vars/defaults/main.yml
+    - ../roles/edxapp/defaults/main.yml
+  roles:
+    - figures

@@ -1,0 +1,95 @@
+---
+
+# This role is based on a temporary hack
+# This should configure figures in a prod instance but that's not the correct method
+
+- include_vars: ../../common_vars/defaults/main.yml
+- include_vars: ../../edxapp/defaults/main.yml
+
+- name: create figures parent and installation directories
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0755
+    owner: "edxapp"
+    group: "{{ common_web_group }}"
+  with_items:
+    - { path: "{{ figures_parent_dir }}" }
+    - { path: "{{ figures_code_dir }}" }
+  tags:
+    - figures
+
+- name: uninstall any previous versions of figures
+  command: "{{ edxapp_venv_dir }}/bin/pip uninstall -y {{ item }}"
+  become_user: "{{ edxapp_user }}"
+  environment: "{{ edxapp_environment }}"
+  register: figures_exists
+  ignore_errors: yes
+  with_items: 
+    - "figures"
+  tags:
+    - figures
+    - uninstall:figures
+
+# if figures existed before, chances are that the static assets were built
+# that would fail git checkout because local modifications will exists in the repo
+# reset HEAD before checking out
+
+- name: reset git HEAD before checkout
+  command: "git reset HEAD --hard"
+  args: 
+    chdir: "{{ figures_code_dir }}"
+  become_user: "{{ edxapp_user }}"
+  when: figures_exists|success
+  tags:
+    - figures
+    - figures:git_reset
+
+- name: checkout figures repo into {{ figures_code_dir }}
+  git:
+    dest: "{{ figures_code_dir }}"
+    repo: "{{ figures_git_repo }}"
+    version: "{{ figures_version }}"
+    accept_hostkey: yes
+  become_user: "{{ edxapp_user }}"
+  tags:
+    - figures
+    - deploy:figures
+
+- name: install figures from {{ figures_code_dir }}
+  args:
+    chdir: "{{ figures_code_dir }}"
+  command: "{{ edxapp_venv_dir }}/bin/pip install -e ."
+  become_user: "{{ edxapp_user }}"
+  environment: "{{ edxapp_environment }}"
+  tags:
+    - figures
+    - install:figures
+
+- name: install node dependencies
+  npm:
+    executable: "{{ edxapp_nodeenv_bin }}/npm"
+    path: "{{ figures_code_dir }}/frontend"
+    state: latest
+  environment: "{{ edxapp_environment }}"
+  become_user: "{{ edxapp_user }}"
+  tags:
+    - figures
+    - figures:node_dependencies
+
+# To build frontend assets for Enterprise customers
+- name: npm build
+  shell: bash -c "{{ figures_customer_specific_vars | default('') }} {{ edxapp_nodeenv_bin }}/npm run build"
+  become_user: "{{ edxapp_user }}"
+  environment: "{{ edxapp_environment }}"
+  args:
+    chdir: "{{ figures_code_dir }}/frontend"
+  tags:
+    - figures
+    - figures:frontend
+
+- name: "gather lms static assets with paver"
+  command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-lms"
+  tags:
+    - figures
+    - figures:assets

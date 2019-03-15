@@ -358,6 +358,18 @@
     - service_variant_config
     - deploy
 
+# generate any declared database cache
+# tables (will make in default db)
+- name: create database cache tables
+  django_manage:
+    app_path: "{{ edxapp_code_dir }}"
+    command: "lms createcachetable"
+    settings: "{{ EDXAPP_SETTINGS }}"
+    virtualenv: "{{ edxapp_venv_dir }}"
+  environment: "{{ edxapp_environment }}"
+  ignore_errors: yes
+
+
   # call supervisorctl update. this reloads
   # the supervisorctl config and restarts
   # the services if any of the configurations

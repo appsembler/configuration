@@ -26,7 +26,7 @@
     - memcached
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
     - role: "{{ appsembler_roles }}/cert_agent"
-
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Configure app server instance(s)
   hosts: edx
@@ -79,6 +79,7 @@
     - role: newrelic
       when: COMMON_ENABLE_NEWRELIC
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Install xqueue, notifier and rabbitmq on services node
   hosts: "services"

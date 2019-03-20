@@ -4,6 +4,11 @@ language: python
 python:
   - "2.7"
 
+branches:
+  only:
+  - master
+  - appsembler/hawthorn/master
+
 services:
   - docker
 
@@ -23,7 +28,7 @@ install:
 
 env:
   - MAKE_TARGET=test.syntax SHARD=0 SHARDS=1
-  - MAKE_TARGET=test.edx_east_roles
+  - MAKE_TARGET=test.playbooks SHARD=0 SHARDS=1
   - MAKE_TARGET=docker.test.shard SHARD=0 SHARDS=3
   - MAKE_TARGET=docker.test.shard SHARD=1 SHARDS=3
   - MAKE_TARGET=docker.test.shard SHARD=2 SHARDS=3
@@ -32,3 +37,12 @@ script:
   - docker --version
   - make --version
   - travis_wait 50 make --keep-going $MAKE_TARGET SHARD=$SHARD SHARDS=$SHARDS
+
+# Appsembler addition to automatically push
+# our hawthorn image
+after_success:
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "appsembler/hawthorn/master" ]]; then
+      docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
+      travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:latest ;
+      docker push appsembler/edxapp:latest ;
+    fi

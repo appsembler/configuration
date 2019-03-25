@@ -33,6 +33,7 @@
     id: "{{ MONGODB_APT_KEY }}"
     keyserver: "{{ MONGODB_APT_KEYSERVER }}"
     state: present
+  retries: 3
   tags:
     - install:system-requirements
 
@@ -74,7 +75,7 @@
   tags:
     - scripts
     - install:base
-    
+
 #These templates rely on there being a global
 # read_only mysql user, you must override the default
 # in order for these templates to be written out.
@@ -93,7 +94,7 @@
     - scripts:mysql
     - install:code
   with_items: "{{ AD_HOC_REPORTING_REPLICA_DB_HOSTS }}"
-  
+
 # These templates rely on there being a global
 # read_only mongo user, you must override the default
 # in order for these templates to be written out
@@ -109,7 +110,7 @@
       db_name: "{{ EDXAPP_MONGO_DB_NAME }}"
       db_port: "{{ EDXAPP_MONGO_PORT }}"
       script_name: edxapp-mongo.sh
-    - db_hosts: "{{ FORUM_MONGO_HOSTS }}"
+    - db_hosts: "{{ FORUM_MONGO_HOSTS_FOR_AD_HOC_REPORTING }}"
       db_name: "{{ FORUM_MONGO_DATABASE }}"
       db_port: "{{ FORUM_MONGO_PORT }}"
       script_name: forum-mongo.sh

@@ -4,28 +4,29 @@ edxlocal_debian_pkgs:
   - libjpeg-dev
 
 edxlocal_databases:
-  - "{{ ECOMMERCE_DEFAULT_DB_NAME | default(None) }}"
+  - "{{ ECOMMERCE_DATABASE_NAME | default(None) }}"
   - "{{ INSIGHTS_DATABASE_NAME | default(None) }}"
   - "{{ XQUEUE_MYSQL_DB_NAME | default(None) }}"
   - "{{ EDXAPP_MYSQL_DB_NAME | default(None) }}"
   - "{{ EDXAPP_MYSQL_CSMH_DB_NAME | default(None) }}"
   - "{{ EDX_NOTES_API_MYSQL_DB_NAME | default(None) }}"
-  - "{{ PROGRAMS_DEFAULT_DB_NAME | default(None) }}"
   - "{{ ANALYTICS_API_DEFAULT_DB_NAME | default(None) }}"
   - "{{ ANALYTICS_API_REPORTS_DB_NAME | default(None) }}"
   - "{{ CREDENTIALS_DEFAULT_DB_NAME | default(None) }}"
   - "{{ DISCOVERY_DEFAULT_DB_NAME | default(None) }}"
+  - "{{ JOURNALS_DEFAULT_DB_NAME | default(None) }}"
+  - "{{ VEDA_WEB_FRONTEND_DEFAULT_DB_NAME | default(None) }}"
 
 edxlocal_database_users:
   - {
-      db: "{{ ECOMMERCE_DEFAULT_DB_NAME | default(None) }}",
+      db: "{{ ECOMMERCE_DATABASE_NAME | default(None) }}",
       user: "{{ ECOMMERCE_DATABASE_USER | default(None) }}",
       pass: "{{ ECOMMERCE_DATABASE_PASSWORD | default(None) }}"
     }
   - {
       db: "{{ INSIGHTS_DATABASE_NAME | default(None) }}",
-      user: "{{ INSIGHTS_MYSQL_USER | default(None) }}",
-      pass: "{{ INSIGHTS_MYSQL_USER | default(None) }}"
+      user: "{{ INSIGHTS_DATABASE_USER | default(None) }}",
+      pass: "{{ INSIGHTS_DATABASE_PASSWORD | default(None) }}"
     }
   - {
       db: "{{ XQUEUE_MYSQL_DB_NAME | default(None) }}",
@@ -41,11 +42,6 @@ edxlocal_database_users:
       db: "{{ EDXAPP_MYSQL_CSMH_DB_NAME | default(None) }}",
       user: "{{ EDXAPP_MYSQL_CSMH_USER | default(None) }}",
       pass: "{{ EDXAPP_MYSQL_CSMH_PASSWORD | default(None) }}"
-    }
-  - {
-      db: "{{ PROGRAMS_DEFAULT_DB_NAME | default(None) }}",
-      user: "{{ PROGRAMS_DATABASE_USER | default(None) }}",
-      pass: "{{ PROGRAMS_DATABASE_PASSWORD | default(None) }}"
     }
   - {
       db: "{{ ANALYTICS_PIPELINE_OUTPUT_DATABASE_NAME | default(None) }}",
@@ -66,4 +62,14 @@ edxlocal_database_users:
       db: "{{ DISCOVERY_DEFAULT_DB_NAME | default(None) }}",
       user: "{{ DISCOVERY_MYSQL_USER | default(None) }}",
       pass: "{{ DISCOVERY_MYSQL_PASSWORD | default(None) }}"
+    }
+  - {
+      db: "{{ JOURNALS_DEFAULT_DB_NAME | default(None) }}",
+      user: "{{ JOURNALS_MYSQL_USER | default(None) }}",
+      pass: "{{ JOURNALS_MYSQL_PASSWORD | default(None) }}"
+    }
+  - {
+      db: "{{ VEDA_WEB_FRONTEND_DEFAULT_DB_NAME | default(None) }}",
+      user: "{{ VEDA_WEB_FRONTEND_MYSQL_USER | default(None) }}",
+      pass: "{{ VEDA_WEB_FRONTEND_MYSQL_PASSWORD | default(None) }}"
     }

@@ -18,7 +18,8 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
-    - custom_domains # This gets the list of domains
+    - role: custom_domains # This gets the list of domains
+      when: nginx_enable_custom_domains|default(False)
     - edx_ansible
     - role: "{{ appsembler_roles }}/gcsfuse"
     - oraclejdk
@@ -76,8 +77,6 @@
       when: COMMON_ENABLE_DATADOG
     - role: splunkforwarder
       when: COMMON_ENABLE_SPLUNKFORWARDER
-    - role: newrelic
-      when: COMMON_ENABLE_NEWRELIC
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
     - role: "{{ appsembler_roles }}/google-fluentd"
 
@@ -95,7 +94,6 @@
       nginx_sites:
       - xqueue
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
-    - notifier
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
 

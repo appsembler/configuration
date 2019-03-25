@@ -55,6 +55,7 @@ supervisor_spec:
   - service: xqueue
     python: python.xqueue
     code: "{{ xqueue_code_dir | default(None) }}"
+    env: "{{ xqueue_app_dir | default(none) }}/xqueue_env"
   - service: ecommerce
     python: python.ecommerce
     code: "{{ ecommerce_code_dir | default(None) }}"
@@ -67,10 +68,6 @@ supervisor_spec:
     python: python.analytics_api
     code: "{{ analytics_api_code_dir | default(None) }}"
     env: "{{ analytics_api_home | default(None) }}/analytics_api_env"
-  - service: programs
-    python: python.programs
-    code: "{{ programs_code_dir | default(None) }}"
-    env: "{{ programs_home | default(None) }}/programs_env"
   - service: credentials
     python: python.credentials
     code: "{{ credentials_code_dir | default(None) }}"
@@ -79,3 +76,7 @@ supervisor_spec:
     python: python.discovery
     code: "{{ discovery_code_dir | default(None) }}"
     env: "{{ discovery_home | default(None) }}/discovery_env"
+  - service: journals
+    python: python.journals
+    code: "{{ journals_code_dir | default(None) }}"
+    env: "{{ journals_home | default(None) }}/journals_env"

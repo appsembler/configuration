@@ -10,26 +10,6 @@ upstream cms-backend {
     {% endfor %}
 }
 
-{% if NGINX_REDIRECT_OLD_DOMAIN %}
-server {
-  listen 80;
-  server_name studio.{{ OLD_EDXAPP_SITE_NAME }};
-
-  return 302 https://studio.{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-
-server {
-  listen 443 ssl;
-  server_name studio.{{ OLD_EDXAPP_SITE_NAME}};
-
-  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
-  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
-
-  return 302 https://studio.{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-{% endif %}
-
-
 server {
   # CMS configuration file for nginx, templated by ansible
 
@@ -58,38 +38,17 @@ error_page {{ k }} {{ v }};
 
   ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
   ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
+  {% endif %}
+
+  {% if NGINX_ENABLE_SSL or NGINX_REDIRECT_TO_HTTPS %}
   # request the browser to use SSL for all connections
-  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+  add_header Strict-Transport-Security "max-age={{ NGINX_HSTS_MAX_AGE }}";
   {% endif %}
 
   # Prevent invalid display courseware in IE 10+ with high privacy settings
   add_header P3P '{{ NGINX_P3P_MESSAGE }}';
 
-  # Nginx does not support nested condition or or conditions so
-  # there is an unfortunate mix of conditonals here.
-  {% if NGINX_REDIRECT_TO_HTTPS %}
-     {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
-  # Redirect http to https over single instance
-  if ($scheme != "https")
-  {
-   set $do_redirect_to_https "true";
-  }
-
-     {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
-
-  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
-  if ($http_x_forwarded_proto = "http")
-  {
-   set $do_redirect_to_https "true";
-  }
-     {% endif %}
-
-  # Execute the actual redirect
-  if ($do_redirect_to_https = "true")
-  {
-  return 301 https://$host$request_uri;
-  }
-  {% endif %}
+  {% include "handle-tls-redirect-and-ip-disclosure.j2" %}
 
   server_name {{ CMS_HOSTNAME }};
 
@@ -131,6 +90,17 @@ error_page {{ k }} {{ v }};
 
     proxy_redirect off;
     proxy_pass http://cms-backend;
+    {% if NGINX_CMS_PROXY_CONNECT_TIMEOUT %}
+    proxy_connect_timeout {{ NGINX_CMS_PROXY_CONNECT_TIMEOUT }};
+    {% endif %}
+    {% if NGINX_CMS_PROXY_SEND_TIMEOUT %}
+    proxy_send_timeout {{ NGINX_CMS_PROXY_SEND_TIMEOUT }};
+    {% endif %}
+    {% if NGINX_CMS_PROXY_READ_TIMEOUT %}
+    proxy_read_timeout {{ NGINX_CMS_PROXY_READ_TIMEOUT }};
+    {% endif %}
+
+    {{ NGINX_EDXAPP_CMS_APP_EXTRA }}
   }
 
   location / {
@@ -150,6 +120,23 @@ error_page {{ k }} {{ v }};
   location /heartbeat {
     try_files $uri @proxy_to_cms_app;
   }
+
+  # The api is accessed using OAUTH2 which
+  # uses the authorization header so we can't have
+  # basic auth on it as well.
+  location /api {
+    try_files $uri @proxy_to_cms_app;
+  }
+
+{% if NGINX_DJANGO_ADMIN_ACCESS_CIDRS and EDXAPP_ENABLE_DJANGO_ADMIN_RESTRICTION %}
+  location /admin {
+    {% for cidr in NGINX_DJANGO_ADMIN_ACCESS_CIDRS %}
+      allow {{ cidr }};
+    {% endfor %}
+      deny all;
+      try_files $uri @proxy_to_lms_app;
+  }
+{% endif %}
 
   {% include "robots.j2" %}
   {% include "static-files.j2" %}

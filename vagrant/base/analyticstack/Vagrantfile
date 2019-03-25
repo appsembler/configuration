@@ -27,7 +27,6 @@ VERSION_VARS = [
   'NOTIFIER_VERSION',
   'ECOMMERCE_VERSION',
   'ECOMMERCE_WORKER_VERSION',
-  'PROGRAMS_VERSION',
   'ANALYTICS_API_VERSION',
   'INSIGHTS_VERSION',
 ]
@@ -35,9 +34,9 @@ VERSION_VARS = [
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Creates a devstack from a base Ubuntu 16.04 image for virtualbox
-  config.vm.box = "boxcutter/ubuntu1604"
+  config.vm.box = "bento/ubuntu-16.04"
 
-  config.vm.network :private_network, ip: vm_guest_ip, nic_type: "virtio"
+  config.vm.network :private_network, ip: vm_guest_ip
 
   # If you want to run the box but don't need network ports, set VAGRANT_NO_PORTS=1.
   # This is useful if you want to run more than one box at once.
@@ -46,7 +45,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :forwarded_port, guest: 8001, host: 8001  # Studio
     config.vm.network :forwarded_port, guest: 8002, host: 8002  # Ecommerce
     config.vm.network :forwarded_port, guest: 8003, host: 8003  # LMS for Bok Choy
-    config.vm.network :forwarded_port, guest: 8004, host: 8004  # Programs
     config.vm.network :forwarded_port, guest: 8031, host: 8031  # Studio for Bok Choy
     config.vm.network :forwarded_port, guest: 8120, host: 8120  # edX Notes Service
     config.vm.network :forwarded_port, guest: 8765, host: 8765
@@ -68,10 +66,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", MEMORY.to_s]
     vb.customize ["modifyvm", :id, "--cpus", CPU_COUNT.to_s]
-
-    # Allow DNS to work for Ubuntu 12.10 host
-    # http://askubuntu.com/questions/238040/how-do-i-fix-name-service-for-vagrant-client
-    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
 

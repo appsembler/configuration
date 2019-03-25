@@ -3,18 +3,10 @@ dependencies:
   - common
   - jscover
   - role: oraclejdk
-    oraclejdk_version: "8u60"
-    oraclejdk_base: "jdk1.8.0_60"
-    oraclejdk_build: "b27"
-    oraclejdk_link: "/usr/lib/jvm/java-8-oracle"
 
   # dependencies for edx-app jenkins worker:
   - role: edxapp_common
     when: platform_worker is defined
-
-  # dependencies for sitespeed worker
-  - role: sitespeedio
-    when: sitespeed_worker is defined
 
   # dependencies for android worker
   - role: android_sdk
@@ -43,5 +35,9 @@ dependencies:
     #  - { package: 'sys-img-armeabi-v7a-android-23', android_test_path: 'system-images/android-23/default/armeabi-v7a/' }
     # libraries needed for avd(android virtual device) emulation
     android_apt_libraries:
-      - libstdc++6:i386
+      - lib32stdc++6
       - lib32z1
+
+  # dependencies for loadtest driver worker
+  - role: loadtest_driver
+    when: loadtest_driver_worker is defined

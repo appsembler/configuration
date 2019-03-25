@@ -22,7 +22,6 @@ VERSION_VARS = [
   'NOTIFIER_VERSION',
   'ECOMMERCE_VERSION',
   'ECOMMERCE_WORKER_VERSION',
-  'PROGRAMS_VERSION',
   'ANALYTICS_API_VERSION',
   'INSIGHTS_VERSION',
 ]
@@ -33,7 +32,6 @@ MOUNT_DIRS = {
   :forum => {:repo => "cs_comments_service", :local => "/edx/app/forum/cs_comments_service", :owner => "forum"},
   :ecommerce => {:repo => "ecommerce", :local => "/edx/app/ecommerce/ecommerce", :owner => "ecommerce"},
   :ecommerce_worker => {:repo => "ecommerce-worker", :local => "/edx/app/ecommerce_worker/ecommerce_worker", :owner => "ecommerce_worker"},
-  :programs => {:repo => "programs", :local => "/edx/app/programs/programs", :owner => "programs"},
   :insights => {:repo => "insights", :local => "/edx/app/insights/edx_analytics_dashboard", :owner => "insights"},
   :analytics_api => {:repo => "analytics_api", :local => "/edx/app/analytics_api/analytics_api", :owner => "analytics_api"},
   :analytics_pipeline => {:repo => "edx-analytics-pipeline", :local => "/edx/app/analytics_pipeline/analytics_pipeline", :owner => "hadoop"},
@@ -50,6 +48,10 @@ end
 # to a name and a file path, which are used for retrieving
 # a Vagrant box from the internet.
 openedx_releases = {
+  "open-release/hawthorn.master" => "master-analyticstack-2018-06-11",
+
+  "open-release/gingko.master" => "master-analyticstack-2017-06-28",
+
   "open-release/ficus.master" => "ficus-analyticstack-2017-04-20",
   "open-release/ficus.3" => "ficus-analyticstack-2017-04-20",
 
@@ -93,7 +95,7 @@ EXTRA_VARS="#{extra_vars_lines}"
 CONFIG_VER="#{ENV['CONFIGURATION_VERSION'] || openedx_release || 'master'}"
 
 ansible-playbook -i localhost, -c local run_role.yml -e role=edx_ansible -e configuration_version=$CONFIG_VER $EXTRA_VARS
-ansible-playbook -i localhost, -c local vagrant-analytics.yml -e configuration_version=$CONFIG_VER $EXTRA_VARS -e ELASTICSEARCH_CLUSTER_MEMBERS=[]
+ansible-playbook -i localhost, -c local vagrant-analytics.yml -e configuration_version=$CONFIG_VER $EXTRA_VARS
 
 SCRIPT
 
@@ -160,10 +162,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", MEMORY.to_s]
     vb.customize ["modifyvm", :id, "--cpus", CPU_COUNT.to_s]
-
-    # Allow DNS to work for Ubuntu 12.10 host
-    # http://askubuntu.com/questions/238040/how-do-i-fix-name-service-for-vagrant-client
-    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
     # Virtio is faster, but the box needs to have support for it.  We didn't
     # have support in the boxes before Ficus.

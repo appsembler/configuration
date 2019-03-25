@@ -82,6 +82,16 @@
     - install
     - install:configuration
 
+# clean out an old edxapp.conf file which we don't use now.
+# this can be deleted after we build things from scratch.
+- name: clean out old edxapp.conf
+  file:
+    path: "{{ supervisor_available_dir }}/edxapp.conf"
+    state: "absent"
+  tags:
+    - install
+    - install:configuration
+
 - name: writing celerybeat supervisor scripts
   template:
     src: "celerybeat.conf.j2"
@@ -275,12 +285,11 @@
     - update_lms_theme
 
 # Gather assets using paver
-- name: "gather {{ item }} static assets with paver"
-  command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-{{ item }}"
+- name: "gather static assets with paver"
+  command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
   environment:
     EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
-  when: celery_worker is not defined and not devstack and item != "lms-preview"
-  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack
   tags:
     - gather_static_assets
     - assets

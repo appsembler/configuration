@@ -24,43 +24,6 @@ upstream lms-backend {
 
 }
 
-{% if NGINX_REDIRECT_OLD_DOMAIN %}
-server {
-  listen 80;
-  server_name ~^([\w-]+)\.{{ OLD_EDXAPP_SITE_NAME| regex_escape() }};
-
-  return 302 https://$1.{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-
-server {
-  listen 80;
-  server_name {{ OLD_EDXAPP_SITE_NAME }};
-
-  return 302 https://{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-
-server {
-  listen 443 ssl;
-  server_name ~^([\w-]+)\.{{ OLD_EDXAPP_SITE_NAME| regex_escape() }};
-
-  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
-  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
-
-  return 302 https://$1.{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-
-server {
-  listen 443 ssl;
-  server_name {{ OLD_EDXAPP_SITE_NAME }};
-
-  ssl_certificate {{ OLD_NGINX_SSL_CERTIFICATE_PATH }};
-  ssl_certificate_key {{ OLD_NGINX_SSL_KEY_PATH }};
-
-  return 302 https://{{ EDXAPP_SITE_NAME }}$request_uri;
-}
-{% endif %}
-
-
 {%- if EDXAPP_ENABLE_RATE_LIMITING -%}
 # Make Zone
 limit_req_zone $cookie_{{ EDXAPP_SESSION_COOKIE_NAME }} zone=cookies:10m rate={{ EDXAPP_COURSES_REQUEST_RATE }};
@@ -93,6 +56,23 @@ geo $http_x_forwarded_for $embargo {
 }
 {%- endif %}
 
+
+{% if EDXAPP_CORS_ORIGIN_WHITELIST|length > 0 %}
+  # The Origin request header indicates where a fetch originates from. It doesn't include any path information,
+  # but only the server name (e.g. https://www.example.com).
+  # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin for details.
+  #
+  # Here we set the value that is included in the Access-Control-Allow-Origin response header. If the origin is one
+  # of our known hosts--served via HTTP or HTTPS--we allow for CORS. Otherwise, we set the "null" value, disallowing CORS.
+  map $http_origin $cors_origin {
+  default "null";
+  {% for host in EDXAPP_CORS_ORIGIN_WHITELIST %}
+    "~*^https?:\/\/{{ host|replace('.', '\.') }}$" $http_origin;
+  {% endfor %}
+  }
+{% endif %}
+
+
 server {
   # LMS configuration file for nginx, templated by ansible
 
@@ -119,8 +99,11 @@ error_page {{ k }} {{ v }};
 
   ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
   ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
+  {% endif %}
+
+  {% if NGINX_ENABLE_SSL or NGINX_REDIRECT_TO_HTTPS %}
   # request the browser to use SSL for all connections
-  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+  add_header Strict-Transport-Security "max-age={{ NGINX_HSTS_MAX_AGE }}";
   {% endif %}
 
   # Prevent invalid display courseware in IE 10+ with high privacy settings
@@ -133,32 +116,8 @@ error_page {{ k }} {{ v }};
   {% endif %}
 
 
-  # Nginx does not support nested condition or or conditions so
-  # there is an unfortunate mix of conditonals here.
-  {% if NGINX_REDIRECT_TO_HTTPS %}
-     {% if NGINX_HTTPS_REDIRECT_STRATEGY == "scheme" %}
-  # Redirect http to https over single instance
-  if ($scheme != "https")
-  {
-   set $do_redirect_to_https "true";
-  }
-
-     {% elif NGINX_HTTPS_REDIRECT_STRATEGY == "forward_for_proto" %}
-
-  # Forward to HTTPS if we're an HTTP request... and the server is behind ELB
-  if ($http_x_forwarded_proto = "http")
-  {
-   set $do_redirect_to_https "true";
-  }
-     {% endif %}
-
-  # Execute the actual redirect
-  if ($do_redirect_to_https = "true")
-  {
-  return 301 https://$host$request_uri;
-  }
-  {% endif %}
-
+  {% include "handle-tls-redirect-and-ip-disclosure.j2" %}
+  
   access_log {{ nginx_log_dir }}/access.log {{ NGINX_LOG_FORMAT_NAME }};
   access_log {{ nginx_log_dir }}/access_lms_json.log json_combined;
   error_log {{ nginx_log_dir }}/error.log error;
@@ -212,6 +171,8 @@ error_page {{ k }} {{ v }};
 
     proxy_redirect off;
     proxy_pass http://lms-backend;
+
+    {{ NGINX_EDXAPP_LMS_APP_EXTRA }}
   }
 
   location / {
@@ -231,6 +192,7 @@ error_page {{ k }} {{ v }};
     {% endif %}
 
     if ( $arg_next ~* "favicon.ico" ) {
+      access_log off;
       return 403;
     }
 
@@ -252,6 +214,16 @@ error_page {{ k }} {{ v }};
   # uses the authorization header so we can't have
   # basic auth on it as well.
   location /api {
+    try_files $uri @proxy_to_lms_app;
+  }
+
+  #enterprise API
+  location /enterprise/api {
+    try_files $uri @proxy_to_lms_app;
+  }
+
+  # Consent API
+  location /consent/api {
     try_files $uri @proxy_to_lms_app;
   }
 
@@ -331,8 +303,19 @@ location ~ ^{{ EDXAPP_MEDIA_URL }}/(?P<file>.*) {
     expires {{ EDXAPP_PROFILE_IMAGE_MAX_AGE }}s;
 }
 
+{% if NGINX_DJANGO_ADMIN_ACCESS_CIDRS and EDXAPP_ENABLE_DJANGO_ADMIN_RESTRICTION %}
+  location /admin {
+    {% for cidr in NGINX_DJANGO_ADMIN_ACCESS_CIDRS %}
+      allow {{ cidr }};
+    {% endfor %}
+      deny all;
+      try_files $uri @proxy_to_lms_app;
+  }
+{% endif %}
+
   {% include "robots.j2" %}
   {% include "static-files.j2" %}
+  {% include "extra_locations_lms.j2" ignore missing %}
 
   {% if nginx_lms_extra_locations != "" %}
     {{ nginx_lms_extra_locations }}

@@ -1,9 +1,19 @@
-
 yml_files:=$(shell find . -name "*.yml")
 json_files:=$(shell find . -name "*.json")
 # $(images) is calculated in the docker.mk file
 
-test: test.syntax test.edx_east_roles
+help: test.help
+
+test.help:
+	@echo '    Tests:'
+	@echo '        test.syntax                Run all syntax tests'
+	@echo '        test.syntax.json           Run syntax tests on .json files'
+	@echo '        test.syntax.yml            Run syntax tests on .yml files'
+	@echo '        test.syntax.jinja          Run syntax tests on .j2 files'
+	@echo '        test.playbooks        Run validation on playbooks'
+	@echo ''
+
+test: test.syntax test.playbooks
 
 test.syntax: test.syntax.yml test.syntax.json test.syntax.dockerfiles
 
@@ -19,11 +29,11 @@ test.syntax.json/%:
 
 test.syntax.dockerfiles:
 	python util/check_dockerfile_coverage.py "$(images)"
-	
-test.edx_east_roles:
-	tests/test_edx_east_roles.sh
+
+test.playbooks:
+	tests/test_playbooks.sh
 
 clean: test.clean
 
 test.clean:
-	rm -rf playbooks/edx-east/test_output
+	rm -rf playbooks/test_output

@@ -24,19 +24,24 @@ demo_test_users:
     username: honor
     hashed_password: "{{ demo_hashed_password }}"
     is_staff: false
+    is_superuser: false
   - email: 'audit@example.com'
     username: audit
     hashed_password: "{{ demo_hashed_password }}"
     is_staff: false
+    is_superuser: false
   - email: 'verified@example.com'
     username: verified
     hashed_password: "{{ demo_hashed_password }}"
     is_staff: false
+    is_superuser: false
 demo_staff_user:
   email: 'staff@example.com'
   username: staff
   hashed_password: "{{ demo_hashed_password }}"
   is_staff: true
+  is_superuser: false
+SANDBOX_EDXAPP_USERS: []
 demo_edxapp_user: 'edxapp'
 demo_edxapp_settings: '{{ COMMON_EDXAPP_SETTINGS }}'
 demo_edxapp_venv_bin: '{{ COMMON_APP_DIR }}/{{ demo_edxapp_user }}/venvs/{{demo_edxapp_user}}/bin'
@@ -45,3 +50,5 @@ demo_edxapp_code_dir: '{{ COMMON_APP_DIR }}/{{ demo_edxapp_user }}/edx-platform'
 
 # Don't override this. This is needed so Ansible won't error if the `set_fact` tasks are skipped
 demo_test_and_staff_users: []
+
+demo_edxapp_env: '{{ COMMON_APP_DIR }}/{{ demo_edxapp_user }}/edxapp_env'

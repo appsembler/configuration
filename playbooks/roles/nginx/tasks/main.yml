@@ -8,16 +8,20 @@
     - install:configuration
 
 - name: Create Diffie-Hellman parameters to prevent weak key exchange
-  command: >
-    openssl dhparam -out dhparams.pem 2048
-    chdir=/etc/ssl/private
-    creates=/etc/ssl/private/dhparams.pem
+  command: openssl dhparam -out "{{ NGINX_DH_PARAMS_PATH | basename }}" {{ NGINX_DH_KEYSIZE }}
+  args:
+    chdir: "{{ NGINX_DH_PARAMS_PATH | dirname }}"
+    creates: "{{ NGINX_DH_PARAMS_PATH }}"
   tags:
     - install
     - install:configuration
 
 - name: Restrict permissions of DH parameters file
-  file: path=/etc/ssl/private/dhparams.pem owner=root group=root mode=0600
+  file:
+    path: "{{ NGINX_DH_PARAMS_PATH }}"
+    owner: "root"
+    group: "root"
+    mode: 0600
   tags:
     - install
     - install:configuration
@@ -111,7 +115,7 @@
     mode: "{{ item.mode }}"
   with_items:
     - { src: 'etc/nginx/nginx.conf.j2', dest: '/etc/nginx/nginx.conf', group: '{{ common_web_user }}', mode: "0644" }
-    - { src: 'edx/app/nginx/sites-available/edx-release.j2', dest: '{{ nginx_sites_available_dir }}/edx-release', group: 'root', mode: "0600" }
+    - { src: 'edx/app/nginx/sites-available/maps.j2', dest: '{{ nginx_sites_available_dir }}/maps', group: 'root', mode: "0600" }
   notify: restart nginx
   tags:
     - install
@@ -142,12 +146,14 @@
 
 - name: Creating link for common nginx configuration
   file:
-    src: "{{ nginx_sites_available_dir }}/edx-release"
-    dest: "{{ nginx_sites_enabled_dir }}/edx-release"
+    src: "{{ nginx_sites_available_dir }}/{{ item }}"
+    dest: "{{ nginx_sites_enabled_dir }}/{{ item }}"
     state: link
     owner: root
     group: root
   notify: reload nginx
+  with_items:
+    - "maps"
   tags:
     - install
     - install:configuration
@@ -174,6 +180,7 @@
     owner: root
     group: root
   with_items: "{{ nginx_sites }}"
+  when: not nginx_skip_enable_sites
   notify: reload nginx
   tags:
     - install
@@ -299,10 +306,10 @@
     - install:configuration
     - nginx:custom_domains
 
-- name: Reload nginx for custom domains to take effect
-  service: name=nginx state=reloaded
-  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
-  tags: ['nginx:custom_domains']
+#- name: Reload nginx for custom domains to take effect
+#  service: name=nginx state=reloaded
+#  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+#  tags: ['nginx:custom_domains']
 
   # These are static pages that can be used
   # for nginx rate limiting, 500 errors, etc.
@@ -364,18 +371,6 @@
     - install
     - install:configuration
 
-- name: copy OLD ssl cert
-  copy:
-    content: "{{ OLD_NGINX_SSL_CERTIFICATE_CONTENT }}"
-    dest: "{{ OLD_NGINX_SSL_CERTIFICATE_PATH }}"
-    owner: root
-    group: root
-    mode: 0644
-  when: NGINX_ENABLE_SSL and OLD_NGINX_SSL_CERTIFICATE_CONTENT != ''
-  tags:
-    - install
-    - install:configuration
-
 - name: copy ssl cert
   copy:
     src: "{{ NGINX_SSL_CERTIFICATE }}"
@@ -384,19 +379,6 @@
     group: root
     mode: 0644
   when: ssl_cert.stat.exists and NGINX_ENABLE_SSL and NGINX_SSL_CERTIFICATE != 'ssl-cert-snakeoil.pem'
-  tags:
-    - install
-    - install:configuration
-
-- name: copy OLD ssl key
-  copy:
-    content: "{{ OLD_NGINX_SSL_KEY_CONTENT }}"
-    dest: "{{ OLD_NGINX_SSL_KEY_PATH }}"
-    owner: root
-    group: root
-    mode: 0640
-  when: NGINX_ENABLE_SSL and OLD_NGINX_SSL_KEY_CONTENT != ''
-  no_log: True
   tags:
     - install
     - install:configuration
@@ -437,7 +419,7 @@
     - install
     - install:configuration
 
-- name: Set up nginx access log rotation
+- name: Set up nginx error log rotation
   template:
     src: "etc/logrotate.d/edx_logrotate_nginx_error.j2"
     dest: "/etc/logrotate.d/nginx-error"

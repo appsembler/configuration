@@ -5,24 +5,33 @@
     - custom_domains
     - custom_domains:get_domains
 
-- name: "Fetch custom domains list"
+- debug:
+    var: edxapp_venv_bin
+- debug:
+    var: EDXAPP_SETTINGS
+- debug:
+    var: edxapp_code_dir
+- debug:
+    var: groups
+    
+- name: Fetch custom domains list
   become_user: "{{ edxapp_user }}"
-  django_manage: >
-    command="lms custom_domains_list"
-    app_path="{{ edxapp_code_dir }}"
-    settings=amc
-    pythonpath="{{ edxapp_code_dir }}"
-    virtualenv="{{ edxapp_venv_dir }}"
+  shell: >
+    {{ edxapp_venv_bin }}/python manage.py lms --setting={{ EDXAPP_SETTINGS }} custom_domains_list
+    chdir={{ edxapp_code_dir }}
   register: custom_domains_cmd
   run_once: True
-  delegate_to: "{{ groups['edx'][0] }}"
+  delegate_to: "{{ groups['edx'][1] }}"
   tags:
     - custom_domains
     - custom_domains:get_domains
 
+- debug:
+    var: custom_domains_cmd
+
 - name: Set fact letsencrypt_certs
   set_fact:
-    letsencrypt_certs: "{{ custom_domains_cmd.out|from_json }}"
+    letsencrypt_certs: "{{ custom_domains_cmd.stdout|from_json }}"
   tags:
     - custom_domains
     - custom_domains:get_domains

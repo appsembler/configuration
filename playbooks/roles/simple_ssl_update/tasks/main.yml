@@ -1,0 +1,45 @@
+---
+
+# a simple, fast role for quickly deploying new SSL certs
+# the regular setup makes this extremely complicated and involves
+# pulling in half a dozen different settings files just to replace
+# two files and reload a service.
+
+# Check to see if the ssl cert/key exists before copying.
+# This extra check is done to prevent failures when
+# ansible-playbook is run locally
+- local_action:
+    module: stat
+    path: "{{ NGINX_SSL_CERTIFICATE }}"
+  become: False
+  register: ssl_cert
+
+- local_action:
+    module: stat
+    path: "{{ NGINX_SSL_KEY }}"
+  become: False
+  register: ssl_key
+
+- name: copy ssl cert
+  copy:
+    src: "{{ NGINX_SSL_CERTIFICATE }}"
+    dest: "{{ NGINX_SSL_CERTIFICATE_PATH }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: ssl_cert.stat.exists
+
+- name: copy ssl key
+  copy:
+    src: "{{ NGINX_SSL_KEY }}"
+    dest: "{{ NGINX_SSL_KEY_PATH }}"
+    owner: root
+    group: root
+    mode: 0640
+  when: ssl_key.stat.exists
+  no_log: True
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted

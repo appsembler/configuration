@@ -1,4 +1,5 @@
 # Travis CI configuration file for running tests
+---
 language: python
 python:
   - "2.7"
@@ -10,7 +11,7 @@ branches:
 
 services:
   - docker
-  
+
 addons:
   apt:
     packages:

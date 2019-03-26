@@ -5,6 +5,7 @@ import datetime
 import logging
 import math
 import os
+import requests
 import shutil
 import socket
 import subprocess
@@ -14,15 +15,19 @@ import time
 import raven
 
 
+def make_file_prefix(base_name):
+    hostname = socket.gethostname()
+    return '{0}_{1}'.format(hostname, base_name)
+
+
 def make_file_name(base_name):
     """
     Create a file name based on the hostname, a base_name, and date
         e.g. openedxlite12345_mysql_20140102
     """
 
-    hostname = socket.gethostname()
-    return '{0}_{1}_{2}'.format(hostname, base_name, datetime.datetime.now().
-                                strftime("%Y%m%d"))
+    return '{0}_{1}'.format(make_file_prefix(base_name), datetime.datetime.now().
+                            strftime("%Y%m%d"))
 
 
 def upload_to_s3(file_path, bucket, aws_access_key_id, aws_secret_access_key):
@@ -104,6 +109,72 @@ def upload_to_azure_storage(file_path, bucket, account, key):
     blob_service = BlockBlobService(account_name=account, account_key=key)
     blob_service.create_blob_from_path(bucket, file_name, file_path)
     logging.info('Upload successful')
+
+
+class NoBackupsFound(Exception):
+    pass
+
+
+def monitor_gcloud_backups(bucket, service, sentry, pushgateway):
+    """Double check the backups in the Google Cloud Storage Bucket
+
+    Finds the most recent backup file and pushes the creation
+    timestamp to our monitoring. This gives us something of a "dead
+    man's switch" to alert us if the previous day's backups failed
+    silently.
+
+    We also raise a Sentry error if there are no backups found or
+    if this monitoring process fails.
+
+        bucket: The name of a Google Cloud Storage bucket.
+        service: the service name (really only supports 'mongodb' currently)
+        sentry: The sentry client
+        pushgateway: URL of the pushgateway
+
+    """
+
+    import boto
+    import gcs_oauth2_boto_plugin
+
+    logging.info('checking backups in Google Cloud Storage bucket '
+                 '"{}"'.format(bucket))
+
+    sentry.extra_context({'bucket': bucket})
+
+    try:
+        gcloud_uri = boto.storage_uri(bucket, 'gs')
+        keys = gcloud_uri.get_all_keys()
+        prefix = make_file_prefix(service)
+        backups = [k for k in keys if k.key.startswith(prefix)]
+        if len(backups) < 1:
+            raise NoBackupsFound("There are no backup files in the bucket")
+        backups.sort(key=lambda x: x.last_modified)
+        most_recent = backups[-1]
+
+        sentry.extra_context({'most_recent': most_recent})
+        last_modified = datetime.datetime.strptime(most_recent.last_modified,
+                                                   '%Y-%m-%dT%H:%M:%S.%fZ')
+        push_backups_age_metric(pushgateway, socket.gethostname(),
+                                float(last_modified.strftime('%s')),
+                                backups_type=service)
+        logging.info('Monitoring successful')
+    except Exception:
+        sentry.CaptureException()
+
+
+def push_backups_age_metric(gateway, instance, value, backups_type="mongodb"):
+    """ submits backups timestamp to push gateway service
+
+    labelled with the instance (typically hostname) and type ('mongodb'
+     or 'mysql')"""
+
+    headers = {
+        'Content-type': 'application/octet-stream'
+    }
+    requests.post(
+        '{}/metrics/job/backups_monitor/instance/{}'.format(gateway, instance),
+        data='backups_timestamp{type="%s"} %f\n' % (backups_type, value),
+        headers=headers)
 
 
 def compress_backup(backup_path):
@@ -336,6 +407,7 @@ def _parse_args():
                         help='Django settings used when running database '
                              'migrations')
     parser.add_argument('--sentry-dsn', help='Sentry data source name')
+    parser.add_argument('--pushgateway', help='Prometheus pushgateway URL')
 
     return parser.parse_args()
 
@@ -358,6 +430,7 @@ def _main():
     azure_key = args.azure_key or os.environ.get('BACKUP_AZURE_STORAGE_KEY')
     settings = args.settings or os.environ.get('BACKUP_SETTINGS', 'aws_appsembler')
     sentry_dsn = args.sentry_dsn or os.environ.get('BACKUP_SENTRY_DSN', '')
+    pushgateway = args.pushgateway or os.environ.get('PUSHGATEWAY', 'https://pushgateway.infra.appsembler.com')
     service = args.service
 
     sentry = raven.Client(sentry_dsn)
@@ -393,6 +466,14 @@ def _main():
 
     elif program_name == 'edx_restore':
         restore(service, restore_path, compressed, settings=settings)
+
+    elif program_name == 'edx_backups_monitor':
+        if provider == 'gs':
+            monitor_gcloud_backups(bucket, service, sentry, pushgateway)
+        else:
+            # other providers not supported yet
+            logging.warning("no backup monitoring available for this provider")
+
 
 if __name__ == '__main__':
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)

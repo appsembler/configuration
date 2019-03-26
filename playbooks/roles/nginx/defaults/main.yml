@@ -12,6 +12,8 @@ nginx_extra_sites: []
 nginx_extra_configs: []
 
 nginx_server_names_hash_bucket_size: 64
+nginx_map_hash_bucket_size: 128
+nginx_map_hash_max_size: 2048
 
 # Appsembler custom
 ALLOW_BASIC_AUTH: false
@@ -111,6 +113,16 @@ NGINX_SERVER_HTML_FILES:
     style_p_h2: "{{ NGINX_SERVER_ERROR_STYLE_P_H2 }}"
     style_p: "{{ NGINX_SERVER_ERROR_STYLE_P }}"
     style_div: "{{ NGINX_SERVER_ERROR_STYLE_DIV }}"
+  - file: server-maintenance.html
+    title: '{{ EDXAPP_PLATFORM_NAME | default("Site") }} temporarily unavailable'
+    msg: 'A maintenance operation is currently in progress on our system that will affect your access to our online courses.<br/><br/>If you have any questions or concerns, please contact <a href="mailto:{{ EDXAPP_TECH_SUPPORT_EMAIL|default("technical@example.com") }}">{{ EDXAPP_TECH_SUPPORT_EMAIL|default("technical@example.com") }}</a>'
+    img: "{{ NGINX_SERVER_ERROR_IMG }}"
+    heading: 'Maintenance in Progress'
+    style_h1: "{{ NGINX_SERVER_ERROR_STYLE_H1 }}"
+    style_p_h2: "{{ NGINX_SERVER_ERROR_STYLE_P_H2 }}"
+    style_p: "{{ NGINX_SERVER_ERROR_STYLE_P }}"
+    style_div: "{{ NGINX_SERVER_ERROR_STYLE_DIV }}"
+
 
 NGINX_APT_REPO: deb http://nginx.org/packages/ubuntu/ {{ ansible_distribution_release }} nginx
 

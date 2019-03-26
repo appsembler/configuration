@@ -1,14 +1,4 @@
 
-# to make sure we have the edxapp user without
-# adding a dependency on rull edxapp role, for convenience
-- name: create edxapp application user
-  user: >
-    name="{{ edxapp_user }}" home="{{ edxapp_app_dir }}"
-    createhome=no shell=/bin/false
-  tags:
-    - install
-    - install:base
-
 - name: create all service directories
   file: >
     path="{{ item.value.path }}"

@@ -28,6 +28,7 @@ weights:
   - tools_jenkins: 8
   - ecomworker: 4
   - notes: 2
+  - course_discovery: 2
   - notifier: 2
   - mongo: 1
   - devpi: 1

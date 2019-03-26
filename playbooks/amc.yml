@@ -27,7 +27,7 @@
     - memcached
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
     - role: "{{ appsembler_roles }}/cert_agent"
-
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Configure app server instance(s)
   hosts: edx
@@ -47,6 +47,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
+    - role: aws
     - custom_domains # This gets a list of custom domains
     - role: "{{ appsembler_roles }}/gcsfuse"
     - mysql_init
@@ -77,6 +78,7 @@
     - role: splunkforwarder
       when: COMMON_ENABLE_SPLUNKFORWARDER
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Install xqueue, notifier and rabbitmq on services node
   hosts: "services"

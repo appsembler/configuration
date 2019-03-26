@@ -28,3 +28,6 @@ BACKUPS_GS_SERVICE_KEY_FILE_PASSWORD: 'notasecret'
 # Azure
 BACKUPS_AZURE_STORAGE_ACCOUNT: ''
 BACKUPS_AZURE_STORAGE_KEY: ''
+
+# Prometheus Pushgateway
+PUSHGATEWAY: 'https://pushgateway.infra.appsembler.com'

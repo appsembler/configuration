@@ -1,0 +1,169 @@
+---
+# Tasks for role xapi_bridge
+#
+# Overview:
+#
+# Install a Python process to watch the edxapp tracking.log and send xAPI events to an LRS
+#
+
+- include_vars: ../../common_vars/defaults/main.yml
+
+- name: ensure group exists
+  group:
+    name: "{{ xapi_bridge_user_group }}"
+    system: yes
+    state: present
+  tags: ["xapi_bridge"]
+
+- name: ensure user exists
+  user:
+    name: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
+    home: "{{ xapi_bridge_user_home }}"
+    createhome: yes
+    shell: /bin/bash
+    system: yes
+    generate_ssh_key: no
+    state: present
+  tags: ["xapi_bridge"]
+
+- name: create xapi_bridge app dirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
+    mode: "{{ item.mode | default(0755) }}"
+  with_items:
+    - { path: "{{ xapi_bridge_venv_dir }}" }
+  tags: ["xapi_bridge"]
+
+- name: checkout xapi-bridge repo into {{ xapi_bridge_code_dir }}
+  git:
+    dest: "{{ xapi_bridge_code_dir }}"
+    repo: "{{ xapi_bridge_repo }}"
+    version: "{{ xapi_bridge_version }}"
+    accept_hostkey: yes
+  become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
+
+- name: git clean after checking out xapi_bridge code
+  shell: cd {{ xapi_bridge_code_dir }} && git clean -xdf
+  become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
+
+- name: install python requirements xapi_bridge into virtualenv
+  pip:
+    chdir: "{{ xapi_bridge_code_dir }}"
+    requirements: "requirements/base.txt"
+    virtualenv: "{{ xapi_bridge_venv_dir }}"
+    virtualenv_python: python2.7
+    state: present
+  become_user: "{{ xapi_bridge_user }}"
+  tags: ["xapi_bridge"]
+
+- name: install production python requirements xapi_bridge into virtualenv
+  pip:
+    chdir: "{{ xapi_bridge_code_dir }}"
+    requirements: "requirements/production.txt"
+    virtualenv: "{{ xapi_bridge_venv_dir }}"
+    virtualenv_python: python2.7.12
+    state: present
+  become_user: "{{ xapi_bridge_user }}"
+  when: COMMON_ENVIRONMENT in ("prod", "staging")
+  tags: ["xapi_bridge"]
+
+- name: create the settings file from template
+  template:
+    src: "settings.py.j2"
+    dest: "{{ xapi_bridge_code_dir }}/xapi_bridge/settings.py"
+    owner: "{{ xapi_bridge_user }}"
+    group: "{{ xapi_bridge_user_group }}"
+  tags:
+    - xapi_bridge
+    - xapi_bridge:config
+
+- name: Create symlinks from the venv bin dir and repo dir
+  file:
+    src: "{{ xapi_bridge_venv_bin }}/{{ item }}"
+    dest: "{{ COMMON_BIN_DIR }}/{{ item }}.xapi_bridge"
+    state: link
+  with_items:
+    - 'python'
+  tags: ["xapi_bridge"]
+
+- name: create the xapi log directory
+  file:
+    path: "{{ xapi_bridge_log_dir }}"
+    state: directory
+    mode: 0755
+    owner: "{{ xapi_bridge_log_user }}"
+    group: "{{ xapi_bridge_log_user }}"
+  tags:
+    - xapi
+    - xapi:log_files
+
+- name: create the xapi log file
+  file:
+    path: "{{ xapi_bridge_log_dir }}/xapi_bridge.log"
+    state: touch
+    mode: 0644
+    owner: "{{ xapi_bridge_user }}"
+    group: "{{ common_log_user }}"
+  tags:
+    - xapi
+    - xapi:log_files
+
+# This is only needed for systemd version 236 or more
+# - name: create the log file
+#   file:
+#     path: "{{ xapi_bridge_log_dir }}/{{ item }}"
+#     state: touch
+#     mode: 0644
+#     owner: "{{ xapi_bridge_log_user }}"
+#     group: "{{ xapi_bridge_log_user }}"
+#   with_items:
+#     - 'xapi_stderr.log'
+#     - 'xapi_stdout.log'
+#   tags: ["xapi_bridge"]
+
+- name: Add xapi_bridge systemd configuration on 16.04
+  template:
+    src:  "etc/systemd/system/xapi_bridge.service.j2"
+    dest: "/etc/systemd/system/xapi_bridge.service"
+  when: ansible_distribution_release == 'xenial'
+  tags: ["xapi_bridge"]
+
+- name: enable xapi_bridge systemd unit on 16.04
+  systemd:
+    name: xapi_bridge
+    enabled: yes
+    daemon_reload: yes
+  when: ansible_distribution_release == 'xenial'
+  tags: ["xapi_bridge"]
+
+- name: Create xapi_bridge logrotate config
+  template:
+    src: "etc/logrotate.d/xapi_bridge.j2"
+    dest: "/etc/logrotate.d/xapi_bridge"
+  tags:
+    - xapi_bridge
+    - logrotate
+
+- name: Stop xapi_bridge service
+  service:
+    name: xapi_bridge
+    state: stopped
+  tags:
+    - xapi_bridge
+    - manage
+    - manage:stop
+
+- name: Start xapi_bridge service
+  service:
+    name: xapi_bridge
+    state: started
+  tags:
+    - xapi_bridge
+    - manage
+    - manage:start

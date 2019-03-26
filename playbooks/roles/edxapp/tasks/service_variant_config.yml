@@ -82,6 +82,16 @@
     - install
     - install:configuration
 
+# clean out an old edxapp.conf file which we don't use now.
+# this can be deleted after we build things from scratch.
+- name: clean out old edxapp.conf
+  file:
+    path: "{{ supervisor_available_dir }}/edxapp.conf"
+    state: "absent"
+  tags:
+    - install
+    - install:configuration
+
 - name: writing celerybeat supervisor scripts
   template:
     src: "celerybeat.conf.j2"
@@ -217,28 +227,111 @@
   tags:
     - migrate
 
-# There are problems with django collectstatic copying files.  It doesn't retain
-# last modified timestamps, but relies on those same timestamps to know if a new file
-# should be recopied.  While collectstatic --clear exists, it only clears some of the
-# files in edxapp_staticfile_dir, it leaves postprocessed or otherwise hashed files.
-# This ensures we have a totally clean directory.
-- name: Remove and recreate the staticfiles directory so nothing stale can exist
-  file:
-      path: "{{ edxapp_staticfile_dir }}"
-      state: "{{ item }}"
-      owner: "{{ edxapp_user }}"
-      group: "{{ common_web_group }}"
-      mode:  "0755"
+# to avoid the running site breaking while collectstatic runs, we
+# generate a temp dir, make a new temporary configuration that points
+# STATIC_ROOT at that temp dir, runs the collectstatic to populate it,
+# then swaps in that temp dir in place of the actual staticfiles
+# directory in one quick step
+
+# this is what we should be using, but it's only available in ansible 2.3+
+# - name: Create temporary staticfiles directory
+#   tempfile:
+#     state: directory
+#     suffix: staticfiles
+#     owner: "{{ edxapp_user }}"
+#     group: "{{ common_web_group }}"
+#   register: staticfiles_tmpdir
+#   when: celery_worker is not defined and not devstack and item != "lms-preview"
+#   tags:
+#     - gather_static_assets
+#     - assets
+#     - update_lms_theme
+
+# instead, for now we have to do this:
+
+- name: Create temporary staticfiles directory
+  command: "mktemp -d"
+  register: staticfiles_tmpdir
   when: celery_worker is not defined and not devstack
-  with_items: ['absent', 'directory']
   tags:
     - gather_static_assets
     - assets
+    - update_lms_theme
 
-# Gather assets using paver if possible
+- name: make sure it has proper ownership
+  file:
+    path: "{{ staticfiles_tmpdir.stdout }}"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode:  "0755"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: "generate new {{ item }} override config"
+  template:
+    src: staticfiles_override.py.j2
+    dest: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: 0640
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# Gather assets using paver
 - name: "gather static assets with paver"
   command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
+  environment:
+    EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
   when: celery_worker is not defined and not devstack
   tags:
     - gather_static_assets
     - assets
+    - update_lms_theme
+
+# make sure the old staticfiles backup dir isn't lingering around.
+- name: Remove old staticfiles backup dir
+  file:
+    path: "/tmp/old_staticfiles_dir"
+    state: absent
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# stash the previous contents of the staticfiles directory
+# to /tmp/old_staticfiles_dir. Eventually this might not be necessary
+# but for now it's useful to have around to debug with
+- name: Move staticfiles out of the way
+  command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: Replace with new version of staticfiles
+  command: "mv {{ staticfiles_tmpdir.stdout }} {{ edxapp_staticfile_dir}}"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: "Remove {{ item }} temporary staticfiles config"
+  file:
+    path: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    state: absent
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_themes

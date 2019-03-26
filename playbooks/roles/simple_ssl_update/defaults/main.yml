@@ -1,0 +1,4 @@
+---
+
+NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }}'
+NGINX_SSL_KEY_PATH: '/etc/ssl/private/{{ NGINX_SSL_KEY|basename }}'

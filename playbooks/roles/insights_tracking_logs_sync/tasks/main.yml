@@ -22,7 +22,7 @@
   tags: ['insights_tracking_logs_sync']
 
 - name: Install raven package for Sentry alerts
-  pip: name=raven version="5.27.1"
+  pip: name=raven version="6.9.0"
   tags: ['insights_tracking_logs_sync']
 
 - name: Copy boto configuration

@@ -67,7 +67,7 @@
     chdir: "{{ xapi_bridge_code_dir }}"
     requirements: "requirements/production.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
-    virtualenv_python: python2.7.12
+    virtualenv_python: python2.7
     state: present
   become_user: "{{ xapi_bridge_user }}"
   when: COMMON_ENVIRONMENT in ("prod", "staging")

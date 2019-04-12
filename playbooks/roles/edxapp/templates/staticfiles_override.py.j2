@@ -1,8 +1,7 @@
 from .{{ edxapp_settings }} import *
 
 {% if item == 'cms' %}
-# cms uses a hashed directory to bust caches
-STATIC_ROOT = "{{ staticfiles_tmpdir.stdout }}" + "/" + EDX_PLATFORM_REVISION
+STATIC_ROOT = "{{ staticfiles_tmpdir.stdout }}" + "/studio"
 {% else %}
 STATIC_ROOT = "{{ staticfiles_tmpdir.stdout }}"
 {% endif %}

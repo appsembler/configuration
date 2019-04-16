@@ -6,7 +6,7 @@
   become_method: sudo
   gather_facts: True
   roles:
-    - mongo_3_0
+    - mongo_3_2
 
 - name: Configure shared services (es and memcached)
   hosts: services

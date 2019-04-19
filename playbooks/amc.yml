@@ -8,7 +8,7 @@
   roles:
     - mongo_3_2
 
-- name: Configure shared services (es and memcached)
+- name: Configure shared services (es, memcached, rabbitmq)
   hosts: services
   become: True
   become_method: sudo
@@ -28,6 +28,7 @@
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
     - role: "{{ appsembler_roles }}/cert_agent"
     - role: "{{ appsembler_roles }}/google-fluentd"
+    - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
 
 - name: Configure app server instance(s)
   hosts: edx
@@ -79,7 +80,7 @@
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
     - role: "{{ appsembler_roles }}/google-fluentd"
 
-- name: Install xqueue, notifier and rabbitmq on services node
+- name: Install xqueue and notifier on services node
   hosts: "services"
   become: True
   become_method: sudo
@@ -92,7 +93,6 @@
     - role: nginx
       nginx_sites:
       - xqueue
-    - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
 

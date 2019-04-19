@@ -18,14 +18,11 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
-    - role: custom_domains # This gets the list of domains
-      when: nginx_enable_custom_domains|default(False)
     - edx_ansible
     - role: "{{ appsembler_roles }}/gcsfuse"
     - oraclejdk
     - elasticsearch
     - memcached
-    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
     - role: "{{ appsembler_roles }}/cert_agent"
     - role: "{{ appsembler_roles }}/google-fluentd"
 
@@ -47,16 +44,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
-    - custom_domains # This gets a list of custom domains
-    - role: "{{ appsembler_roles }}/gcsfuse"
     - mysql_init
-    - role: nginx
-      nginx_sites:
-      - cms
-      - lms
-      - forum
-      nginx_default_sites:
-      - lms
     - role: mysql
       when: EDXAPP_MYSQL_HOST == 'localhost'
     - role: mongo_3_2
@@ -64,6 +52,15 @@
     # Do we need need edxapp 2 times here????
     - { role: 'edxapp', celery_worker: True }
     - edxapp
+    - custom_domains # This gets a list of custom domains
+    - role: "{{ appsembler_roles }}/gcsfuse"
+    - role: nginx
+      nginx_sites:
+      - cms
+      - lms
+      - forum
+      nginx_default_sites:
+      - lms
     - amc
     #- analytics_api
     #- insights
@@ -85,6 +82,7 @@
   become_method: sudo
   gather_facts: True
   vars:
+    appsembler_roles: "../../appsembler-roles"
     migrate_db: "yes"
   roles:
     - mysql_init
@@ -95,6 +93,9 @@
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
     - { role: "xqueue", update_users: True }
+    - role: custom_domains # This gets the list of domains
+      when: nginx_enable_custom_domains|default(False)
+    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
 
 # must come after xqueue running
 - name: Install certs

@@ -64,16 +64,20 @@
   environment: "{{ edxapp_environment }}"
   tags:
     - figures
-    - figures:install
+    - install:figures
 
+# Although figures should be migrated with LMS, most of customers doesn't have figures
+# And its not practical to migrate the whole LMS for figures. 
+# Migrating everytime doesn't make sense. So, we're using ansible tag - `never`.
+# This step won't run unless you run ansible explicitly with either 'never' or `figures:migrate`
 - name: migrate figures
-  command: "{{ edxapp_venv_bin }}/python manage.py lms migrate figures --settings={{ EDXAPP_SETTINGS }}"
+  command: ". {{ edxapp_app_dir }}/edxapp_env && python manage.py lms migrate figures --settings={{ EDXAPP_SETTINGS }}"
   become_user: "{{ edxapp_user }}"
   args:
     chdir: "{{ edxapp_code_dir }}"
+  environment: "{{ edxapp_environment }}"
   tags:
-    - figures
-    - figures:install
+    - never
     - figures:migrate
 
 - name: install node dependencies

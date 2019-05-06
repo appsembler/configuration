@@ -85,7 +85,7 @@
     - install
     - install:app-requirements
 
-# If there is a common user for migrations run migrations using his username
+# If there is a common user for migrations run migrations using its username
 # and credentials. If not we use the xqueue mysql user
 - name: Migrate
   shell: "SERVICE_VARIANT=xqueue {{ xqueue_venv_bin }}/django-admin.py migrate --noinput --settings=xqueue.{{ XQUEUE_SETTINGS }} --pythonpath={{ xqueue_code_dir }}"

@@ -188,7 +188,7 @@
     - install:base
 
 - name: update rubygems
-  shell: "gem install rubygems-update && update_rubygems"
+  shell: "gem install rubygems-update -v '<3' && update_rubygems"
   become_user: "{{ rbenv_user }}"
   environment: "{{ rbenv_environment }}"
   tags:

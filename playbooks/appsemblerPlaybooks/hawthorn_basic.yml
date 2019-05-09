@@ -73,9 +73,6 @@
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5", tags: ['notifier_role'] }
     - { role: xqueue, update_users: True, tags: ['xqueue_role'] }
     - { role: backups, BACKUPS_MONGO: True, BACKUPS_MYSQL: True, when: COMMON_ENABLE_BACKUPS }
-    - role: githubsshkeys
-      when: "cloud_provider == 'azure'"
-      tags: ['githubsshkeys_role']
     - role: ecommerce
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_role']

@@ -90,27 +90,6 @@ def upload_to_gcloud_storage(file_path, bucket):
     logging.info('Upload successful')
 
 
-def upload_to_azure_storage(file_path, bucket, account, key):
-    """
-    Upload a file to the specified Azure Storage container.
-
-        file_path: An absolute path to the file to be uploaded.
-        bucket: The name of an Azure Storage container.
-        account: An Azure Storage account.
-        key: An Azure Storage account key.
-    """
-
-    from azure.storage.blob import BlockBlobService
-
-    logging.info('Uploading backup at "{}" to Azure Storage container'
-                 '"{}"'.format(file_path, bucket))
-
-    file_name = os.path.basename(file_path)
-    blob_service = BlockBlobService(account_name=account, account_key=key)
-    blob_service.create_blob_from_path(bucket, file_name, file_path)
-    logging.info('Upload successful')
-
-
 class NoBackupsFound(Exception):
     pass
 
@@ -396,10 +375,6 @@ def _parse_args():
                         help='AWS access key id')
     parser.add_argument('-k', '--s3-key', dest='s3_key',
                         help='AWS secret access key')
-    parser.add_argument('--azure-account', dest='azure_account',
-                        help='Azure storage account')
-    parser.add_argument('--azure-key', dest='azure_key',
-                        help='Azure storage account key')
     parser.add_argument('-n', '--uncompressed', dest='compressed',
                         action='store_false', default=True,
                         help='disable compression')
@@ -426,8 +401,6 @@ def _main():
     restore_path = args.restore_path
     s3_id = args.s3_id or os.environ.get('BACKUP_AWS_ACCESS_KEY_ID')
     s3_key = args.s3_key or os.environ.get('BACKUP_AWS_SECRET_ACCESS_KEY')
-    azure_account = args.azure_account or os.environ.get('BACKUP_AZURE_STORAGE_ACCOUNT')
-    azure_key = args.azure_key or os.environ.get('BACKUP_AZURE_STORAGE_KEY')
     settings = args.settings or os.environ.get('BACKUP_SETTINGS', 'aws_appsembler')
     sentry_dsn = args.sentry_dsn or os.environ.get('BACKUP_SENTRY_DSN', '')
     pushgateway = args.pushgateway or os.environ.get('PUSHGATEWAY', 'https://pushgateway.infra.appsembler.com')
@@ -451,9 +424,6 @@ def _main():
             elif provider == 's3':
                 upload_to_s3(backup_path, bucket, aws_access_key_id=s3_id,
                              aws_secret_access_key=s3_key)
-            elif provider == 'azure':
-                upload_to_azure_storage(backup_path, bucket, azure_account,
-                                        azure_key)
             else:
                 error_msg = ('Invalid storage provider specified. Please use '
                              '"gs" or "s3".')

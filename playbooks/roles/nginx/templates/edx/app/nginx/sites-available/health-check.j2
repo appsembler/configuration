@@ -3,7 +3,7 @@
 # on /status/
 
 upstream health-check-backend {
-  {% for host in nginx_cms_gunicorn_hosts %}
+  {% for host in nginx_lms_gunicorn_hosts %}
     server {{ host }}:{{ edxapp_lms_gunicorn_port }} fail_timeout=0;
   {% endfor %}
 }

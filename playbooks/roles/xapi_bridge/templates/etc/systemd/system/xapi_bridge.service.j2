@@ -17,3 +17,15 @@ Restart=always
 # more than 5 times within a period of 10 seconds.
 # https://www.freedesktop.org/software/systemd/man/systemd.unit.html#StartLimitIntervalSec=
 RestartSec=3
+
+# Implementing resource restrictions with systemd
+CPUAccounting=yes
+CPUQuota=30%
+StartupCPUWeight= 35%
+
+MemoryAccounting=yes
+
+# we also have MemoryMax where the process is actively killed as soon as it corsses the set limit. 
+# A more sane setting would be MemoryHigh where the process is allowed to go above limits (with struggle)
+# but is heavily slowed down and memory is taken away aggressively.
+MemoryHigh=512M

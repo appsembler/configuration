@@ -1,0 +1,31 @@
+# config to pass GCP load balancer health checks along to the
+# /heartbeat endpoint of the LMS and allow lighter weight checks
+# on /status/
+
+upstream health-check-backend {
+  {% for host in nginx_cms_gunicorn_hosts %}
+    server {{ host }}:{{ edxapp_lms_gunicorn_port }} fail_timeout=0;
+  {% endfor %}
+}
+
+
+server {
+  listen {{ EDXAPP_LMS_NGINX_PORT }};
+  server_name gcp-health-check;
+
+  # useful as a lightweight liveness check
+  location '/status/' {
+    return 200 'ok';
+  }
+
+  # heavier weight readiness check
+  location '/heartbeat' {
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Port $server_port;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header Host $http_host;
+
+    proxy_redirect off;
+    proxy_pass http://health-check-backend;
+  }
+}

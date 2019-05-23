@@ -42,3 +42,59 @@ EDXAPP_XQUEUE_URL: 'http://edx.devstack.xqueue:18040'
 
 EDXAPP_ENABLE_EDXNOTES: true
 EDXAPP_EDXNOTES_INTERNAL_API: 'http://edx.devstack.edx_notes_api:18120/api/v1'
+
+# Appsembler's devstack customizations
+
+EDXAPP_COMPREHENSIVE_THEME_DIRS:
+  - '/edx/var/edxapp/themes'
+
+EDXAPP_DEFAULT_SITE_THEME: 'edx-theme-codebase'
+EDXAPP_ENABLE_COMPREHENSIVE_THEMING: true
+
+
+EDXAPP_REGISTRATION_EXTRA_FIELDS:
+  city: hidden
+  country: hidden
+  gender: optional
+  goals: optional
+  honor_code: required
+  level_of_education: optional
+  mailing_address: optional
+  year_of_birth: optional
+
+
+EDXAPP_FEATURES:
+  # Appsembler: Copied as-is from edX's devstack dump Just because there's no better method in YAML.
+  #             Shouldn't be a problem, even across releases
+  AUTH_USE_OPENID_PROVIDER: true
+  AUTOMATIC_AUTH_FOR_TESTING: false
+  CUSTOM_COURSES_EDX: false
+  ENABLE_COMBINED_LOGIN_REGISTRATION: true
+  ENABLE_CORS_HEADERS: false
+  ENABLE_COUNTRY_ACCESS: false
+  ENABLE_CREDIT_API: false
+  ENABLE_CREDIT_ELIGIBILITY: false
+  ENABLE_CROSS_DOMAIN_CSRF_COOKIE: false
+  ENABLE_CSMH_EXTENDED: true
+  ENABLE_DISCUSSION_HOME_PANEL: true
+  ENABLE_DISCUSSION_SERVICE: true
+  ENABLE_EDXNOTES: true
+  ENABLE_GRADE_DOWNLOADS: true
+  ENABLE_INSTRUCTOR_ANALYTICS: false
+  ENABLE_MKTG_SITE: false
+  ENABLE_MOBILE_REST_API: false
+  ENABLE_OAUTH2_PROVIDER: false
+  ENABLE_READING_FROM_MULTIPLE_HISTORY_TABLES: true
+  ENABLE_SPECIAL_EXAMS: false
+  ENABLE_SYSADMIN_DASHBOARD: false
+  ENABLE_THIRD_PARTY_AUTH: true
+  ENABLE_VIDEO_UPLOAD_PIPELINE: false
+  PREVIEW_LMS_BASE: "preview.localhost:18000"
+  SHOW_FOOTER_LANGUAGE_SELECTOR: false
+  SHOW_HEADER_LANGUAGE_SELECTOR: false
+
+  # Actual Appsembler Customizations
+  ENABLE_TIERS_APP: false  # TODO: Fix the tiers app in devstack
+  ENABLE_CREATOR_GROUP: true
+  DISABLE_COURSE_CREATION: false
+  FIGURES_IS_MULTISITE: true

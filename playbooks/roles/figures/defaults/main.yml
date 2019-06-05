@@ -1,0 +1,13 @@
+---
+##
+# Defaults for figures temp role
+
+figures_parent_dir: "{{ COMMON_BASE_DIR }}/src"
+figures_code_dir: "{{ figures_parent_dir }}/figures"
+
+figures_git_repo: "https://github.com/appsembler/figures"
+figures_version: "0.1.6"
+
+## A space separated list of all customer specific flags
+## For Enterprise customers, keep adding your perms to this flag like "REM_BASE=10 PRIMARY_COLOR=#000000"
+figures_customer_specific_vars: "REM_BASE=10"

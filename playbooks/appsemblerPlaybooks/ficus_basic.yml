@@ -54,6 +54,7 @@
     - { role: edxapp, tags: ['edxapp_role'] }
     - role: figures
       when: ENABLE_FIGURES|default(False)
+      tags: ['figures']
     - { role: notifier, tags: ['notifier_role'] }
     - role: edx_notes_api
       when: "INSTALL_EDX_NOTES is defined and INSTALL_EDX_NOTES"

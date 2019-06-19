@@ -23,6 +23,7 @@
     - { role: elasticsearch, tags: ['elasticsearch_role'] }
     - { role: memcached, tags: ['memcached_role'] }
     - backups
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Configure stateless edxapp instance
   hosts: edxapp-server
@@ -92,6 +93,7 @@
         - "EDXAPP_APPSEMBLER_FEATURES.ENABLE_APPSEMBLER_REPORTING|default(false)"
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
+    - role: "{{ appsembler_roles }}/google-fluentd"
 
 - name: Install xqueue, notifier and rabbitmq
   hosts: mongo-server

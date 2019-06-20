@@ -11,6 +11,7 @@
   become_method: sudo
   gather_facts: True
   vars:
+    appsembler_roles: "../../../appsembler-roles"
     BACKUPS_MONGO: yes
     BACKUPS_MYSQL: no
     COMMON_ENABLE_BACKUPS: True

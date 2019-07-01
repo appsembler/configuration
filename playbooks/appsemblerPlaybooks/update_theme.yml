@@ -107,24 +107,17 @@
         - update_lms_theme:compile_css
 
     # Gather assets using paver if possible
-    - name: "gather lms static assets with paver"
-      command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-lms"
+    - name: "gather lms and cms static assets with paver"
+      command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
       when: celery_worker is not defined and not devstack
       tags:
         - gather_static_assets
         - assets
         - update_lms_theme:compile_css
 
-    - name: "gather cms static assets with paver"
-      command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets-cms"
-      when: celery_worker is not defined and not devstack
-      tags:
-        - gather_static_assets
-        - assets
-
     - name: restart LMS
       supervisorctl:
-        name: "edxapp:lms"
+        name: "lms"
         supervisorctl_path: "{{ supervisor_ctl }}"
         config: "{{ supervisor_cfg }}"
         state: restarted
@@ -136,7 +129,7 @@
 
     - name: restart CMS
       supervisorctl:
-        name: "edxapp:cms"
+        name: "cms"
         supervisorctl_path: "{{ supervisor_ctl }}"
         config: "{{ supervisor_cfg }}"
         state: restarted
@@ -145,9 +138,21 @@
       tags:
         - manage
 
-    - name: ensure edxapp has started
+    - name: ensure lms has started
       supervisorctl:
-        name: "edxapp:"
+        name: "lms"
+        supervisorctl_path: "{{ supervisor_ctl }}"
+        config: "{{ supervisor_cfg }}"
+        state: started
+      become_user: "{{ supervisor_service_user }}"
+      when: celery_worker is not defined and not disable_edx_services
+      tags:
+        - manage
+        - update_lms_theme
+
+    - name: ensure cms has started
+      supervisorctl:
+        name: "cms"
         supervisorctl_path: "{{ supervisor_ctl }}"
         config: "{{ supervisor_cfg }}"
         state: started

@@ -80,6 +80,9 @@
     - role: postgresql_aggregation
       when: COMMON_ENVIRONMENT == "prod"
       tags: ['postgresql_aggregation_role']
+    - role: discovery
+      when: ENABLE_DISCOVERY
+      tags: ['discovery_role']
     - role: ecommerce
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_role']

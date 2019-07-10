@@ -339,6 +339,9 @@ EDXAPP_FEATURES:
   SHOW_HEADER_LANGUAGE_SELECTOR: "{{ EDXAPP_SHOW_HEADER_LANGUAGE_SELECTOR }}"
   SHOW_FOOTER_LANGUAGE_SELECTOR: "{{ EDXAPP_SHOW_FOOTER_LANGUAGE_SELECTOR }}"
 
+# Enable wiki by default
+EDXAPP_WIKI_ENABLED: true
+
 # This needs to be set to localhost
 # if xqueue is run on the same server
 # as the lms (it's sent in the request)
@@ -1237,7 +1240,7 @@ generic_env_config:  &edxapp_generic_env
   AWS_SES_REGION_NAME: "{{ EDXAPP_AWS_SES_REGION_NAME }}"
   AWS_SES_REGION_ENDPOINT: "{{ EDXAPP_AWS_SES_REGION_ENDPOINT }}"
   FEATURES: "{{ EDXAPP_FEATURES }}"
-  WIKI_ENABLED: true
+  WIKI_ENABLED: "{{ EDXAPP_WIKI_ENABLED }}"
   SYSLOG_SERVER:  "{{ EDXAPP_SYSLOG_SERVER }}"
   LOG_DIR:  "{{ edxapp_log_dir }}"
   DATA_DIR: "{{ edxapp_data_dir }}"

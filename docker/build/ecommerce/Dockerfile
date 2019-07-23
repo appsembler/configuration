@@ -21,6 +21,10 @@ COPY docker/build/devstack/ansible_overrides.yml /devstack/ansible_overrides.yml
 
 ARG OPENEDX_RELEASE=master
 ENV OPENEDX_RELEASE=${OPENEDX_RELEASE}
+RUN apt-get update \
+    && apt-get install -qyy \
+       -o APT::Install-Recommends=false -o APT::Install-Suggests=false \
+       libsqlite3-dev
 RUN sudo /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook ecommerce.yml \
     -c local -i '127.0.0.1,' \
     -t 'install,assets,devstack' \

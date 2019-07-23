@@ -225,6 +225,7 @@ ecommerce_debian_pkgs:
   - libjpeg-dev
   - libssl-dev
   - libffi-dev
+  - libsqlite3-dev
 
 ecommerce_redhat_pkgs: []
 

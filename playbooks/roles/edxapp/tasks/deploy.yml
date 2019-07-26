@@ -446,20 +446,17 @@
   environment: "{{ edxapp_environment }}"
   when: ENABLE_COMPILEMESSAGES|default(False)
 
-- name: restart edxapp
-  supervisorctl:
-    name: "{{ item }}"
-    supervisorctl_path: "{{ supervisor_ctl }}"
-    config: "{{ supervisor_cfg }}"
-    state: restarted
-  when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
-  become_user: "{{ supervisor_service_user }}"
-  with_items:
-    - 'lms'
-    - 'cms'
-  tags:
-    - manage
-    - deploy:platform
+# Appsembler custom:
+# perform restarts one server at a time
+# to avoid downtime. Ansible doesn't yet
+# have a `serial: 1` equivalent for a single
+# task, so this is a workaround to achieve that
+- name: serial restart edxapp
+  include_tasks: "restart_services.yml"
+  with_items: "{{ play_hosts }}"
+  when: "hostvars[host_item].inventory_hostname == inventory_hostname"
+  loop_control:
+      loop_var: host_item
 
 - name: restart edxapp_workers
   supervisorctl:

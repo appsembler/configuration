@@ -67,9 +67,6 @@
       when: "'localhost' in EDXAPP_ELASTIC_SEARCH_CONFIG|map(attribute='host')"
       tags: ['elasticsearch_role']
     - { role: forum, tags: ['forum_role'] }
-    - role: postgresql_aggregation
-      when: COMMON_ENVIRONMENT == "prod"
-      tags: ['postgresql_aggregation_role']
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5", tags: ['notifier_role'] }
     - { role: xqueue, update_users: True, tags: ['xqueue_role'] }
     - { role: backups, BACKUPS_MONGO: True, BACKUPS_MYSQL: True, when: COMMON_ENABLE_BACKUPS }

@@ -33,7 +33,7 @@ server {
 
   server_name forum.*;
   listen {{ FORUM_NGINX_PORT }} {{ default_site }};
-  client_max_body_size 1M;
+  client_max_body_size {{ nginx_forum_client_max_body_size }};
   keepalive_timeout 5;
 
   location / {

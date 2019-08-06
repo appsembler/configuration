@@ -15,6 +15,7 @@ nginx_map_hash_max_size: 2048
 ALLOW_BASIC_AUTH: false
 nginx_cms_client_max_body_size: 100M
 nginx_lms_client_max_body_size: 4M
+nginx_forum_client_max_body_size: 1M
 nginx_cms_proxy_read_timeout: 60s
 nginx_lms_proxy_read_timeout: 60s
 

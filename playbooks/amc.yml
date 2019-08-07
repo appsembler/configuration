@@ -63,6 +63,7 @@
       - health-check
       nginx_default_sites:
       - lms
+    - role: "{{ appsembler_roles }}/fix_dir_perms"
     - amc
     #- analytics_api
     #- insights

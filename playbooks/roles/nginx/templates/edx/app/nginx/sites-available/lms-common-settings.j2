@@ -224,9 +224,20 @@ location ~ ^{{ EDXAPP_MEDIA_URL }}/(?P<file>.*) {
 
   {% include "extra_locations_lms.j2" ignore missing %}
 
-  {% if nginx_lms_extra_locations != "" %}
-    {{ nginx_lms_extra_locations }}
-  {% endif %}
+  # Hack: This rule is hardcoded here instead of using `nginx_lms_extra_locations` because of
+  #       `tahoe_certs_agent` wasn't getting the value from `server-vars.yml` and we don't know why.
+  location = /static/images/favicon.ico {
+    # Hide the edX default favicon when accessing non-HTML resources.
+
+    # Note: Using the path above instead of just '/favicon.icon' to
+    #       catch a rewrite rule above in the 'lms' config file.
+
+    # No need for access logs for this one
+    log_not_found off;
+    access_log off;
+
+    return 404;
+  }
 
   {% if EDXAPP_XBLOCK_SETTINGS.get('ScormXBlock', False) %}
     # asterisk needed so it doesn't break if the file doesn't exist

@@ -16,7 +16,6 @@
     COMMON_ENABLE_INSIGHTS: False
     COMMON_ENABLE_OAUTH_CLIENT: False
     COMMON_ENABLE_BACKUPS: True
-    POSTGRESQL_AGGREGATION_INSTALL_CRON: true
     ENABLE_ECOMMERCE: false
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB", tags: ['swapfile_role'] }

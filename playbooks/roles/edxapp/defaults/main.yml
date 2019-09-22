@@ -130,6 +130,14 @@ EDXAPP_SEARCH_HOST: 'localhost'
 EDXAPP_SEARCH_PORT: 9200
 EDXAPP_SEARCH_USE_SSL: false
 
+EDXAPP_POSTGRESQL_AGGREGATION_HOST: "localhost"
+EDXAPP_POSTGRESQL_AGGREGATION_DATABASE: ""
+EDXAPP_POSTGRESQL_AGGREGATION_USER: "aggregation_user"
+EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD: "password"
+EDXAPP_POSTGRESQL_AGGREGATION_USER_ROLE: "boxes"
+EDXAPP_POSTGRESQL_AGGREGATION_PORT: 5432
+EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS: {}
+
 # list of dictionaries of the format
 # { 'host': 'hostname', 'port': 'portnumber', 'otherconfigsuchas use_ssl': 'True' }
 # http://elasticsearch-py.readthedocs.org/en/master/api.html#elasticsearch
@@ -777,21 +785,6 @@ EDXAPP_PROCTORING_BACKEND_PROVIDER:
   class: 'edx_proctoring.backends.null.NullBackendProvider'
   options: {}
 
-EDXAPP_RETIRED_USERNAME_PREFIX: "retired__user_"
-EDXAPP_RETIRED_EMAIL_PREFIX: "retired__user_"
-EDXAPP_RETIRED_EMAIL_DOMAIN: "retired.invalid"
-EDXAPP_RETIRED_USER_SALTS:
-  - "OVERRIDE ME WITH A RANDOM VALUE"
-  - "ROTATE SALTS BY APPENDING NEW VALUES"
-EDXAPP_RETIREMENT_SERVICE_WORKER_USERNAME: "OVERRIDE THIS WITH A VALID LMS USERNAME"
-# These get loaded into database models per environment via management command
-# These are the required states, environmental overrides are in edx-internal.
-EDXAPP_RETIREMENT_STATES:
-  - "PENDING"
-  - "ERRORED"
-  - "ABORTED"
-  - "COMPLETE"
-
 # Comprehensive Theming
 # Deprecated, maintained for backward compatibility
 EDXAPP_COMPREHENSIVE_THEME_DIR: ""
@@ -1108,6 +1101,15 @@ edxapp_databases:
     PORT: "{{ EDXAPP_MYSQL_CSMH_PORT }}"
     CONN_MAX_AGE: "{{ EDXAPP_MYSQL_CONN_MAX_AGE }}"
     OPTIONS: "{{ EDXAPP_MYSQL_CSMH_OPTIONS }}"
+
+  appsembler_usage:
+    ENGINE: 'django.db.backends.postgresql_psycopg2'
+    NAME: "{{ EDXAPP_POSTGRESQL_AGGREGATION_DATABASE }}"
+    USER: "{{ EDXAPP_POSTGRESQL_AGGREGATION_USER }}"
+    PASSWORD: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PASSWORD }}"
+    HOST: "{{ EDXAPP_POSTGRESQL_AGGREGATION_HOST }}"
+    PORT: "{{ EDXAPP_POSTGRESQL_AGGREGATION_PORT }}"
+    OPTIONS: "{{ EDXAPP_POSTGRESQL_AGGREGATION_OPTIONS }}"
 
 edxapp_generic_auth_config:  &edxapp_generic_auth
   EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST: "{{ EDXAPP_EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST }}"

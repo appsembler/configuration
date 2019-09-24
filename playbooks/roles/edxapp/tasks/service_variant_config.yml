@@ -289,7 +289,6 @@
   command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
   environment:
     EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
-  when: celery_worker is not defined and not devstack
   tags:
     - gather_static_assets
     - assets

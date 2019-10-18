@@ -20,6 +20,10 @@ EDXAPP_APPSEMBLER_FEATURES: {
   TMP: None
 }
 
+# Enables the "Update Tahoe site-specific styles" task.
+# This variable should be only enabled for Tahoe deployments.
+EDXAPP_TAHOE_REBUILD_SITE_STYLES: false
+
 # Bucket used for xblock file storage
 EDXAPP_XBLOCK_FS_STORAGE_BUCKET: "None"
 EDXAPP_XBLOCK_FS_STORAGE_PREFIX: "None"

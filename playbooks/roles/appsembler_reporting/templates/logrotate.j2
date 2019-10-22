@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+{{ appsembler_reporting_log_dir }}/*.log {
+  compress
+  delaycompress
+  dateext
+  missingok
+  notifempty
+  daily
+  rotate 90
+  size 1M
+  nocreate
+}

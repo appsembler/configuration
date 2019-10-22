@@ -295,6 +295,20 @@
     - assets
     - update_lms_theme
 
+- name: "Update Tahoe site-specific styles"
+  shell: ". {{ edxapp_app_dir }}/edxapp_env && {{ edxapp_venv_bin }}/python manage.py lms save_all_sites --settings={{ edxapp_settings }}"
+  args:
+    chdir: "{{ edxapp_code_dir }}"
+  become_user: "{{ edxapp_user }}"
+  when:
+   - celery_worker is not defined
+   - not devstack
+   - EDXAPP_TAHOE_REBUILD_SITE_STYLES
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
 # make sure the old staticfiles backup dir isn't lingering around.
 - name: Remove old staticfiles backup dir
   file:

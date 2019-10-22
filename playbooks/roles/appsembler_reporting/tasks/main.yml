@@ -38,3 +38,15 @@
     minute: "{{ item.cron_m }}" # Minute of the hour
     job: "bash -e {{ appsembler_reporting_scripts_dir }}/{{ item.name }}_report.sh"
   with_items: "{{ appsembler_reporting_jobs }}"
+
+- name: install logrotate configuration
+  template:
+    src: logrotate.j2
+    dest: /etc/logrotate.d/appsembler_reporting
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - "install"
+    - "install:app-configuration"
+    - "logrotate"

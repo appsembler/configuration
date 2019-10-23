@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 
 {{ appsembler_reporting_log_dir }}/*.log {
+  create 0640 {{ edxapp_user }} {{ edxapp_user }}
   compress
   delaycompress
   dateext

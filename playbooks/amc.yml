@@ -79,22 +79,23 @@
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
     - role: "{{ appsembler_roles }}/google-fluentd"
 
-- name: Install xqueue and notifier on services node
-  hosts: "services"
-  become: True
-  become_method: sudo
-  gather_facts: True
-  vars:
-    appsembler_roles: "../../appsembler-roles"
-    migrate_db: "yes"
-  roles:
-    - mysql_init
-    - edxapp_common
-    - role: nginx
-      nginx_sites:
-      - xqueue
-    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
-    - { role: "xqueue", update_users: True }
-    - role: custom_domains # This gets the list of domains
-      when: nginx_enable_custom_domains|default(False)
-    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
+# TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
+#- name: Install xqueue and notifier on services node
+#  hosts: "services"
+#  become: True
+#  become_method: sudo
+#  gather_facts: True
+#  vars:
+#    appsembler_roles: "../../appsembler-roles"
+#    migrate_db: "yes"
+#  roles:
+#    - mysql_init
+#    - edxapp_common
+#    - role: nginx
+#      nginx_sites:
+#      - xqueue
+#    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
+#    - { role: "xqueue", update_users: True }
+#    - role: custom_domains # This gets the list of domains
+#      when: nginx_enable_custom_domains|default(False)
+#    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }

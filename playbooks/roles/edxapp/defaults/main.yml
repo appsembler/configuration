@@ -1052,7 +1052,7 @@ edxapp_generic_contentstore_config: &edxapp_generic_default_contentstore
     ssl: "{{ EDXAPP_MONGO_USE_SSL }}"
     ssl_certfile: "{{ EDXAPP_MONGO_SSL_CLIENT_CERT_PATH }}"
     ssl_ca_certs: "{{ EDXAPP_MONGO_SSL_CA_CERT_PATH }}"
-    authSource: {{ EDXAPP_MONGO_AUTH_SOURCE }}
+    authSource: "{{ EDXAPP_MONGO_AUTH_SOURCE }}"
 
 edxapp_generic_doc_store_config: &edxapp_generic_default_docstore
   db: "{{ EDXAPP_MONGO_DB_NAME }}"

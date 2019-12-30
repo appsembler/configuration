@@ -20,7 +20,7 @@ COPY docker/build/edxapp/ansible_overrides.yml /
 COPY docker/build/edxapp/devstack.yml /
 COPY docker/build/devstack/ansible_overrides.yml /devstack/ansible_overrides.yml
 
-ARG OPENEDX_RELEASE=appsembler/tahoe/master
+ARG OPENEDX_RELEASE=appsembler/tahoe/develop
 ARG APPSEMBLER_PLATFORM_REPO=https://github.com/appsembler/edx-platform.git
 ENV OPENEDX_RELEASE=${OPENEDX_RELEASE}
 ENV APPSEMBLER_PLATFORM_REPO=${APPSEMBLER_PLATFORM_REPO}

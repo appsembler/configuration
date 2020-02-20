@@ -18,6 +18,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
+    - edxapp_common
     - edx_ansible
     - role: "{{ appsembler_roles }}/gcsfuse"
     - oraclejdk

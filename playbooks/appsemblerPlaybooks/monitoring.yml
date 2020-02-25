@@ -22,4 +22,5 @@
 
     - "{{ appsembler_roles }}/monit"
 
-    - "{{ appsembler_roles }}/snort"
+    - role: "{{ appsembler_roles }}/snort"
+      when: "SNORT_ENABLED|default(True)"

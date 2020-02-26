@@ -402,6 +402,22 @@
   tags:
     - manage
 
+- name: restart celery beat lms process
+  supervisorctl:
+    name: lms_celerybeat
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
+  when: celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED
+
+- name: restart celery beat cms process
+  supervisorctl:
+    name: cms_celerybeat
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
+  when: celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_CMS_ENABLED
+
 - name: create symlinks from the venv bin dir and repo dir
   file:
     src: "{{ item }}"

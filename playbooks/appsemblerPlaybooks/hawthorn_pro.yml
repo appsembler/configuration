@@ -23,6 +23,7 @@
     - { role: oraclejdk, tags: ['oraclejdk_role'] }
     - { role: elasticsearch, tags: ['elasticsearch_role'] }
     - { role: memcached, tags: ['memcached_role'] }
+    - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
     - backups
     - role: "{{ appsembler_roles }}/google-fluentd"
 
@@ -107,7 +108,6 @@
       nginx_sites:
       - xqueue
       tags: ['nginx_role']
-    - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
     - { role: notifier, tags: ['notifier_role'] }
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5", tags: ['notifier_role'] }
     - { role: xqueue, update_users: True, tags: ['xqueue_role'] }

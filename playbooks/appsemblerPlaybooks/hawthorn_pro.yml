@@ -14,7 +14,6 @@
     appsembler_roles: "../../../appsembler-roles"
     BACKUPS_MONGO: yes
     BACKUPS_MYSQL: no
-    COMMON_ENABLE_BACKUPS: True
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
     - sudo

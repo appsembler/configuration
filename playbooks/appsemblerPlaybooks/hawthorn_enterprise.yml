@@ -13,7 +13,6 @@
   vars:
     BACKUPS_MONGO: True
     BACKUPS_MYSQL: False
-    COMMON_ENABLE_BACKUPS: True
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
     - { role: mongo_3_2, tags: ['mongo_3_2_role'] }

@@ -43,6 +43,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
+    - role: aws
     - mysql_init
     - role: mysql
       when: EDXAPP_MYSQL_HOST == 'localhost'

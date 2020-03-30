@@ -1,5 +1,12 @@
 ---
 
+- name: ensure config directory exists
+  file:
+    path: "{{ EDXAPP_CFG_DIR }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+
 - name: copy Mongo CA certificate
   copy: >
     content="{{ EDXAPP_MONGO_SSL_CA_CERT }}"

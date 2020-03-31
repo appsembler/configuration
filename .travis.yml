@@ -42,7 +42,13 @@ script:
 # our hawthorn image
 after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "appsembler/hawthorn/master" ]]; then
-      docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
-      travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:latest ;
-      docker push appsembler/edxapp:latest ;
+    docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
+    travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:latest ;
+    docker push appsembler/edxapp:latest ;
+    fi
+
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "appsembler/hawthorn/master" ]]; then
+    docker login -u $DOCKERUSER -p $DOCKERPASSWORD ;
+    travis_wait 50 docker build -f docker/build/amc-frontend/Dockerfile . -t appsembler/amc-frontend:latest ;
+    docker push appsembler/amc-frontend:latest ;
     fi

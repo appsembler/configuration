@@ -5,6 +5,7 @@ aws_plays_paths:
 docker_plays_paths:
   - docker/plays
 weights:
+  - amc-frontend: 2  # Appsembler: Omar: Setting value to a dummy 2 without really caring about it.
   - discovery: 6
   - go-agent: 3
   - go-server: 5

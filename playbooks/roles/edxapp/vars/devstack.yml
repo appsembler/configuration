@@ -7,3 +7,4 @@ development_requirements_file:   "{{ edxapp_code_dir }}/requirements/edx/develop
 edxapp_requirements_files:
   - "{{ custom_requirements_file }}"
   - "{{ development_requirements_file }}"
+  - "{{ edxapp_code_dir }}/requirements/edx/appsembler.txt"

@@ -1,3 +1,3 @@
-FROM scratch
+FROM ubuntu
 
 # TODO: Add something here

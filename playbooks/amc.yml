@@ -28,6 +28,22 @@
     - role: "{{ appsembler_roles }}/google-fluentd"
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
 
+- name: Deploy edxapp workers
+  hosts: workers
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../appsembler-roles"
+  roles:
+    - role: sudo
+    - role: aws
+    - mysql_init
+    - role: mysql
+    - role: edxapp
+      celery_worker: True
+    - role: "{{ appsembler_roles }}/google-fluentd"
+
 - name: Configure app server instance(s)
   hosts: edx
   become: True
@@ -49,28 +65,36 @@
       when: EDXAPP_MYSQL_HOST == 'localhost'
     - role: mongo_3_2
       when: "'localhost' in EDXAPP_MONGO_HOSTS"
-    # Do we need need edxapp 2 times here????
-    - { role: 'edxapp', celery_worker: True }
-    - edxapp
+    - { role: 'edxapp', celery_worker: False }
     - custom_domains # This gets a list of custom domains
     - role: "{{ appsembler_roles }}/gcsfuse"
     - role: nginx
       nginx_sites:
       - cms
       - lms
-      - forum
       - health-check
       nginx_default_sites:
       - lms
     - role: "{{ appsembler_roles }}/fix_dir_perms"
     - amc
-    #- analytics_api
-    #- insights
-    #- demo
     - oauth_client_setup
-    - oraclejdk
     - forum
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+    - role: "{{ appsembler_roles }}/google-fluentd"
+
+- name: Deploy forum
+  hosts: forum
+  become: True
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../appsembler-roles"
+  roles:
+    - role: sudo
+    - role: aws
+    - role: nginx
+      nginx_sites:
+      - forum
+    - forum
     - role: "{{ appsembler_roles }}/google-fluentd"
 
 # TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133

@@ -372,8 +372,8 @@
     settings: "{{ EDXAPP_SETTINGS }}"
     virtualenv: "{{ edxapp_venv_dir }}"
   environment: "{{ edxapp_environment }}"
-  ignore_errors: yes
-
+  ignore_errors: true
+  run_once: true
 
   # call supervisorctl update. this reloads
   # the supervisorctl config and restarts

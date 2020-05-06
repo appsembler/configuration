@@ -41,8 +41,8 @@ EDXAPP_CMS_GUNICORN_EXTRA_CONF: ""
 # Set this to the maximum number
 # of requests for gunicorn for the lms and cms
 # gunicorn --max-requests <num>
-EDXAPP_LMS_MAX_REQ: !!null
-EDXAPP_CMS_MAX_REQ: !!null
+EDXAPP_LMS_MAX_REQ: 1000
+EDXAPP_CMS_MAX_REQ: 1000
 # 'None' will be written out as null in
 # the configuration on disk
 EDXAPP_AWS_ACCESS_KEY_ID:  "None"

@@ -514,6 +514,9 @@ EDXAPP_INSTALL_PRIVATE_REQUIREMENTS: false
 #   - name: git+https://git.myproject.org/MyProject#egg=MyProject
 EDXAPP_EXTRA_REQUIREMENTS: []
 
+# Prevent arbitrary packages from being installed by the extra requirements
+EDXAPP_EXTRA_REQUIREMENTS_EXTRA_ARGS: '--no-deps'
+
 # List of private requirements that should be installed into the
 # edxapp virtual environment.
 # `name` (required), 'extra_args' (optional)

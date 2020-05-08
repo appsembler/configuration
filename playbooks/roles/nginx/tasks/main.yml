@@ -419,6 +419,33 @@
     - install
     - install:configuration
 
+# Appsembler: we add an override to tell systemd to try restarting
+# the service. On Tahoe (and possibly others), it takes some time
+# for the GCS Fuse mount to be ready and nginx needs that
+# before it can read SSL certs. With the default `Restart=no`,
+# systemd tries once, fails, and then nginx has to be started
+# manually.
+- name: create systemd override directory
+  file:
+    path: /etc/systemd/system/nginx.service.d
+    state: directory
+  notify: restart nginx
+  tags:
+    - install
+    - install:configuration
+
+- name: add systemd override
+  template:
+    src: etc/systemd/system/nginx.service.d/override.conf
+    dest: /etc/systemd/system/nginx.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+  tags:
+    - install
+    - install:configuration
+
 # nginx is started during package installation, before any of the configuration files are in place.
 # The handler that reloads the configuration would be run only at the very end of the playbook, so
 # none of the local services would be available in the meantime, e.g. causing certs to error out

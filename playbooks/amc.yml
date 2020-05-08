@@ -77,15 +77,12 @@
       - lms
     - role: "{{ appsembler_roles }}/fix_dir_perms"
     - amc
-<<<<<<< HEAD
-=======
     - role: credentials
       when: TAHOE_CREDENTIALS_ENABLE|default(false)
       tags: credentials_role
     #- analytics_api
     #- insights
     #- demo
->>>>>>> maxi/fix-codesandbox-perms-error
     - oauth_client_setup
     - forum
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }

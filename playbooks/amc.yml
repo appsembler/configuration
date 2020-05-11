@@ -65,7 +65,7 @@
       when: EDXAPP_MYSQL_HOST == 'localhost'
     - role: mongo_3_2
       when: "'localhost' in EDXAPP_MONGO_HOSTS"
-    - { role: 'edxapp', celery_worker: False }
+    - edxapp
     - custom_domains # This gets a list of custom domains
     - role: "{{ appsembler_roles }}/gcsfuse"
     - role: nginx

@@ -84,7 +84,6 @@
     #- insights
     #- demo
     - oauth_client_setup
-    - forum
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
     - role: "{{ appsembler_roles }}/google-fluentd"
 

@@ -445,7 +445,8 @@
     supervisorctl_path: "{{ supervisor_ctl }}"
     config: "{{ supervisor_cfg }}"
     state: restarted
-  when: celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED
+  when: (celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED) and
+        (inventory_hostname == ansible_play_hosts_all[0])
 
 - name: restart celery beat cms process
   supervisorctl:
@@ -453,7 +454,8 @@
     supervisorctl_path: "{{ supervisor_ctl }}"
     config: "{{ supervisor_cfg }}"
     state: restarted
-  when: celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_CMS_ENABLED
+  when: (celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_CMS_ENABLED) and
+        (inventory_hostname == ansible_play_hosts_all[0])
 
 - name: create symlinks from the venv bin dir and repo dir
   file:

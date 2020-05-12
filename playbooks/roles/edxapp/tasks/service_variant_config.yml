@@ -111,7 +111,8 @@
     - install
     - install:configuration
     - install:celerybeat
-  when: EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED
+  when: (EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED) and
+        (inventory_hostname == ansible_play_hosts_all[0])
 
 - name: add gunicorn configuration files
   template:
@@ -166,7 +167,8 @@
     force: yes
   become_user: "{{ supervisor_user }}"
   when: celery_worker is not defined and not disable_edx_services and
-        (EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED)
+        (EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED) and
+        (inventory_hostname == ansible_play_hosts_all[0])
   tags:
     - install
     - install:configuration

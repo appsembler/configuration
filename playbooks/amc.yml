@@ -63,6 +63,7 @@
       nginx_default_sites:
       - lms
     - role: "{{ appsembler_roles }}/fix_dir_perms"
+    - role: "{{ appsembler_roles }}/scriabin"
     - amc
     - role: credentials
       when: TAHOE_CREDENTIALS_ENABLE|default(false)

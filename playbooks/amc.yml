@@ -26,6 +26,7 @@
     - memcached
     - role: "{{ appsembler_roles }}/cert_agent"
     - role: "{{ appsembler_roles }}/google-fluentd"
+    - role: "{{ appsembler_roles }}/node_exporter"
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
 
 - name: Configure app server instance(s)
@@ -76,6 +77,15 @@
     - forum
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
     - role: "{{ appsembler_roles }}/google-fluentd"
+    - role: "{{ appsembler_roles }}/node_exporter"
+      node_exporter_enabled_collectors:
+        - systemd
+        - supervisord
+        - textfile:
+            directory: "{{ node_exporter_textfile_dir }}"
+        - filesystem:
+            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
 
 # TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
 #- name: Install xqueue and notifier on services node

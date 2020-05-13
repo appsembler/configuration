@@ -445,8 +445,9 @@
     supervisorctl_path: "{{ supervisor_ctl }}"
     config: "{{ supervisor_cfg }}"
     state: restarted
-  when: (celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED) and
-        (inventory_hostname == ansible_play_hosts_all[0])
+  when:
+    - celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED
+    - inventory_hostname == ansible_play_hosts_all[0]   # Avoid duplicate scheduling
 
 - name: restart celery beat cms process
   supervisorctl:

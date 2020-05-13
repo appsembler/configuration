@@ -168,8 +168,10 @@
     force: yes
   become_user: "{{ supervisor_user }}"
   when: celery_worker is not defined and not disable_edx_services and
-        (EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED) and
-        (inventory_hostname == ansible_play_hosts_all[0])
+  when: 
+    - celery_worker is not defined and not disable_edx_services
+    - EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED
+    - inventory_hostname == ansible_play_hosts_all[0]  # Avoid duplicate scheduling
   tags:
     - install
     - install:configuration

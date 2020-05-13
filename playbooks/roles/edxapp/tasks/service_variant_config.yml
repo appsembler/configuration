@@ -167,7 +167,6 @@
     state: link
     force: yes
   become_user: "{{ supervisor_user }}"
-  when: celery_worker is not defined and not disable_edx_services and
   when: 
     - celery_worker is not defined and not disable_edx_services
     - EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED

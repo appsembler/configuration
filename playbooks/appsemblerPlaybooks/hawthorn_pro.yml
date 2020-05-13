@@ -51,6 +51,7 @@
     - role: nginx
       nginx_sites: []
       tags: ['nginx_role']
+    - role: "{{ appsembler_roles }}/scriabin"
     - role: "{{ appsembler_roles }}/letsencrypt"
       when: letsencrypt_certs | length
     - role: "{{ appsembler_roles }}/sshguard"

@@ -27,6 +27,7 @@
     - role: "{{ appsembler_roles }}/cert_agent"
     - role: "{{ appsembler_roles }}/google-fluentd"
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
+    - mysql_init
     - role: credentials
       when: TAHOE_CREDENTIALS_ENABLE|default(false)
       tags: credentials_role

@@ -27,6 +27,9 @@
     - role: "{{ appsembler_roles }}/cert_agent"
     - role: "{{ appsembler_roles }}/google-fluentd"
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
+    - role: credentials
+      when: TAHOE_CREDENTIALS_ENABLE|default(false)
+      tags: credentials_role
 
 - name: Deploy edxapp workers
   hosts: workers
@@ -77,9 +80,6 @@
       - lms
     - role: "{{ appsembler_roles }}/fix_dir_perms"
     - amc
-    - role: credentials
-      when: TAHOE_CREDENTIALS_ENABLE|default(false)
-      tags: credentials_role
     #- analytics_api
     #- insights
     #- demo

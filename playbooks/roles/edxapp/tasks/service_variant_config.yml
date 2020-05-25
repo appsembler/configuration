@@ -113,7 +113,6 @@
     - install:celerybeat
   when:
    - EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED
-   - inventory_hostname == ansible_play_hosts_all[0]  # Avoid duplicate scheduling
 
 - name: add gunicorn configuration files
   template:
@@ -170,7 +169,6 @@
   when: 
     - celery_worker is not defined and not disable_edx_services
     - EDXAPP_CELERY_BEAT_LMS_ENABLED or EDXAPP_CELERY_BEAT_CMS_ENABLED
-    - inventory_hostname == ansible_play_hosts_all[0]  # Avoid duplicate scheduling
   tags:
     - install
     - install:configuration

@@ -447,7 +447,6 @@
     state: restarted
   when:
     - celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED
-    - inventory_hostname == ansible_play_hosts_all[0]   # Avoid duplicate scheduling
 
 - name: restart celery beat cms process
   supervisorctl:
@@ -457,7 +456,6 @@
     state: restarted
   when:
     - celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_CMS_ENABLED
-    - inventory_hostname == ansible_play_hosts_all[0]  # Avoid duplicate scheduling
 
 - name: create symlinks from the venv bin dir and repo dir
   file:

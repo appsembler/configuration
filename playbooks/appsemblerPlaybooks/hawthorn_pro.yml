@@ -25,6 +25,7 @@
     - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
     - backups
     - role: "{{ appsembler_roles }}/google-fluentd"
+    - role: "{{ appsembler_roles }}/node_exporter"
 
 - name: Configure stateless edxapp instance
   hosts: edxapp-server
@@ -51,6 +52,7 @@
     - role: nginx
       nginx_sites: []
       tags: ['nginx_role']
+    - role: "{{ appsembler_roles }}/scriabin"
     - role: "{{ appsembler_roles }}/letsencrypt"
       when: letsencrypt_certs | length
     - role: "{{ appsembler_roles }}/sshguard"
@@ -94,6 +96,15 @@
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
     - role: "{{ appsembler_roles }}/google-fluentd"
+    - role: "{{ appsembler_roles }}/node_exporter"
+      node_exporter_enabled_collectors:
+        - systemd
+        - supervisord
+        - textfile:
+            directory: "{{ node_exporter_textfile_dir }}"
+        - filesystem:
+            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
 
 - name: Install xqueue, notifier and rabbitmq
   hosts: mongo-server

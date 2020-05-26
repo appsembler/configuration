@@ -41,6 +41,7 @@
   vars:
     appsembler_roles: "../../appsembler-roles"
   roles:
+    - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
     - role: aws
     - mysql_init
@@ -115,6 +116,7 @@
   vars:
     appsembler_roles: "../../appsembler-roles"
   roles:
+    - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
     - role: aws
     - role: nginx

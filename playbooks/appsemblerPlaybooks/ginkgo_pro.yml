@@ -14,6 +14,7 @@
     BACKUPS_MONGO: yes
     BACKUPS_MYSQL: no
     COMMON_ENABLE_BACKUPS: True
+    appsembler_roles: "../../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
     - sudo
@@ -23,6 +24,7 @@
     - { role: elasticsearch, tags: ['elasticsearch_role'] }
     - { role: memcached, tags: ['memcached_role'] }
     - backups
+    - role: "{{ appsembler_roles }}/node_exporter"
 
 - name: Configure stateless edxapp instance
   hosts: edxapp-server
@@ -88,6 +90,15 @@
     - role: ecommerce_theme
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_theme_role']
+    - role: "{{ appsembler_roles }}/node_exporter"
+      node_exporter_enabled_collectors:
+        - systemd
+        - supervisord
+        - textfile:
+            directory: "{{ node_exporter_textfile_dir }}"
+        - filesystem:
+            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
 
 - name: Install xqueue, notifier and rabbitmq
   hosts: mongo-server

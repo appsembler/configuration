@@ -59,11 +59,37 @@
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
 
+# first, do everything we can safely do in parallel
+- name: app server common setup
+  hosts: edx
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    appsembler_roles: "../../appsembler-roles"
+  roles:
+    - { role: swapfile, SWAPFILE_SIZE: "2GB" }
+    - role: sudo
+    - role: aws
+    - role: "{{ appsembler_roles }}/scriabin"
+    - role: "{{ appsembler_roles }}/google-fluentd"
+    - role: "{{ appsembler_roles }}/node_exporter"
+      node_exporter_enabled_collectors:
+        - systemd
+        - supervisord
+        - textfile:
+            directory: "{{ node_exporter_textfile_dir }}"
+        - filesystem:
+            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+
+# rolling deploy to one at a time
 - name: Configure app server instance(s)
   hosts: edx
   become: True
   become_method: sudo
   gather_facts: True
+  serial: 1
   vars:
     appsembler_roles: "../../appsembler-roles"
     migrate_db: "yes"
@@ -71,10 +97,15 @@
     EDXAPP_LMS_NGINX_PORT: '80'
     # Set to false if deployed behind another proxy/load balancer.
     NGINX_SET_X_FORWARDED_HEADERS: True
+  pre_tasks:
+    - name: remove from load balancer
+      service:
+        name: nginx
+        state: stopped
+      ignore_errors: yes
+      tags:
+        - deploy
   roles:
-    - { role: swapfile, SWAPFILE_SIZE: "2GB" }
-    - role: sudo
-    - role: aws
     - mysql_init
     - role: mysql
       when: EDXAPP_MYSQL_HOST == 'localhost'
@@ -91,23 +122,17 @@
       nginx_default_sites:
       - lms
     - role: "{{ appsembler_roles }}/fix_dir_perms"
-    - role: "{{ appsembler_roles }}/scriabin"
     - amc
-    #- analytics_api
-    #- insights
-    #- demo
     - oauth_client_setup
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
-    - role: "{{ appsembler_roles }}/google-fluentd"
-    - role: "{{ appsembler_roles }}/node_exporter"
-      node_exporter_enabled_collectors:
-        - systemd
-        - supervisord
-        - textfile:
-            directory: "{{ node_exporter_textfile_dir }}"
-        - filesystem:
-            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
-            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+  post_tasks:
+    - name: re-add to load balancer
+      service:
+        name: nginx
+        state: started
+      ignore_errors: yes
+      tags:
+        - deploy
 
 - name: Deploy forum
   hosts: forum

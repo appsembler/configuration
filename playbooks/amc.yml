@@ -102,7 +102,8 @@
       service:
         name: nginx
         state: stopped
-      ignore_errors: yes
+      ignore_errors: yes  # Ignore the errors on this because it could potentially be the first 
+                                     # deploy to a new server, in which case nginx would not yet be installed.
       tags:
         - deploy
   roles:

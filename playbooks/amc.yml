@@ -134,7 +134,7 @@
       retries: 3
       delay: 60
       register: task_result
-      until: task_result.rc == 0
+      until: task_result is succeeded
       tags:
         - deploy
 

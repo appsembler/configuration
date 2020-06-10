@@ -45,7 +45,6 @@
     - role: sudo
     - role: aws
     - mysql_init
-    - role: mysql
     - role: edxapp
       celery_worker: True
     - role: "{{ appsembler_roles }}/google-fluentd"

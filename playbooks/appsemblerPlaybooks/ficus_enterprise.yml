@@ -14,6 +14,7 @@
     BACKUPS_MONGO: True
     BACKUPS_MYSQL: False
     COMMON_ENABLE_BACKUPS: True
+    appsembler_roles: "../../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB", tags: ['swapfile_role'] }
     - { role: mongo_3_0, tags: ['mongo_3_0_role'] }
@@ -21,17 +22,21 @@
     - role: githubsshkeys
       when: "cloud_provider == 'azure'"
       tags: ['githubsshkeys_role']
+    - role: "{{ appsembler_roles }}/node_exporter"
 
 - name: Configure instance for stateful services
   hosts: services-server
   sudo: True
   gather_facts: True
+  vars:
+    appsembler_roles: "../../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB", tags: ['swapfile_role'] }
     - sudo
     - { role: oraclejdk, tags: ['oraclejdk_role'] }
     - { role: elasticsearch, tags: ['elasticsearch_role'] }
     - { role: memcached, tags: ['memcached_role'] }
+    - role: "{{ appsembler_roles }}/node_exporter"
 
 - name: Configure stateless edxapp instances
   hosts: edxapp-server
@@ -98,6 +103,15 @@
     - role: ecommerce_theme
       when: ENABLE_ECOMMERCE
       tags: ['ecommerce_theme_role']
+    - role: "{{ appsembler_roles }}/node_exporter"
+       node_exporter_enabled_collectors:
+         - systemd
+         - supervisord
+         - textfile:
+             directory: "{{ node_exporter_textfile_dir }}"
+         - filesystem:
+             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
 
 - name: Install xqueue, notifier and rabbitmq on services instance
   hosts: services-server

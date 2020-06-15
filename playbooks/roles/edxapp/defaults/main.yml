@@ -1039,6 +1039,10 @@ edxapp_environment_default:
   # yaml based configs is complete
   CONFIG_ROOT: "{{ edxapp_app_dir }}"
   BOTO_CONFIG: "{{ edxapp_app_dir }}/.boto"
+  # honeycomb config, if set needs to be made available
+  # to gunicorn
+  HONEYCOMB_WRITEKEY: "{{ honeycomb_writekey | default(None) }}"
+  HONEYCOMB_DATASET: "{{ honeycomb_dataset | default(None) }}"
 
 edxapp_environment_extra: {}
 

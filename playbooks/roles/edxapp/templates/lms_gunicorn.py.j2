@@ -64,17 +64,15 @@ def sampler(fields):
     the goal is to default to sending everything (ie, sample rate = 1)
 
     *except*, the requests for `/heartbeat`, GCP load balancer hits about
-    4 times per second, we want to aggressively downsample as long as they
-    are "boring", returning a 200.
+    4 times per second, we want to aggressively downsample
     """
 
     sample_rate = 1
     heartbeat_sample_rate = 100
 
-    response_code = fields.get('response.status_code')
     path = fields.get('request.path')
 
-    if path == "/heartbeat" and response_code == 200:
+    if path == "/heartbeat":
         sample_rate = heartbeat_sample_rate
 
     # The truthiness of the first return argument determines whether we keep the

@@ -70,7 +70,7 @@ def sampler(fields):
     sample_rate = 1
     heartbeat_sample_rate = 100
 
-    path = fields.get('request.path')
+    path = fields.get('request.path', fields.get('app.request.path'))
 
     if path == "/heartbeat":
         sample_rate = heartbeat_sample_rate

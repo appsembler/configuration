@@ -1,0 +1,8 @@
+# requires:
+#  - group_vars/all
+#  - common/tasks/main.yml
+---
+
+- include: deploy.yml
+  tags:
+    - deploy

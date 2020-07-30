@@ -1,0 +1,254 @@
+---
+
+- name: ensure config directory exists
+  file:
+    path: "{{ EDXAPP_CFG_DIR }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+
+- name: copy Mongo CA certificate
+  copy: >
+    content="{{ EDXAPP_MONGO_SSL_CA_CERT }}"
+    dest="{{ EDXAPP_MONGO_SSL_CA_CERT_PATH }}"
+    mode=0440
+    owner=edxapp
+    group=www-data
+  when: EDXAPP_MONGO_SSL_CA_CERT_PATH != None
+  tags:
+    - install
+    - install:configuration
+    - edxapp_cfg
+
+- name: copy Mongo client key and certificate
+  copy: >
+    content="{{ EDXAPP_MONGO_SSL_CLIENT_KEY ~ EDXAPP_MONGO_SSL_CLIENT_CERT }}"
+    dest="{{ EDXAPP_MONGO_SSL_CLIENT_CERT_PATH }}"
+    mode=0440
+    owner=edxapp
+    group=www-data
+  when: EDXAPP_MONGO_SSL_CLIENT_CERT_PATH != None
+  tags:
+    - install
+    - install:configuration
+    - edxapp_cfg
+
+- name: create application and auth config
+  template:
+    src: "{{ item[0] }}.{{ item[1] }}.json.j2"
+    dest: "{{ edxapp_app_dir }}/{{ item[0] }}.{{ item[1] }}.json"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: 0640
+  become: true
+  with_nested:
+    - "{{ service_variants_enabled }}"
+    - [ 'env', 'auth' ]
+  tags:
+    - install
+    - install:configuration
+    - install:app-configuration
+    - edxapp_cfg # Old deprecated tag, will remove when possible
+
+# clean out an old edxapp.conf file which we don't use now.
+# this can be deleted after we build things from scratch.
+- name: clean out old edxapp.conf
+  file:
+    path: "{{ supervisor_available_dir }}/edxapp.conf"
+    state: "absent"
+  tags:
+    - install
+    - install:configuration
+
+# write the supervisor script for mongod and sshd
+# this should only be run when provisioning a jenkins-worker container
+- name: Set ignore_jenkins_worker_command when no tags present
+  set_fact: ignore_jenkins_worker_command=true
+
+- name: writing mongod and sshd supervisor scripts
+  template:
+    src: "edx/app/supervisor/conf.d.available/{{ item }}.j2"
+    dest: "{{ supervisor_available_dir }}/{{ item }}"
+    owner: "{{ supervisor_user }}"
+    group: "{{ supervisor_user }}"
+    mode: 0644
+  become_user: "{{ supervisor_user }}"
+  with_items:
+    - mongod.conf
+    - sshd.conf
+  when: 'ignore_jenkins_worker_command is not defined'
+  tags:
+    - jenkins-worker
+
+- name: "enable mongod and sshd supervisor script"
+  file:
+    src: "{{ supervisor_available_dir }}/{{ item }}.conf"
+    dest: "{{ supervisor_cfg_dir }}/{{ item }}.conf"
+    state: link
+    force: yes
+  become_user: "{{ supervisor_user }}"
+  with_items:
+    - mongod
+    - sshd
+  when: 'ignore_jenkins_worker_command is not defined'
+  tags:
+    - jenkins-worker
+
+- name: create helper scripts for managing edxapp
+  template:
+    src: "edx/bin/{{ item[0] }}-{{ item[1] }}.j2"
+    dest: "{{ COMMON_BIN_DIR }}/{{ item[0] }}-{{ item[1] }}"
+    owner: "{{ edxapp_user }}"
+    mode: 0755
+  with_nested:
+    - "{{ edxapp_helper_scripts }}"
+    - "{{ service_variants_enabled }}"
+  tags:
+    - install
+    - install:configuration
+
+- name: create script to compile and update assets
+  template:
+    src: "edx/bin/edxapp-update-assets.j2"
+    dest: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
+    owner: "{{ edxapp_user }}"
+    mode: 0755
+  tags:
+    - install
+    - install:configuration
+
+# migrate when the migrate user is overridden in extra vars
+- name: migrate
+  command: "{{ COMMON_BIN_DIR }}/edxapp-migrate-{{ item }}"
+  when: migrate_db is defined and migrate_db|lower == "yes" and COMMON_MYSQL_MIGRATE_PASS and item != "lms-preview"
+  run_once: yes
+  environment:
+    DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
+    DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"
+  with_items: "{{ service_variants_enabled }}"
+  run_once: true
+  tags:
+    - migrate
+
+# to avoid the running site breaking while collectstatic runs, we
+# generate a temp dir, make a new temporary configuration that points
+# STATIC_ROOT at that temp dir, runs the collectstatic to populate it,
+# then swaps in that temp dir in place of the actual staticfiles
+# directory in one quick step
+
+# this is what we should be using, but it's only available in ansible 2.3+
+# - name: Create temporary staticfiles directory
+#   tempfile:
+#     state: directory
+#     suffix: staticfiles
+#     owner: "{{ edxapp_user }}"
+#     group: "{{ common_web_group }}"
+#   register: staticfiles_tmpdir
+#   when: celery_worker is not defined and not devstack and item != "lms-preview"
+#   tags:
+#     - gather_static_assets
+#     - assets
+#     - update_lms_theme
+
+# instead, for now we have to do this:
+
+- name: Create temporary staticfiles directory
+  command: "mktemp -d"
+  register: staticfiles_tmpdir
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: make sure it has proper ownership
+  file:
+    path: "{{ staticfiles_tmpdir.stdout }}"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode:  "0755"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: "generate new {{ item }} override config"
+  template:
+    src: staticfiles_override.py.j2
+    dest: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: 0640
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# Gather assets using paver
+- name: "gather static assets with paver"
+  command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
+  environment:
+    EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: "Update Tahoe site-specific styles"
+  shell: ". {{ edxapp_app_dir }}/edxapp_env && {{ edxapp_venv_bin }}/python manage.py lms save_all_sites --settings={{ edxapp_settings }}"
+  args:
+    chdir: "{{ edxapp_code_dir }}"
+  become_user: "{{ edxapp_user }}"
+  when:
+   - celery_worker is not defined
+   - not devstack
+   - EDXAPP_TAHOE_REBUILD_SITE_STYLES
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# make sure the old staticfiles backup dir isn't lingering around.
+- name: Remove old staticfiles backup dir
+  file:
+    path: "/tmp/old_staticfiles_dir"
+    state: absent
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+# stash the previous contents of the staticfiles directory
+# to /tmp/old_staticfiles_dir. Eventually this might not be necessary
+# but for now it's useful to have around to debug with
+- name: Move staticfiles out of the way
+  command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: Replace with new version of staticfiles
+  command: "mv {{ staticfiles_tmpdir.stdout }} {{ edxapp_staticfile_dir}}"
+  when: celery_worker is not defined and not devstack
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_theme
+
+- name: "Remove {{ item }} temporary staticfiles config"
+  file:
+    path: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
+    state: absent
+  with_items: "{{ service_variants_enabled }}"
+  when: celery_worker is not defined and not devstack and item != "lms-preview"
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_themes

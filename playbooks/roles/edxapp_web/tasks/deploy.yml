@@ -1,0 +1,84 @@
+---
+
+- name: "create service wrapper scripts - {{item}}"
+  template:
+    dest: "{{ edxapp_app_dir }}/{{item}}"
+    src: "edx/app/edxapp/{{item}}.j2"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: "og+rx"
+  with_items:
+    - "lms.sh"
+    - "cms.sh"
+  tags:
+    - install
+    - install:configuration
+
+# creates the supervisor jobs for the
+# service variants configured, runs
+# gather_assets and db migrations
+- include: service_variant_config.yml
+  tags:
+    - service_variant_config
+    - deploy
+
+  # call supervisorctl update. this reloads
+  # the supervisorctl config and restarts
+  # the services if any of the configurations
+  # have changed.
+
+- name: update supervisor configuration
+  shell:  "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
+  register: supervisor_update
+  become_user: "{{ supervisor_service_user }}"
+  changed_when: supervisor_update.stdout is defined and supervisor_update.stdout != ""
+  when: not disable_edx_services
+  tags:
+    - manage
+
+- name: ensure edxapp has started
+  supervisorctl:
+    name: "{{ item }}"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: started
+  become_user: "{{ supervisor_service_user }}"
+  when: celery_worker is not defined and not disable_edx_services
+  with_items:
+    - 'lms'
+    - 'cms'
+  tags:
+    - manage
+
+- name: restart celery beat lms process
+  supervisorctl:
+    name: lms_celerybeat
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
+  when:
+    - celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_LMS_ENABLED
+
+- name: restart celery beat cms process
+  supervisorctl:
+    name: cms_celerybeat
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
+  when:
+    - celery_worker is defined and not disable_edx_services and EDXAPP_CELERY_BEAT_CMS_ENABLED
+
+- name: restart edxapp
+  supervisorctl:
+    name: "{{ item }}"
+    supervisorctl_path: "{{ supervisor_ctl }}"
+    config: "{{ supervisor_cfg }}"
+    state: restarted
+  when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
+  become_user: "{{ supervisor_service_user }}"
+  with_items:
+    - 'lms'
+    - 'cms'
+  tags:
+    - manage
+    - deploy:platform

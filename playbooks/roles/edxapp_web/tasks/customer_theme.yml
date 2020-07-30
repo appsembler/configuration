@@ -1,0 +1,32 @@
+---
+
+- debug: msg="Checking out site theme {{item}}"
+  with_dict: "{{EDXAPP_SITE_THEMES}}"
+  tags: debug
+
+- name: checkout comprehensive themes
+  git:
+    dest: "{{ edxapp_theme_dir }}/{{ item.value.theme_name }}"
+    repo: "{{ item.value.theme_source_repo }}"
+    version: "{{ item.value.theme_version }}"
+    accept_hostkey: yes
+  with_dict: "{{EDXAPP_SITE_THEMES}}"
+  when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true
+  become_user: "{{ edxapp_user }}"
+  environment:
+    GIT_SSH: "{{ edxapp_git_ssh }}"
+  register: edxapp_theme_checkout
+
+- name: checkout customer override themes
+  git:
+    dest: "{{ edxapp_theme_dir }}/{{ item.value.theme_name }}/customer_specific"
+    repo: "{{ item.value.customer_theme_source_repo }}"
+    version: "{{ item.value.customer_theme_version }}"
+    accept_hostkey: yes
+    key_file: "/edx/app/edxapp/.ssh/id_rsa"
+  with_dict: "{{EDXAPP_SITE_THEMES}}"
+  when: EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true and item.value.customer_theme_version and item.value.customer_theme_source_repo
+  become_user: "{{ edxapp_user }}"
+  environment:
+    GIT_SSH: "{{ edxapp_git_ssh }}"
+  register: edxapp_theme_override_checkout

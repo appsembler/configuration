@@ -1,0 +1,86 @@
+"""
+gunicorn configuration file: http://docs.gunicorn.org/en/develop/configure.html
+
+{{ ansible_managed }}
+"""
+import hashlib
+import logging
+import math
+import os
+import multiprocessing
+import struct
+
+preload_app = False
+timeout = {{ EDXAPP_LMS_GUNICORN_TIMEOUT }}
+bind = "{{ edxapp_lms_gunicorn_host }}:{{ edxapp_lms_gunicorn_port }}"
+pythonpath = "{{ edxapp_code_dir }}"
+
+{% if EDXAPP_LMS_MAX_REQ -%}
+max_requests = {{ EDXAPP_LMS_MAX_REQ }}
+{% endif -%}
+
+{% if EDXAPP_WORKERS %}
+workers = {{ EDXAPP_WORKERS.lms }}
+{% else %}
+workers = (multiprocessing.cpu_count()-1) * {{ worker_core_mult.lms }} + {{ worker_core_mult.lms }}
+{% endif %}
+
+{{ common_close_all_caches }}
+
+def post_fork(server, worker):
+    close_all_caches()
+
+
+def post_worker_init(worker):
+    try:
+        import beeline
+    except ImportError:
+        # beeline library isn't installed,
+        return
+    logging.info('beeline initialization in process pid {}'.format(os.getpid()))
+    if os.environ.get('HONEYCOMB_WRITEKEY'):
+        beeline.init(
+            writekey=os.environ['HONEYCOMB_WRITEKEY'],
+            dataset=os.environ['HONEYCOMB_DATASET'],
+            service_name='lms',
+            sampler_hook=sampler,
+        )
+
+
+MAX_INT32 = math.pow(2, 32) - 1
+
+# Deterministic _should_sample taken from https://github.com/honeycombio/beeline-python/blob/1ffe66ed1779143592edf9227d3171cb805216b6/beeline/trace.py#L258-L267
+def _should_sample(trace_id, sample_rate):
+    sample_upper_bound = MAX_INT32 / sample_rate
+    sha1 = hashlib.sha1()
+    sha1.update(trace_id.encode('utf-8'))
+    # convert last 4 digits to int
+    value, = struct.unpack('<I', sha1.digest()[-4:])
+    return value < sample_upper_bound
+
+
+def sampler(fields):
+    """
+    the goal is to default to sending everything (ie, sample rate = 1)
+
+    *except*, the requests for `/heartbeat`, GCP load balancer hits about
+    4 times per second, we want to aggressively downsample
+    """
+
+    sample_rate = 1
+    heartbeat_sample_rate = 100
+
+    path = fields.get('request.path', fields.get('app.request.path'))
+
+    if path == "/heartbeat":
+        sample_rate = heartbeat_sample_rate
+
+    # The truthiness of the first return argument determines whether we keep the
+    # event. The second argument, the sample rate, tells Honeycomb what rate the
+    # event was sampled at (important to correctly weight calculations on the data).
+    trace_id = fields.get('trace.trace_id')
+    if _should_sample(trace_id, sample_rate):
+        return True, sample_rate
+    return False, 0
+
+{{ EDXAPP_LMS_GUNICORN_EXTRA_CONF }}

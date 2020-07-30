@@ -1,0 +1,140 @@
+# requires:
+#  - group_vars/all
+#  - common/tasks/main.yml
+---
+- name: create application user
+  user:
+    name: "{{ edxapp_user }}"
+    home: "{{ edxapp_app_dir }}"
+    createhome: no
+    shell: /bin/false
+  tags:
+    - install
+    - install:base
+
+- name: create edxapp user dirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: "{{ item.mode | default(0755) }}"
+  with_items:
+    - { path: "{{ edxapp_app_dir }}" }
+    # needed for the ansible 1.5 git module
+    - { path: "{{ edxapp_app_dir }}/.ssh" }
+    - { path: "{{ edxapp_venvs_dir }}" }
+    - { path: "{{ edxapp_theme_dir }}" }
+    - { path: "{{ edxapp_staticfile_dir }}" }
+    - { path: "{{ edxapp_course_static_dir }}" }
+    - { path: "{{ edxapp_course_data_dir }}" }
+    # var should have more permissive permissions than the rest
+    - { path: "{{ edxapp_data_dir }}", mode: "0775" }
+    # directory to import the courses from github
+    - { path: "{{ EDXAPP_GIT_REPO_DIR }}", mode: "0775" }
+  tags:
+    - install
+    - install:base
+
+- name: write devstack script
+  template:
+    src: "devstack.sh.j2"
+    dest: "{{ edxapp_app_dir }}/devstack.sh"
+    owner: "{{ supervisor_user }}"
+    group: "{{ common_web_user }}"
+    mode: 0744
+  when: devstack is defined and devstack
+  tags:
+    - devstack
+    - devstack:install
+
+- name: create edxapp log dir
+  file:
+    path: "{{ edxapp_log_dir }}"
+    state: directory
+    owner: "{{ common_log_user }}"
+    group: "{{ common_log_user }}"
+  tags:
+    - install
+    - install:base
+
+- name: Ensure the tracking folder exists
+  file:
+    path: "{{ COMMON_LOG_DIR }}/tracking"
+    state: directory
+    owner: root
+    group: root
+  tags:
+    - install
+    - install:base
+
+- name: Ensure the tracking.log file exists
+  file:
+    path: "{{ COMMON_LOG_DIR }}/tracking/tracking.log"
+    state: touch
+    owner: syslog
+    group: adm
+    mode: "0640"
+  tags:
+    - install
+    - install:base
+
+- name: create web-writable edxapp data dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ common_web_user }}"
+    group: "{{ edxapp_user }}"
+    mode: "0775"
+  with_items:
+    - "{{ edxapp_course_data_dir }}"
+    - "{{ edxapp_upload_dir }}"
+    - "{{ edxapp_media_dir }}"
+  tags:
+    - install
+    - install:base
+
+- name: install system packages on which LMS and CMS rely
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_flattened:
+    - "{{ edxapp_debian_pkgs_default }}"
+    - "{{ edxapp_debian_pkgs_extra }}"
+  tags:
+    - install
+    - install:base
+
+- name: set up edxapp .npmrc
+  template:
+    src: .npmrc.j2
+    dest: "{{ edxapp_app_dir }}/.npmrc"
+    owner: "{{ edxapp_user }}"
+    group: "{{ common_web_group }}"
+    mode: 0600
+  tags:
+    - install
+    - install:base
+
+- name: create log directories for service variants
+  file:
+    path: "{{ edxapp_log_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ common_log_user }}"
+    group: "{{ common_log_user }}"
+    mode: "0750"
+  with_items: "{{ service_variants_enabled }}"
+  tags:
+    - install
+    - install:base
+
+# Set up the python sandbox execution environment
+- include: python_sandbox_env.yml
+  when: EDXAPP_PYTHON_SANDBOX
+  tags:
+    - deploy
+
+- include: deploy.yml
+  tags:
+    - deploy

@@ -68,8 +68,13 @@
       nginx_default_sites:
       - lms
       tags: ['nginx_role']
-    - { role: edxapp, celery_worker: True, tags: ['edxapp_role'] }
-    - { role: edxapp, tags: ['edxapp_role'] }
+    - role: edxapp_install
+      tags: ['edxapp_role']
+    - role: edxapp_celery
+      celery_worker: True
+      tags: ['edxapp_role']
+    - role: edxapp_web
+      tags: ['edxapp_role']
     - role: edx_notes_api
       when: "INSTALL_EDX_NOTES is defined and INSTALL_EDX_NOTES"
       tags: ['edx_notes_api_role']

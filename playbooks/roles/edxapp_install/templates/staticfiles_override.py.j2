@@ -1,0 +1,7 @@
+from .{{ edxapp_settings }} import *
+
+{% if item == 'cms' %}
+STATIC_ROOT = "{{ staticfiles_tmpdir.stdout }}" + "/studio"
+{% else %}
+STATIC_ROOT = "{{ staticfiles_tmpdir.stdout }}"
+{% endif %}

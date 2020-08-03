@@ -1,0 +1,9 @@
+---
+- name: reload daemons
+  shell: systemctl daemon-reload
+
+- name: restart the forum_docker service
+  service:
+    name: forum_docker
+    state: restarted
+  when: forum_installed is defined and not disable_edx_services

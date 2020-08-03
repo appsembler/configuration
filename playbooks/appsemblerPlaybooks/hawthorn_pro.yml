@@ -77,7 +77,15 @@
       when: "INSTALL_DEMO_DATA"
       tags: ['demo_role']
     - { role: oauth_client_setup, tags: ['oauth_client_setup_role'] }
-    - { role: forum, tags: ['forum_role'] }
+    - role: docker_ce
+      when: DOCKER_FORUM|default(false)
+      tags: ['docker_forum_role']
+    - role: forum_docker
+      when: DOCKER_FORUM|default(false)
+      tags: ['docker_forum_role']
+    - role: forum
+      when: not DOCKER_FORUM|default(false)
+      tags: ['forum_role']
     - role: discovery
       when: ENABLE_DISCOVERY|default(false)
       tags: ['discovery_role']

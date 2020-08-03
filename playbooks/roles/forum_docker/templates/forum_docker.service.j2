@@ -1,0 +1,19 @@
+[Unit]
+Description=forum_docker container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+RestartSec={{ FORUM_RESTART_DELAY }}
+ExecStartPre=-/usr/bin/docker stop forum_docker
+ExecStartPre=-/usr/bin/docker rm forum_docker
+ExecStartPre=/usr/bin/docker pull {{ forum_docker_image }}:{{ forum_docker_tag }}
+ExecStart=/usr/bin/docker run \
+    {% if FORUM_USE_TCP %}-p {{ FORUM_LISTEN_HOST }}:{{ FORUM_LISTEN_PORT }}:{{ FORUM_LISTEN_PORT }}{% endif %} --name=forum_docker \
+    -v {{ forum_data_dir }}:{{ forum_data_dir }} \
+    -v {{ forum_app_dir }}/forum_env:{{ forum_app_dir }}/forum_env \
+    {{ forum_docker_image }}:{{ forum_docker_tag }} \
+    bash -c 'source {{ forum_app_dir }}/ruby_env && source {{ forum_app_dir }}/forum_env && cd {{ forum_code_dir }} && ./bin/unicorn -c config/unicorn{% if FORUM_USE_TCP %}_tcp{% endif %}.rb'
+[Install]
+WantedBy=multi-user.target

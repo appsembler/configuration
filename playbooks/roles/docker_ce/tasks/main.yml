@@ -1,0 +1,26 @@
+---
+
+- name: Enable HTTPS links for APT
+  apt: name=apt-transport-https state=present update_cache=yes
+  tags: ['docker']
+
+- name: Add Docker APT repository key
+  apt_key: data="{{ docker_apt_key }}" state=present
+  tags: ['docker']
+
+- name: Enable Docker APT repository
+  apt_repository: repo="{{ docker_repo }}" state=present update_cache=yes
+  tags: ['docker']
+
+- name: Install Docker
+  apt: name="{{ docker_pkg }}={{ docker_version }}" state=present
+  tags: ['docker']
+
+- name: install certain python modules for docker
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+  with_items:
+  - { name: docker, version: "{{ docker_python_version }}" }
+  - { name: docker-compose, version: "{{ docker_compose_python_version }}" }

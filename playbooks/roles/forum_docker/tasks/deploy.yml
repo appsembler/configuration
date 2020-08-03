@@ -1,0 +1,56 @@
+---
+
+- name: pull the docker image to prep things
+  docker_image:
+    name: "{{ forum_docker_image }}"
+    tag: "{{ forum_docker_tag }}"
+  notify: restart the forum_docker service
+
+- name: create the systemd config
+  template:
+    src: forum_docker.service.j2
+    dest: "/etc/systemd/system/forum_docker.service"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  notify:
+    - reload daemons
+    - restart the forum_docker service
+  tags:
+    - install
+    - install:configuration
+
+- name: enable systemd service
+  systemd:
+    name: "forum_docker"
+    enabled: True
+    state: started
+    
+- name: initialize elasticsearch
+  command: >-
+    docker run
+    --rm
+    -v {{ forum_app_dir }}/forum_env:{{ forum_app_dir }}/forum_env
+    {{ forum_docker_image }}:{{ forum_docker_tag }}
+    bash -c 'source {{ forum_app_dir }}/ruby_env && source {{ forum_app_dir }}/forum_env && cd {{ forum_code_dir }} && ./bin/rake search:initialize'
+  when: migrate_db is defined and migrate_db|lower == "yes"
+  run_once: yes
+  tags:
+    - migrate
+    - migrate:db
+
+- name: rebuild elasticsearch indexes
+  command: >-
+    docker run
+    --rm
+    -v {{ forum_app_dir }}/forum_env:{{ forum_app_dir }}/forum_env
+    {{ forum_docker_image }}:{{ forum_docker_tag }}
+    bash -c 'source {{ forum_app_dir }}/ruby_env && source {{ forum_app_dir }}/forum_env && cd {{ forum_code_dir }} && ./bin/rake search:rebuild_index'
+  when: migrate_db is defined and migrate_db|lower == "yes" and FORUM_REBUILD_INDEX|bool
+  run_once: yes
+  tags:
+    - migrate
+    - migrate:db
+
+- set_fact:
+    forum_installed: true

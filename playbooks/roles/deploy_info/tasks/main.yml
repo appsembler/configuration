@@ -1,0 +1,6 @@
+---
+
+- name: put deploy_info into node_exporter directory
+  template:
+    src: deploy_info.prom.j2
+    dest: "{{ deploy_info_file }}"

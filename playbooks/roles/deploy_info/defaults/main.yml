@@ -1,0 +1,4 @@
+---
+
+node_exporter_textfile_dir: "/var/lib/node_exporter"
+deploy_info_file: "{{ node_exporter_textfile_dir }}/deploy_info.prom"

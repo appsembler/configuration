@@ -1,0 +1,16 @@
+---
+
+- name: put git_info into node_exporter directory
+  template:
+    src: git_info.prom.j2
+    dest: "{{ node_exporter_textfile_dir }}/git_info.prom"
+  when: edxapp_platform_checkout.after is defined
+
+# we do this as a separate one because depending on the tags
+# and config, there may not be a theme checked out and
+# `edxapp_theme_checkout` might not be defined
+- name: put theme_git_info into node_exporter directory
+  template:
+    src: theme_git_info.prom.j2
+    dest: "{{ node_exporter_textfile_dir }}/theme_git_info.prom"
+  when: edxapp_theme_checkout.after is defined

@@ -105,6 +105,7 @@
         - filesystem:
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+    - { role: deploy_info, tags: ['deploy'] }
 
 - name: Install xqueue, notifier and rabbitmq
   hosts: mongo-server
@@ -121,3 +122,4 @@
     - { role: notifier, tags: ['notifier_role'] }
     - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5", tags: ['notifier_role'] }
     - { role: xqueue, update_users: True, tags: ['xqueue_role'] }
+    - { role: deploy_info }

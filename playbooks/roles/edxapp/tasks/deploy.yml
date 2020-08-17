@@ -490,6 +490,8 @@
     - remove
     - aws
 
+- include: git_info.yml tags=deploy
+
 - set_fact:
     edxapp_installed: true
 

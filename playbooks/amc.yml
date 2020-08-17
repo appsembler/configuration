@@ -32,6 +32,7 @@
     - role: credentials
       when: TAHOE_CREDENTIALS_ENABLE|default(false)
       tags: credentials_role
+    - { role: deploy_info }
 
 - name: Deploy edxapp workers
   hosts: workers
@@ -57,6 +58,7 @@
         - filesystem:
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+    - { role: deploy_info }
 
 # first, do everything we can safely do in parallel
 - name: app server common setup
@@ -125,6 +127,7 @@
     - amc
     - oauth_client_setup
     - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+    - { role: deploy_info, tags: ['deploy'] }
   post_tasks:
     - name: re-add to load balancer
       service:
@@ -161,6 +164,7 @@
         - filesystem:
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+    - { role: deploy_info }
 
 # TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
 #- name: Install xqueue and notifier on services node

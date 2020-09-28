@@ -68,6 +68,8 @@
       nginx_default_sites:
       - lms
       tags: ['nginx_role']
+    - role: "{{ appsembler_roles }}/scriabin"
+    - role: "{{ appsembler_roles }}/nxmon"
     - { role: edxapp, celery_worker: True, tags: ['edxapp_role'] }
     - { role: edxapp, tags: ['edxapp_role'] }
     - role: edx_notes_api

@@ -318,9 +318,6 @@
     - install:configuration
     - nginx:maintenance
 
-<<<<<<< HEAD
-# appsembler mod ..when ALLOW_BASIC_AUTH
-=======
 - name: Copy static files
   copy:
     src: "{{ item }}"
@@ -333,7 +330,6 @@
      - install
      - install:configuration
 
->>>>>>> 05bb4edcf57dd322ff50468952ec75f11617b9ff
 - name: Write out htpasswd file
   htpasswd:
     name: "{{ item.name }}"

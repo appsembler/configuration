@@ -10,6 +10,7 @@ branches:
   only:
   - master
   - appsembler/hawthorn/master
+  - appsembler/juniper/develop
 
 services:
   - docker

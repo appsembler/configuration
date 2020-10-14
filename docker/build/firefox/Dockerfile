@@ -1,5 +1,5 @@
-FROM selenium/standalone-firefox-debug:3.4.0-einsteinium
-MAINTAINER edxops
+FROM selenium/standalone-firefox-debug:3.14.0-arsenic
+LABEL maintainer="edxops"
 
 USER root
 

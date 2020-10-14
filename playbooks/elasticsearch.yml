@@ -10,7 +10,7 @@
     CLUSTER_NAME: "commoncluster"
   serial: "{{ serial_count }}"
   pre_tasks:
-    - action: ec2_facts
+    - action: ec2_metadata_facts
       when: elb_pre_post
     - debug:
         var: ansible_ec2_instance_id
@@ -26,7 +26,8 @@
       when: elb_pre_post
   roles:
     - common
-    - aws
+    - role: aws
+      when: COMMON_ENABLE_AWS_ROLE
     - elasticsearch
   post_tasks:
     - debug:

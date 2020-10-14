@@ -15,7 +15,7 @@
     CLUSTER_NAME: 'rabbitmq'
   serial: "{{ serial_count }}"
   pre_tasks:
-    - action: ec2_facts
+    - action: ec2_metadata_facts
       when: elb_pre_post
     - debug:
         var: ansible_ec2_instance_id
@@ -30,7 +30,8 @@
       become: False
       when: elb_pre_post
   roles:
-    - aws
+    - role: aws
+      when: COMMON_ENABLE_AWS_ROLE
     - role: automated
       AUTOMATED_USERS: "{{ RABBIT_AUTOMATED_USERS | default({}) }}"
       tags: 

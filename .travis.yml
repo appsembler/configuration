@@ -1,8 +1,10 @@
 # Travis CI configuration file for running tests
 ---
 language: python
+dist: xenial
 python:
-  - "2.7"
+  - 3.5
+  - 3.8
 
 branches:
   only:
@@ -16,7 +18,6 @@ addons:
   apt:
     packages:
       - nodejs
-      - python-demjson
 
 before_install:
   - sudo apt-get -y update
@@ -29,14 +30,11 @@ install:
 env:
   - MAKE_TARGET=test.syntax SHARD=0 SHARDS=1
   - MAKE_TARGET=test.playbooks SHARD=0 SHARDS=1
-  - MAKE_TARGET=docker.test.shard SHARD=0 SHARDS=3
-  - MAKE_TARGET=docker.test.shard SHARD=1 SHARDS=3
-  - MAKE_TARGET=docker.test.shard SHARD=2 SHARDS=3
 
 script:
   - docker --version
   - make --version
-  - travis_wait 50 make --keep-going $MAKE_TARGET SHARD=$SHARD SHARDS=$SHARDS
+  - travis_wait 90 make --keep-going $MAKE_TARGET SHARD=$SHARD SHARDS=$SHARDS
 
 # Appsembler addition to automatically push
 # our hawthorn image
@@ -46,3 +44,7 @@ after_success:
       travis_wait 50 docker build -f docker/build/edxapp/Dockerfile . -t appsembler/edxapp:latest ;
       docker push appsembler/edxapp:latest ;
     fi
+
+matrix:
+  allow_failures:
+    - python: 3.8

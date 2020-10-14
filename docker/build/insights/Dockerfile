@@ -9,10 +9,12 @@
 
 ARG BASE_IMAGE_TAG=latest
 FROM edxops/xenial-common:${BASE_IMAGE_TAG}
-MAINTAINER edxops
+LABEL maintainer="edxops"
 
 ADD . /edx/app/edx_ansible/edx_ansible
 COPY docker/build/insights/ansible_overrides.yml /
+COPY docker/build/insights/insights.yml /edx/etc/insights.yml
+
 WORKDIR /edx/app/edx_ansible/edx_ansible/docker/plays
 
 ARG OPENEDX_RELEASE=master
@@ -22,5 +24,8 @@ RUN /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook insights.yml \
     -t "install:base,install:system-requirements,install:configuration,install:app-requirements,install:code" \
     --extra-vars="INSIGHTS_VERSION=${OPENEDX_RELEASE}" \
     --extra-vars="@/ansible_overrides.yml"
-CMD ["/edx/app/supervisor/venvs/supervisor/bin/supervisord", "-n", "--configuration", "/edx/app/supervisor/supervisord.conf"]
+ADD docker/build/insights/devstack.sh /edx/app/insights/devstack.sh
+RUN chown insights:insights /edx/app/insights/devstack.sh && chmod a+x /edx/app/insights/devstack.sh
+ENTRYPOINT ["/edx/app/insights/devstack.sh"]
+CMD ["start"]
 EXPOSE 8110 18110

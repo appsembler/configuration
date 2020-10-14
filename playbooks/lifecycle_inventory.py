@@ -28,6 +28,8 @@ group and state.
 
 }
 """
+from __future__ import absolute_import
+from __future__ import print_function
 import argparse
 import boto3
 import json
@@ -63,10 +65,20 @@ class LifecycleInventory():
 
         return dict
 
-    def run(self):
+    def get_asgs(self):
         asg = boto3.client('autoscaling', region_name=self.region)
-    
-        groups = asg.describe_auto_scaling_groups()['AutoScalingGroups']
+        asg_request = asg.describe_auto_scaling_groups()
+        asg_accumulator = asg_request['AutoScalingGroups']
+
+        while 'NextToken' in asg_request:
+            asg_request = asg.describe_auto_scaling_groups(NextToken=asg_request['NextToken'])
+            asg_accumulator.extend(asg_request['AutoScalingGroups'])
+
+        return asg_accumulator
+
+    def run(self):
+
+        groups = self.get_asgs()
 
         instances = self.get_instance_dict()
         inventory = defaultdict(list)
@@ -83,12 +95,12 @@ class LifecycleInventory():
                     inventory[group['AutoScalingGroupName'] + "_" + instance['LifecycleState'].replace(":","_")].append(private_ip_address)
                     inventory[instance['LifecycleState'].replace(":","_")].append(private_ip_address)
 
-        print json.dumps(inventory, sort_keys=True, indent=2)
+        print(json.dumps(inventory, sort_keys=True, indent=2))
 
 if __name__=="__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--region', help='The aws region to use when connecting.', default='us-east-1')
+    parser.add_argument('-r', '--region', help='The aws region to use when connecting.', default=environ.get('AWS_REGION', 'us-east-1'))
     parser.add_argument('-l', '--list', help='Ansible passes this, we ignore it.', action='store_true', default=True)
     args = parser.parse_args()
 

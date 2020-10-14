@@ -10,6 +10,17 @@
     - install
     - install:system-requirements
 
+- name: Install specific versions of python
+  apt:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items: '{{ jenkins_common_python_versions }}'
+  tags:
+    - jenkins
+    - install
+    - install:system-requirements
+
 - name: Create jenkins group with specified gid
   group:
     name: '{{ jenkins_common_group }}'
@@ -34,7 +45,7 @@
     name: '{{ jenkins_common_user }}'
     append: yes
     uid: '{{ jenkins_common_user_uid }}'
-    groups: '{{ jenkins_common_group }}'
+    groups:  '{{ jenkins_common_groups }}'
   when: jenkins_common_user_uid is defined
   tags:
     - install
@@ -44,8 +55,39 @@
   user:
     name: '{{ jenkins_common_user }}'
     append: yes
-    groups: '{{ jenkins_common_group }}'
+    groups:  '{{ jenkins_common_groups }}'
   when: jenkins_common_user_uid is not defined or not jenkins_common_user_uid
+  tags:
+    - install
+    - install:system-requirements
+
+- name: Create jenkins home and set ownership
+  file:
+    path: "{{ jenkins_common_home }}"
+    state: directory
+    owner: "{{ jenkins_common_user }}"
+    group: "{{ jenkins_common_group }}"
+    mode: 0700
+  tags:
+    - install
+    - install:system-requirements
+
+- name: set nofile soft limit for the user jenkins
+  pam_limits:
+    domain: "{{ jenkins_common_user }}"
+    limit_type: soft
+    limit_item: nofile
+    value: 4096
+  tags:
+    - install
+    - install:system-requirements
+
+- name: set nofile hard limit for the user jenkins
+  pam_limits:
+    domain: "{{ jenkins_common_user }}"
+    limit_type: hard
+    limit_item: nofile
+    value: 8096
   tags:
     - install
     - install:system-requirements
@@ -68,11 +110,13 @@
     state: absent
   with_items:
     - '{{ jenkins_common_home }}/init.groovy.d'
+    - '{{ jenkins_common_home }}/plugins'
+    - '{{ jenkins_common_home }}/utils'
     - '{{ jenkins_common_config_path }}'
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Create necessary folders
@@ -93,7 +137,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Download Jenkins war file
@@ -144,7 +188,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Run gradle libs
@@ -159,7 +203,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Copy init scripts into init.groovy.d
@@ -171,14 +215,14 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
 
-- name: Copy all init scripts other than oauth for local dev
+- name: Copy all init scripts other than oauth and security for local dev
   command: 'cp {{ jenkins_common_git_home }}/jenkins-configuration/{{ jenkins_common_configuration_src_path }}/{{ item }} {{ jenkins_common_home }}/init.groovy.d/'
   with_items: '{{ jenkins_common_configuration_scripts }}'
   become: true
   become_user: '{{ jenkins_common_user }}'
-  when: 'item != "4configureGHOAuth.groovy" and init_scripts_copied is not defined'
+  when: 'item != "4configureGHOAuth.groovy" and item != "4configureSecurity.groovy" and init_scripts_copied is not defined'
   tags:
     - jenkins:local-dev
 
@@ -196,7 +240,7 @@
   tags:
      - install
      - install:base
-     - install:jenkins-configuration
+     - install:plugins
      - jenkins:local-dev
 
 - name: Copy non plugins template files
@@ -210,16 +254,16 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
 
-- name: For local dev, copy any config files other than oauth
+- name: For local dev, copy any config files other than oauth and security
   template:
     src: '{{ role_path }}/templates/config/{{ item }}.yml.j2'
     dest: '{{ jenkins_common_config_path }}/{{ item }}.yml'
     owner: '{{ jenkins_common_user }}'
     group: '{{ jenkins_common_group }}'
   with_items: '{{ jenkins_common_non_plugin_template_files }}'
-  when: 'item != "security" and templates_copied is not defined'
+  when: 'item != "github_oauth" and item != "security" and templates_copied is not defined'
   tags:
     - jenkins:local-dev
 
@@ -243,7 +287,6 @@
     - install
     - install:base
     - install:plugins
-    - install:jenkins-configuration
     - jenkins:local-dev
 
 - name: Copy ec2 config files
@@ -257,7 +300,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Copy xml config files
@@ -267,11 +310,11 @@
     owner: '{{ jenkins_common_user }}'
     group: '{{ jenkins_common_group }}'
   with_fileglob:
-    - '{{ role_path }}/files/xml/*'
+    - '{{ jenkins_common_seed_job_source }}'
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Copy splunk config script
@@ -285,10 +328,10 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
-- name: Run plugins.gradle
+- name: Run plugins.gradle to download plugins
   shell: './gradlew -b plugins.gradle plugins'
   args:
     chdir: '{{ jenkins_common_git_home }}/jenkins-configuration'
@@ -301,7 +344,6 @@
     - install
     - install:base
     - install:plugins
-    - install:jenkins-configuration
     - jenkins:local-dev
 
 - name: Copy secret file credentials
@@ -313,21 +355,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
-    - jenkins:local-dev
-
-- name: Copy ssh key credentials
-  copy:
-    content: "{{ item.content }}"
-    dest: '{{ jenkins_common_config_path }}/credentials/{{ item.name }}'
-    owner: '{{ jenkins_common_user }}'
-    group: '{{ jenkins_common_group }}'
-  with_items: '{{ JENKINS_CUSTOM_SSH_LIST }}'
-  no_log: yes
-  tags:
-    - install
-    - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Copy ec2 key
@@ -340,7 +368,7 @@
   tags:
     - install
     - install:base
-    - install:jenkins-configuration
+    - install:plugins
     - jenkins:local-dev
 
 - name: Start Jenkins Service
@@ -348,9 +376,34 @@
     name: jenkins
     daemon_reload: yes
     state: restarted
+    enabled: yes
   tags:
     - manage
     - manage:start
     - install:plugins
-    - install:jenkins-configuration
     - jenkins:promote-to-production
+
+- name: Wait until the Jenkins service has fully initialized
+  uri:
+    url: "http://127.0.0.1:{{ jenkins_common_port }}"
+    status_code: '{{ jenkins_common_ready_status_code }}'
+  register: result
+  until: result.status == jenkins_common_ready_status_code
+  retries: 600
+  delay: 1
+  tags:
+    - install:base
+    - install:plugins
+
+- name: Delete any existing jenkins-configuration folders to avoid unwanted configuration
+  file:
+    path: '{{ item }}'
+    owner: '{{ jenkins_common_user }}'
+    group: '{{ jenkins_common_group }}'
+    state: absent
+  with_items:
+    - '{{ jenkins_common_home }}/init.groovy.d'
+    - '{{ jenkins_common_config_path }}'
+  tags:
+    - install:base
+    - install:plugins

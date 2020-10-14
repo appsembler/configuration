@@ -6,17 +6,17 @@ RUN bash -c '\curl -sSL https://get.rvm.io | bash -s -- --ignore-dotfiles && \
     usermod -aG rvm go && source /etc/profile.d/rvm.sh && \
     rvm install ruby-2.4.1 && gem install bundler -v 1.16.0'
 
-# Installs node 8.9.3 and npm 5.5.1 as of 12/13/17. Unlikely to change much since node 9 is a stable version for other OS
-RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash - && \
+# Installs node 12 and npm 6 as of October 2019.
+RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && \
     apt-get update && apt-get install -y nodejs
 
 # Install php
 RUN apt-get update && apt-get install -y \
-    php5-common \
-    php5-cli
+    php-common \
+    php-cli
 
 # Install drush (drupal shell) for access to Drupal commands/Acquia
-RUN php -r "readfile('http://files.drush.org/drush.phar');" > drush && \
+RUN php -r "readfile('https://github.com/drush-ops/drush/releases/download/8.2.3/drush.phar');" > drush && \
     chmod +x drush && \
     sudo mv drush /usr/local/bin
 

@@ -10,9 +10,14 @@ location ~ ^/({{ edx_django_service_basic_auth_exempted_paths | join('|') }})/ {
 
 {% include 'concerns/robots.j2' %}
 
-{% include "concerns/django_admin_access_from_restricted_cidrs.j2" %}
+{% include "concerns/admin_urls_access_from_restricted_cidrs.j2" %}
 
 location @proxy_to_app {
+
+{% if edx_django_service_allow_cors_headers %}
+  {% include 'concerns/cors-add-header.j2' %}
+{% endif %}
+
 {% if NGINX_SET_X_FORWARDED_HEADERS %}
   proxy_set_header X-Forwarded-Proto $scheme;
   proxy_set_header X-Forwarded-Port $server_port;

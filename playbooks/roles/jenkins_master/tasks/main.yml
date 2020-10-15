@@ -1,10 +1,9 @@
 ---
 - name: Install jenkins specific system packages
   apt:
-    name: "{{ item }}"
+    name: "{{ jenkins_debian_pkgs }}"
     state: present
     update_cache: yes
-  with_items: "{{ jenkins_debian_pkgs }}"
   tags:
     - jenkins
     - install
@@ -12,10 +11,9 @@
 
 - name: Install jenkins extra system packages
   apt:
-    name: "{{ item }}"
+    name: "{{ JENKINS_EXTRA_PKGS }}"
     state: present
     update_cache: yes
-  with_items: "{{ JENKINS_EXTRA_PKGS }}"
   tags:
     - jenkins
     - install

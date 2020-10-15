@@ -7,7 +7,8 @@
     ENABLE_NEWRELIC: True
     CLUSTER_NAME: 'insights'
   roles:
-    - aws
+    - role: aws
+      when: COMMON_ENABLE_AWS_ROLE
     - role: nginx
       nginx_sites:
         - insights
@@ -20,4 +21,7 @@
       when: COMMON_ENABLE_NEWRELIC_INFRASTRUCTURE
     - role: datadog-uninstall
       when: not COMMON_ENABLE_DATADOG
+    - role: hermes
+      HERMES_TARGET_SERVICE: 'insights'
+      when: INSIGHTS_HERMES_ENABLED
 

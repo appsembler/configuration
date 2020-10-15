@@ -30,17 +30,17 @@
 #     - common
 #
 
-- name: install go-server aptitude repository
-  apt_repository:
-    repo: "{{ GO_SERVER_APT_SOURCE }}"
+- name: install aptitude key for go-server/go-server
+  apt_key:
+    url: "{{ GO_SERVER_APT_KEY_URL }}"
     state: present
   tags:
     - install
     - install:base
-
-- name: install aptitude key for go-server/go-server
-  apt_key:
-    url: "{{ GO_SERVER_APT_KEY_URL }}"
+    
+- name: install go-server aptitude repository
+  apt_repository:
+    repo: "{{ GO_SERVER_APT_SOURCE }}"
     state: present
   tags:
     - install
@@ -127,7 +127,7 @@
   when: GO_SERVER_BACKUP_S3_BUCKET and GO_SERVER_BACKUP_S3_OBJECT and GO_SERVER_RESTORE_BACKUP
 
 - name: generate lines for go-server password file for users
-  command: "/usr/bin/htpasswd -nbs '{{ item.username }}' '{{ item.password }}'"
+  command: "/usr/bin/htpasswd -nbB '{{ item.username }}' '{{ item.password }}'"
   with_items: "{{ GO_SERVER_USERS }}"
   when: item.username and item.password
   register: go_server_users_htpasswds
@@ -149,6 +149,16 @@
   tags:
     - install
     - install:app-configuration
+
+- name: create ssh directory
+  file:
+    path: "/var/go/.ssh"
+    state: directory
+    mode: "0755"
+    owner: "{{ GO_SERVER_USER }}"
+    group: "{{ GO_SERVER_GROUP }}"
+  tags:
+    - git_identity
 
 - name: install ssh key for the secure repos
   copy:

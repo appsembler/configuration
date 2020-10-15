@@ -1,5 +1,5 @@
 """
-gunicorn configuration file: http://docs.gunicorn.org/en/develop/configure.html
+gunicorn configuration file: http://docs.gunicorn.org/en/stable/configure.html
 
 {{ ansible_managed }}
 """
@@ -21,6 +21,8 @@ workers = {{ EDXAPP_WORKERS.cms }}
 {% else %}
 workers = (multiprocessing.cpu_count()-1) * {{ worker_core_mult.cms }} + {{ worker_core_mult.cms }}
 {% endif %}
+
+{{ common_pre_request }}
 
 {{ common_close_all_caches }}
 

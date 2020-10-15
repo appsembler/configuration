@@ -1,14 +1,20 @@
 jenkins_common_user: jenkins
 jenkins_common_group: jenkins
+jenkins_common_groups: '{{ jenkins_common_group }}'
 jenkins_common_home: /var/lib/jenkins
 jenkins_common_config_path: '{{ jenkins_common_home }}/init-configs'
 jenkins_common_port: 8080
-jenkins_common_version: jenkins_1.651.3
+JENKINS_COMMON_VERSION: jenkins_1.651.3
+jenkins_common_version: "{{ JENKINS_COMMON_VERSION }}"
 jenkins_common_war_source: https://s3.amazonaws.com/edx-testeng-tools/jenkins
 jenkins_common_nginx_port: 80
 jenkins_common_protocol_https: true
+# When checking if Jenkins is finished initializing, expect a 200 as it should
+# be publicly available
+jenkins_common_ready_status_code: 200
 
 JENKINS_SERVER_NAME: jenkins.example.org
+jenkins_node_usage: EXCLUSIVE
 
 jenkins_common_debian_pkgs:
   - nginx
@@ -17,6 +23,8 @@ jenkins_common_debian_pkgs:
   - maven
   - daemon
   - psmisc
+
+jenkins_common_python_versions: []
 
 jenkins_common_configuration_git_url: https://github.com/edx/jenkins-configuration.git
 jenkins_common_jenkins_configuration_branch: master
@@ -27,23 +35,30 @@ jenkins_common_configuration_scripts: []
 jenkins_common_non_plugin_template_files:
   - credentials
   - ec2_config
+  - email_ext_config
   - ghprb_config
   - git_config
   - github_config
   - github_oauth
-  - hipchat_config
+  - groovy_config
   - job_config_history
   - log_config
   - mailer_config
   - main_config
   - mask_passwords_config
   - properties_config
+  - python_config
   - security
   - seed_config
+  - slack_config
   - splunk_config
+  - timestamper_config
 
 # Jenkins default config values
 jenkins_common_jvm_args: ''
+
+# Users
+JENKINS_USER_LIST: []
 
 # main
 jenkins_common_main_system_message: ''
@@ -69,6 +84,19 @@ jenkins_common_system_properties:
 JENKINS_MAIN_URL: 'https://jenkins.example.org/'
 JENKINS_MAIN_ADMIN_EMAIL: 'jenkins <admin@example.org>'
 
+# global tool configurations
+jenkins_common_groovy_installations:
+  - NAME: 'DEFAULT_GROOVY'
+    HOME: ''
+    VERSION: '2.5.1'
+jenkins_common_python_installations:
+  - PYTHON_ALIAS: 'System-CPython-2.7'
+    PYTHON_PATH: '/usr/bin/python2.7'
+    PYTHON_PROPERTIES: []
+  - PYTHON_ALIAS: 'PYTHON_3.5'
+    PYTHON_PATH: '/usr/bin/python3.5'
+    PYTHON_PROPERTIES: []
+
 # plugins
 jenkins_common_plugins_list: []
 
@@ -78,8 +106,9 @@ jenkins_common_instance_cap: ''
 
 JENKINS_EC2_PRIVATE_KEY: ''
 JENKINS_EC2_REGION: ''
-JENKINS_EC2_ACCESS_KEY_ID: ''
-JENKINS_EC2_SECRET_ACCESS_KEY: ''
+JENKINS_EC2_CREDENTIAL_ID: ''
+JENKINS_EC2_ROLE_ARN: ''
+JENKINS_EC2_ROLE_SESSION_NAME: ''
 JENKINS_EC2_AMIS: []
 
 # ghprb
@@ -122,14 +151,19 @@ JENKINS_SECRET_FILES_LIST: []
 JENKINS_USERNAME_PASSWORD_LIST: []
 JENKINS_SECRET_TEXT_LIST: []
 JENKINS_CERTIFICATES_LIST: []
-JENKINS_MASTER_SSH_LIST: []
-JENKINS_CUSTOM_SSH_LIST: []
+JENKINS_SSH_LIST: []
+JENKINS_AWS_LIST: []
 
 # security
 jenkins_common_dsl_script_security_enabled: true
 jenkins_common_security_agent_protocols:
   - 'JNLP4-connect'
 jenkins_common_security_agent_jnlp_tcp_port: 0
+JENKINS_CSRF_PROTECTION_ENABLED: false
+# proxy compatibility will exclude the client ip from crumbs.
+# this is useful is dealing with a proxy that filters them
+# in requests
+JENKINS_CSRF_PROXY_COMPATIBILITY: false
 
 JENKINS_SECURITY_GROUPS: []
 
@@ -146,20 +180,15 @@ jenkins_common_github_configs:
     CACHE_SIZE: 20
 
 # github oauth settings
-
 jenkins_common_security_scopes: 'read:org,user:email'
 
 JENKINS_SECURITY_CLIENT_ID: ''
 JENKINS_SECURITY_CLIENT_SECRET: ''
 
-# hipchat
-jenkins_common_hipchat_room: ''
-jenkins_common_hipchat_v2_enabled: true
-JENKINS_HIPCHAT_API_TOKEN: ''
-
 # seed
 jenkins_common_seed_name: 'seed_job'
 jenkins_common_seed_path: '{{ jenkins_common_config_path }}/xml/seed_job.xml'
+jenkins_common_seed_job_source: '{{ role_path }}/files/xml/*'
 
 # logs
 jenkins_common_log_list:
@@ -189,9 +218,58 @@ JENKINS_MAILER_DEFAULT_SUFFIX: '@example.com'
 JENKINS_MAILER_SMTP_AUTH_USERNAME: ''
 JENKINS_MAILER_SMTP_AUTH_PASSWORD: ''
 
+# email ext plugin
+jenkins_common_email_advanced_properties: ''
+jenkins_common_email_content_type: 'text/plain'
+jenkins_common_default_email_subject: '${PROJECT_NAME} #${BUILD_NUMBER} is ${BUILD_STATUS}'
+jenkins_common_email_emergency_reroute: ''
+jenkins_common_email_replyto: ''
+jenkins_common_email_debug_mode: 'false'
+jenkins_common_email_max_attachment_size: 10
+jenkins_common_email_default_recipients: ''
+jenkins_common_email_add_precedence_bulk: 'true'
+jenkins_common_email_allowed_domains: ''
+jenkins_common_email_excluded_committers: ''
+jenkins_common_email_require_admin_for_template_testing: 'true'
+jenkins_common_email_watching_enabled: ''
+jenkins_common_email_allow_unregistered_enabled: ''
+jenkins_common_email_use_list_id: ''
+jenkins_common_email_list_id: ''
+jenkins_common_email_triggers:
+    - 'AbortedTrigger'
+    - 'FailureTrigger'
+    - 'FixedTrigger'
+# if you wish to set the following 3 values, supply paths to
+# individual files with the content you want to specify
+jenkins_common_email_default_body_path: ''
+jenkins_common_email_default_presend_script_path: ''
+jenkins_common_email_default_postsend_script_path: ''
+
 # mask passwords
 JENKINS_MASK_PASSWORDS_CLASSES: []
 JENKINS_MASK_PASSWORDS_PAIRS: []
+
+# SAML
+JENKINS_SAML_IDP_METADATA: |
+    <xml> dummy data </xml>
+JENKINS_SAML_DISPLAY_NAME_ATTRIBUTE: ''
+JENKINS_SAML_GROUP_ATTRIBUTE: ''
+JENKINS_SAML_MAX_AUTH_LIFETIME_SECONDS: 60
+JENKINS_SAML_USERNAME_ATTRIBUTE: ''
+JENKINS_SAML_EMAIL_ATTRIBUTE: ''
+JENKINS_SAML_LOGOUT_URL: ''
+JENKINS_SAML_ADVANCED_CONFIGURATION: {}
+JENKINS_SAML_ENCRYPTION_DATA: {}
+JENKINS_SAML_USERNAME_CASE_CONVENTION: 'None'
+JENKINS_SAML_BINDING: 'POST'
+JENKINS_SAML_CUSTOM_ATTRIBUTES: []
+
+# SLACK
+JENKINS_SLACK_BASE_URL: ''
+JENKINS_IS_SLACK_BOT: 'true'
+JENKINS_SLACK_ROOM: ''
+JENKINS_SLACK_TEAM_DOMAIN: ''
+JENKINS_SLACK_CREDENTIAL_ID: ''
 
 # splunk
 jenkins_common_splunk_enabled: true
@@ -205,11 +283,13 @@ jenkins_common_splunk_event_source: ''
 jenkins_common_splunk_script_type: 'path'
 jenkins_common_splunk_script_path: ''
 jenkins_common_splunk_file_path: '{{ role_path }}/files/splunk/*'
-jenkins_common_splunk_metadata:
-    - data_source: 'Default'
-      config_item: 'Source Type'
-      value: 'json:jenkins:old'
+jenkins_common_splunk_metadata: []
 JENKINS_SPLUNK_HOSTNAME: ''
 JENKINS_SPLUNK_PORT: 8088
 JENKINS_SPLUNK_APP_URL: ''
 JENKINS_SPLUNK_TOKEN: ''
+
+# timestamper
+jenkins_common_timestamper_system_clock_format: "'<b>'HH:mm:ss'</b> '"
+jenkins_common_timestamper_elapsed_time_format: "'<b>'HH:mm:ss.S'</b> '"
+jenkins_common_timestamper_enabled_on_pipelines: true

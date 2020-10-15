@@ -29,7 +29,11 @@ NGINX_CMS_CUSTOM_DOMAINS: []
 
 NGINX_EDXAPP_EXTRA_SITES: []
 NGINX_EDXAPP_EXTRA_CONFIGS: []
-NGINX_EDXAPP_CUSTOM_REDIRECTS: {}
+
+# Override these vars to alter the memory allocated to map_hash
+NGINX_OVERRIDE_DEFAULT_MAP_HASH_SIZE: False
+NGINX_MAP_HASH_MAX_SIZE: 2048
+NGINX_MAP_HASH_BUCKET_SIZE: 64
 
 # Override these vars for adding user to nginx.htpasswd
 NGINX_USERS:
@@ -37,8 +41,14 @@ NGINX_USERS:
     password: "{{ COMMON_HTPASSWD_PASS }}"
     state: present
 
-NGINX_HEALTH_CHECK_ENABLED: False
-NGINX_HEALTH_CHECK_USER_AGENT: ""
+# Override these vars for adding user to nginx.htpasswd
+# for prospectus preview basic auth
+PROSPECTUS_PREVIEW_HTPASSWD_USER: "{{ COMMON_HTPASSWD_USER }}"
+PROSPECTUS_PREVIEW_HTPASSWD_PASS: "{{ COMMON_HTPASSWD_PASS }}"
+PROSPECTUS_PREVIEW_NGINX_USERS:
+  - name: "{{ PROSPECTUS_PREVIEW_HTPASSWD_USER }}"
+    password: "{{ PROSPECTUS_PREVIEW_HTPASSWD_PASS }}"
+    state: present
 
 NGINX_ENABLE_SSL: False
 NGINX_REDIRECT_TO_HTTPS: False
@@ -58,8 +68,8 @@ NGINX_HTTPS_REDIRECT_STRATEGY: "scheme"
 
 NGINX_SSL_CERTIFICATE: 'ssl-cert-snakeoil.pem'
 NGINX_SSL_KEY: 'ssl-cert-snakeoil.key'
-NGINX_SSL_CIPHERS: "'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA'"
-NGINX_SSL_PROTOCOLS: "TLSv1.3 TLSv1.2"
+NGINX_SSL_CIPHERS: "'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA'"
+NGINX_SSL_PROTOCOLS: "TLSv1.1 TLSv1.2"
 NGINX_DH_PARAMS_PATH: "/etc/ssl/private/dhparams.pem"
 NGINX_DH_KEYSIZE: 2048
 
@@ -67,6 +77,10 @@ NGINX_DH_KEYSIZE: 2048
 NGINX_SSL_CERTIFICATE_PATH: '/etc/ssl/certs/{{ NGINX_SSL_CERTIFICATE|basename }}'
 NGINX_SSL_KEY_PATH: '/etc/ssl/private/{{ NGINX_SSL_KEY|basename }}'
 
+# This can be one of 'p_combined' or 'ssl_combined' by default. If you
+# wish to specify your own format then define it in a configuration file
+# located under `nginx_conf_dir` and then use the format name specified
+# in your configuration file.
 NGINX_LOG_FORMAT_NAME: 'p_combined'
 # When set to False, nginx will pass X-Forwarded-For, X-Forwarded-Port,
 # and X-Forwarded-Proto headers through to the backend unmodified.
@@ -91,6 +105,7 @@ NGINX_SERVER_ERROR_STYLE_H1: 'font-family: "Helvetica Neue",Helvetica,Roboto,Ari
 NGINX_SERVER_ERROR_STYLE_P_H2: 'font-family: "Helvetica Neue",Helvetica,Roboto,Arial,sans-serif; margin-bottom: .3em; line-height: 1.25em; text-rendering: optimizeLegibility; font-weight: bold; font-size: 1.8em; color: #5b5e63;'
 NGINX_SERVER_ERROR_STYLE_P: 'font-family: Georgia,Cambria,"Times New Roman",Times,serif; margin: auto; margin-bottom: 1em; font-weight: 200; line-height: 1.4em; font-size: 1.1em; max-width: 80%;'
 NGINX_SERVER_ERROR_STYLE_DIV: 'margin: auto; width: 800px; text-align: center; padding:20px 0px 0px 0px;'
+NGINX_SERVER_HTML_FILES_TEMPLATE: "edx/var/nginx/server-static/server-template.j2"
 NGINX_SERVER_HTML_FILES:
   - file: rate-limit.html
     lang: "{{ NGINX_SERVER_ERROR_LANG }}"
@@ -106,7 +121,7 @@ NGINX_SERVER_HTML_FILES:
   - file: server-error.html
     lang: "{{ NGINX_SERVER_ERROR_LANG }}"
     title: 'Server error'
-    msg: 'A maintenance operation is currently in progress on our system that will affect your access to our online courses.<br/><br/>If you have any questions or concerns, please contact <a href="mailto:{{ EDXAPP_TECH_SUPPORT_EMAIL|default("technical@example.com") }}">{{ EDXAPP_TECH_SUPPORT_EMAIL|default("technical@example.com") }}</a>'
+    msg: 'We are aware of the error and are working to find a resolution.'
     img: "{{ NGINX_SERVER_ERROR_IMG }}"
     img_alt: "{{ NGINX_SERVER_ERROR_IMG_ALT }}"
     heading: 'Uh oh, we are having some server issues..'
@@ -126,6 +141,9 @@ NGINX_SERVER_HTML_FILES:
     style_p: "{{ NGINX_SERVER_ERROR_STYLE_P }}"
     style_div: "{{ NGINX_SERVER_ERROR_STYLE_DIV }}"
 
+
+
+NGINX_SERVER_STATIC_FILES: []
 
 NGINX_APT_REPO: deb http://nginx.org/packages/ubuntu/ {{ ansible_distribution_release }} nginx
 
@@ -152,6 +170,10 @@ NGINX_EDXAPP_ERROR_PAGES:
   "502": "{{ nginx_default_error_page }}"
   "504": "{{ nginx_default_error_page }}"
   "503": "{{ nginx_maintenance_page }}"
+
+NGINX_EDXAPP_PROXY_INTERCEPT_ERRORS: false
+
+NGINX_EDXAPP_FAVICON_PATH: "/static/{{ NGINX_EDXAPP_DEFAULT_SITE_THEME }}images/favicon.ico"
 
 CMS_HOSTNAME: '~^((stage|prod)-)?studio.*'
 NOTES_HOSTNAME: '~^((stage|prod)-)?notes.*'
@@ -196,6 +218,7 @@ EDXAPP_CMS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 EDXAPP_LMS_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 EDXAPP_LMS_PREVIEW_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 KIBANA_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
+PROSPECTUS_PREVIEW_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 XQUEUE_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 XSERVER_ENABLE_BASIC_AUTH: "{{ COMMON_ENABLE_BASIC_AUTH }}"
 
@@ -239,4 +262,14 @@ NGINX_EDXAPP_CMS_APP_EXTRA: ""
 # Extra settings to add to site configuration for LMS
 NGINX_EDXAPP_LMS_APP_EXTRA: ""
 
-NGINX_DJANGO_ADMIN_ACCESS_CIDRS: []
+# If comprehensive theme enabled, write down the name of
+# the theme as in EDXAPP_DEFAULT_SITE_THEME ending with /
+# to allow to override favicon properly.
+# Example: "your-site-theme/"
+NGINX_EDXAPP_DEFAULT_SITE_THEME: ""
+
+# List of subnet or IP addressess to allow to access admin endpoints
+NGINX_ADMIN_ACCESS_CIDRS: []
+
+# Set trusted network subnets or IP addresses to send correct replacement addresses
+NGINX_TRUSTED_IP_CIDRS: "0.0.0.0/0"

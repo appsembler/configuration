@@ -7,3 +7,8 @@ mysql_debian_pkgs:
   
 MYSQL_BIND_IP: "127.0.0.1"
 MYSQL_REMOTE_ROOT_PASSWORD: !!null
+
+mysql_dir: /etc/mysql
+
+DEFAULT_MYSQL_CHARACTER_SET: utf8
+DEFAULT_MYSQL_COLLATION: utf8_general_ci

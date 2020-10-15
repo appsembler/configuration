@@ -9,8 +9,9 @@
 
 ARG BASE_IMAGE_TAG=latest
 FROM edxops/xenial-common:${BASE_IMAGE_TAG}
-MAINTAINER edxops
-CMD ["/edx/app/supervisor/venvs/supervisor/bin/supervisord", "-n", "--configuration", "/edx/app/supervisor/supervisord.conf"]
+LABEL maintainer="edxops"
+ENTRYPOINT ["/edx/app/xqueue/devstack.sh"]
+CMD ["start"]
 
 USER root
 RUN apt-get update
@@ -24,7 +25,7 @@ RUN /edx/app/edx_ansible/venvs/edx_ansible/bin/ansible-playbook xqueue.yml \
     -i '127.0.0.1,' \
     -c local \
     -t "install:base,install:system-requirements,install:configuration,install:app-requirements,install:code,devstack" \
-    --extra-vars="xqueue_version=${OPENEDX_RELEASE}" \
+    --extra-vars="XQUEUE_VERSION=${OPENEDX_RELEASE}" \
     --extra-vars="@/ansible_overrides.yml"
 
 EXPOSE 18040

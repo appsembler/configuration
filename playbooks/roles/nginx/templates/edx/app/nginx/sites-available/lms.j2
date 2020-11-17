@@ -134,8 +134,8 @@ error_page {{ k }} {{ v }};
   # Some Master's courses require submissions up to 20MB in size.
   # CMS requires larger value for course assets, values provided
   # via hiera.
-  client_max_body_size {{ nginx_lms_client_max_body_size }};
-  proxy_read_timeout {{ nginx_lms_proxy_read_timeout }};
+  client_max_body_size {{ NGINX_LMS_CLIENT_MAX_BODY_SIZE }};
+  proxy_read_timeout {{ NGINX_LMS_PROXY_READ_TIMEOUT }};
 
   rewrite ^(.*)/favicon.ico$ {{ NGINX_EDXAPP_FAVICON_PATH }} last;
 

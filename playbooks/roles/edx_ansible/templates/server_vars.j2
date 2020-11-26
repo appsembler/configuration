@@ -17,6 +17,10 @@ letsencrypt_alternative_acme_folder: "{{ letsencrypt_alternative_acme_folder }}"
 letsencrypt_webroot: "{{ letsencrypt_webroot }}"
 letsencrypt_webuser: "{{ letsencrypt_webuser }}"
 letsencrypt_execute_for_single_domain: true
+nginx_lms_extra_locations: {{ nginx_lms_extra_locations }}
+nginx_lms_extra_http: {{ nginx_lms_extra_http }}
+nginx_cms_extra_locations: {{ nginx_cms_extra_locations }}
+nginx_cms_extra_http: {{ nginx_cms_extra_http }}
 
 # Cert agent vars
 # TODO

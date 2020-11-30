@@ -2,13 +2,15 @@ name: Playbook Test
 
 on:
   push:
-    - master
-    - appsembler/hawthorn/master
-    - appsembler/juniper/master
+    branches:
+      - master
+      - appsembler/hawthorn/master
+      - appsembler/juniper/master
   pull_request:
-    - master
-    - appsembler/hawthorn/master
-    - appsembler/juniper/master
+    branches:
+      - master
+      - appsembler/hawthorn/master
+      - appsembler/juniper/master
 
 jobs:
   build:

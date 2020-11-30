@@ -2,7 +2,15 @@ name: Syntax Test
 
 on:
   push:
+    branches:
+      - master
+      - appsembler/hawthorn/master
+      - appsembler/juniper/master
   pull_request:
+    branches:
+      - master
+      - appsembler/hawthorn/master
+      - appsembler/juniper/master
 
 jobs:
   build:

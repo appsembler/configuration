@@ -154,7 +154,10 @@
     - role: nginx
       nginx_sites:
       - forum
-    - forum
+    - role: docker_ce
+      tags: ['forum_role']
+    - role: forum_docker
+      tags: ['forum_role']
     - google_fluentd_role
     - role: node_exporter_role
       node_exporter_enabled_collectors:

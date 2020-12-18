@@ -26,7 +26,7 @@
     - memcached
     - certagent_role
     - google_fluentd_role
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - node_exporter_role
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
     - mysql_init
     - role: credentials
@@ -49,7 +49,7 @@
     - role: edxapp
       celery_worker: True
     - google_fluentd_role
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
         - supervisord
@@ -75,7 +75,7 @@
     - scriabin
     - role: "{{ appsembler_roles }}/nxmon"
     - google_fluentd_role
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
         - supervisord
@@ -156,7 +156,7 @@
       - forum
     - forum
     - google_fluentd_role
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
         - supervisord

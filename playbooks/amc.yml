@@ -20,7 +20,7 @@
     - role: sudo
     - edxapp_common
     - edx_ansible
-    - role: "{{ appsembler_roles }}/gcsfuse"
+    - gcsfuse_role
     - oraclejdk
     - elasticsearch
     - memcached
@@ -116,7 +116,7 @@
       when: "'localhost' in EDXAPP_MONGO_HOSTS"
     - edxapp
     - custom_domains # This gets a list of custom domains
-    - role: "{{ appsembler_roles }}/gcsfuse"
+    - gcsfuse_role
     - role: nginx
       nginx_sites:
       - cms

@@ -455,7 +455,7 @@
     - update_lms_theme
 
 - name: "Update Tahoe site-specific styles"
-  shell: ". {{ edxapp_app_dir }}/edxapp_env && {{ edxapp_venv_bin }}/python manage.py lms save_all_sites --settings={{ edxapp_settings }}"
+  shell: ". {{ edxapp_app_dir }}/edxapp_env && {{ edxapp_venv_bin }}/python manage.py lms save_active_sites --settings={{ edxapp_settings }}"
   args:
     chdir: "{{ edxapp_code_dir }}"
   become_user: "{{ edxapp_user }}"

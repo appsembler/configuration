@@ -42,9 +42,6 @@
     - role: sudo
     - role: aws
     - mysql_init
-    - role: edxapp
-      celery_worker: True
-    - google_fluentd_role
     - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
@@ -54,6 +51,9 @@
         - filesystem:
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
+    - role: edxapp
+      celery_worker: True
+    - google_fluentd_role
     - { role: deploy_info }
 
 # first, do everything we can safely do in parallel

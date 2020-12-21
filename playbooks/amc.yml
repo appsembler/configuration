@@ -37,8 +37,6 @@
   become: True
   become_method: sudo
   gather_facts: True
-  vars:
-    appsembler_roles: "../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
@@ -123,7 +121,7 @@
     - role: "{{ appsembler_roles }}/fix_dir_perms"
     - amc
     - oauth_client_setup
-    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_run: false }
+    - { role: letsencrypt_role, letsencrypt_run: false }
     - { role: deploy_info, tags: ['deploy'] }
   post_tasks:
     - name: re-add to load balancer
@@ -171,7 +169,6 @@
 #  become_method: sudo
 #  gather_facts: True
 #  vars:
-#    appsembler_roles: "../../appsembler-roles"
 #    migrate_db: "yes"
 #  roles:
 #    - mysql_init
@@ -183,4 +180,4 @@
 #    - { role: "xqueue", update_users: True }
 #    - role: custom_domains # This gets the list of domains
 #      when: nginx_enable_custom_domains|default(False)
-#    - { role: "{{ appsembler_roles }}/letsencrypt", letsencrypt_webserver: "" }
+#    - { role: letsencrypt_role, letsencrypt_webserver: "" }

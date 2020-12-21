@@ -13,8 +13,6 @@
   become: True
   become_method: sudo
   gather_facts: True
-  vars:
-    appsembler_roles: "../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
@@ -66,14 +64,12 @@
   become: True
   become_method: sudo
   gather_facts: True
-  vars:
-    appsembler_roles: "../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
     - role: aws
     - scriabin
-    - role: "{{ appsembler_roles }}/nxmon"
+    - nxmon_role
     - google_fluentd_role
     - role: node_exporter_role
       node_exporter_enabled_collectors:
@@ -145,8 +141,6 @@
   hosts: forum
   become: True
   gather_facts: True
-  vars:
-    appsembler_roles: "../../appsembler-roles"
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo

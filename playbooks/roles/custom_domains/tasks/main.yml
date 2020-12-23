@@ -20,6 +20,8 @@
     cd {{ edxapp_code_dir }}
     source {{ edxapp_app_dir }}/edxapp_env
     {{ edxapp_venv_bin }}/python manage.py lms --setting={{ EDXAPP_SETTINGS }} custom_domains_list
+  args:
+    executable: /bin/bash
   register: custom_domains_cmd
   run_once: True
   delegate_to: "{{ groups['edx'][0] }}"

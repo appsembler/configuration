@@ -388,6 +388,7 @@
     - "lms.sh"
     - "cms.sh"
     - "worker.sh"
+    - "celerybeat.sh"
     - "reload_lms_config.sh"
     - "reload_cms_config.sh"
   tags:

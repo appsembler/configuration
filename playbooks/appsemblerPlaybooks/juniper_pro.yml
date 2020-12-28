@@ -11,7 +11,6 @@
   become_method: sudo
   gather_facts: True
   vars:
-    appsembler_roles: "../../../appsembler-roles"
     BACKUPS_MONGO: yes
     BACKUPS_MYSQL: no
   roles:
@@ -24,15 +23,14 @@
     - { role: memcached, tags: ['memcached_role'] }
     - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
     - backups
-    - role: "{{ appsembler_roles }}/google-fluentd"
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - google_fluentd_role
+    - node_exporter_role
 
 - name: Configure stateless edxapp instance
   hosts: edxapp-server
   become: True
   gather_facts: True
   vars:
-    appsembler_roles: "../../../appsembler-roles"
     migrate_db: "yes"
     openid_workaround: True
     ENABLE_ECOMMERCE: false
@@ -52,7 +50,7 @@
     - role: nginx
       nginx_sites: []
       tags: ['nginx_role']
-    - role: "{{ appsembler_roles }}/node_exporter"
+    - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
         - supervisord
@@ -61,11 +59,11 @@
         - filesystem:
             ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
-    - role: "{{ appsembler_roles }}/scriabin"
-    - role: "{{ appsembler_roles }}/nxmon"
-    - role: "{{ appsembler_roles }}/letsencrypt"
+    - scriabin
+    - nxmon_role
+    - role: letsencrypt_role
       when: letsencrypt_certs | length
-    - role: "{{ appsembler_roles }}/sshguard"
+    - role: sshguard_role
       when:
         - sshguard_whitelist | length
       tags: ['sshguard_role']
@@ -108,7 +106,7 @@
         - "EDXAPP_APPSEMBLER_FEATURES.ENABLE_APPSEMBLER_REPORTING|default(false)"
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
-    - role: "{{ appsembler_roles }}/google-fluentd"
+    - google_fluentd_role
     - { role: deploy_info, tags: ['deploy'] }
 
 - name: Install xqueue, notifier and rabbitmq

@@ -137,6 +137,7 @@
 - name: Deploy forum
   hosts: forum
   become: True
+  tags: forum
   gather_facts: True
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }

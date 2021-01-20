@@ -138,7 +138,7 @@ def monitor_gcloud_backups(bucket, service, sentry, pushgateway):
                                 backups_type=service)
         logging.info('Monitoring successful')
     except Exception:
-        sentry.CaptureException()
+        sentry.captureException()
 
 
 def push_backups_age_metric(gateway, instance, value, backups_type="mongodb"):

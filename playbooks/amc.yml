@@ -27,6 +27,7 @@
     - node_exporter_role
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
     - mysql_init
+    - psql_init
     - role: credentials
       when: TAHOE_CREDENTIALS_ENABLE|default(false)
       tags: credentials_role
@@ -42,6 +43,7 @@
     - role: sudo
     - role: aws
     - mysql_init
+    - psql_init
     - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
@@ -103,6 +105,7 @@
         - deploy
   roles:
     - mysql_init
+    - psql_init
     - role: mysql
       when: EDXAPP_MYSQL_HOST == 'localhost'
     - role: mongo_3_2

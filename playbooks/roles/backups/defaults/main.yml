@@ -25,5 +25,7 @@ BACKUPS_GS_SERVICE_KEY_FILE: '/root/backup-service-account.p12'
 BACKUPS_GS_SERVICE_CLIENT_ID: ''
 BACKUPS_GS_SERVICE_KEY_FILE_PASSWORD: 'notasecret'
 
+BACKUPS_VIRTUALENV: /opt/backups/ve
+
 # Prometheus Pushgateway
 PUSHGATEWAY: 'https://pushgateway.infra.appsembler.com'

@@ -1,7 +1,10 @@
 ---
 
 - debug: msg="Checking out site theme {{item}}"
-  with_dict: "{{EDXAPP_SITE_THEMES}}"
+  with_dict:
+    EDXAPP_SITE_THEMES: "{{ EDXAPP_SITE_THEMES }}"
+    key_file: "{{ edxapp_git_identity }}"
+    GIT_SSH: "{{ edxapp_git_ssh }}"
   tags: debug
 
 - name: checkout comprehensive themes
@@ -10,6 +13,7 @@
     repo: "{{ item.value.theme_source_repo }}"
     version: "{{ item.value.theme_version }}"
     accept_hostkey: yes
+    key_file: "{{ edxapp_git_identity }}"
   with_dict: "{{EDXAPP_SITE_THEMES}}"
   when:
    - EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true
@@ -25,7 +29,7 @@
     repo: "{{ item.value.customer_theme_source_repo }}"
     version: "{{ item.value.customer_theme_version }}"
     accept_hostkey: yes
-    key_file: "/edx/app/edxapp/.ssh/id_rsa"
+    key_file: "{{ edxapp_git_identity }}"
   with_dict: "{{EDXAPP_SITE_THEMES}}"
   when:
    - EDXAPP_ENABLE_COMPREHENSIVE_THEMING == true

@@ -11,9 +11,11 @@ EDXAPP_AWS_S3_CUSTOM_DOMAIN: "{{ EDXAPP_AWS_S3_CUSTOM_DOMAIN | default("") }}"
 TAHOE_SCORM_XBLOCK_ROOT_DIR: "{{ TAHOE_SCORM_XBLOCK_ROOT_DIR | default("") }}"
 
 # nging vars
-nginx_lms_specific_extra_locations: "{{ nginx_lms_specific_extra_locations | default("") }}"
+nginx_lms_specific_extra_locations: |
+  {{ nginx_lms_specific_extra_locations | default("") | indent(2) }}
 nginx_lms_specific_extra_http: "{{ nginx_lms_specific_extra_http | default("") }}"
-nginx_cms_specific_extra_locations: "{{ nginx_cms_specific_extra_locations | default("") }}"
+nginx_cms_specific_extra_locations: |
+  {{ nginx_cms_specific_extra_locations | default("") | indent(2) }}
 nginx_cms_specific_extra_http: "{{ nginx_cms_specific_extra_http | default("") }}"
 
 # letsencrypt vars

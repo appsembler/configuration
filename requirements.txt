@@ -18,7 +18,7 @@ cryptography==2.9.2       # via ansible, paramiko
 datadog==0.8.0            # via -r requirements/base.in
 decorator==4.4.2          # via datadog, networkx
 docopt==0.6.2             # via -r requirements/base.in
-docutils==0.16            # via awscli, botocore
+docutils==0.15.2          # via awscli, botocore
 ecdsa==0.13.3             # via -r requirements/base.in
 idna==2.7                 # via requests
 jinja2==2.8               # via -r requirements/base.in, ansible

@@ -52,6 +52,15 @@
     - role: nginx
       nginx_sites: []
       tags: ['nginx_role']
+    - role: "{{ appsembler_roles }}/node_exporter"
+      node_exporter_enabled_collectors:
+        - systemd
+        - supervisord
+        - textfile:
+            directory: "{{ node_exporter_textfile_dir }}"
+        - filesystem:
+            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
+            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
     - role: "{{ appsembler_roles }}/scriabin"
     - role: "{{ appsembler_roles }}/nxmon"
     - role: "{{ appsembler_roles }}/letsencrypt"
@@ -105,15 +114,6 @@
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
     - role: "{{ appsembler_roles }}/google-fluentd"
-    - role: "{{ appsembler_roles }}/node_exporter"
-      node_exporter_enabled_collectors:
-        - systemd
-        - supervisord
-        - textfile:
-            directory: "{{ node_exporter_textfile_dir }}"
-        - filesystem:
-            ignored-mount-points: "^/(sys|proc|dev|var|run)($|/)"
-            ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
     - { role: deploy_info, tags: ['deploy'] }
 
 - name: Install xqueue, notifier and rabbitmq

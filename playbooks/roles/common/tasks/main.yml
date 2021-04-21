@@ -160,6 +160,13 @@
     group: root
     mode: "0440"
 
+- name: python3-pip
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+  when: ansible_distribution in common_debian_variants
+
 - name: pip install virtualenv
   pip:
     name: "{{ common_pip_pkgs }}"

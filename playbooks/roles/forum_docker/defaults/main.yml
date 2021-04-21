@@ -1,7 +1,7 @@
 ---
 
 forum_docker_image: "edxops/forum"
-forum_docker_tag: "hawthorn.master"
+forum_docker_tag: "juniper.master"
 
 forum_app_dir: "{{ COMMON_APP_DIR }}/forum"
 forum_code_dir: "{{ forum_app_dir }}/cs_comments_service"

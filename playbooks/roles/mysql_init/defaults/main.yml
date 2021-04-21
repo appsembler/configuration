@@ -2,6 +2,7 @@
 
 mysql_packages:
   - python-mysqldb
+  - python3-mysqldb
 mysql_login_user: "{{ omit }}"
 mysql_login_password: "{{ omit }}"
 mysql_login_host: "{{ omit }}"

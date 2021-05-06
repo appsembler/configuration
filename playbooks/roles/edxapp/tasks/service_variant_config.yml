@@ -412,6 +412,7 @@
   command: "mktemp -d"
   register: staticfiles_tmpdir
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -424,6 +425,7 @@
     group: "{{ common_web_group }}"
     mode:  "0755"
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -438,6 +440,7 @@
     mode: 0640
   with_items: "{{ service_variants_enabled }}"
   when: celery_worker is not defined and not devstack and item != "lms-preview"
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -449,6 +452,7 @@
   environment:
     EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -463,6 +467,7 @@
    - celery_worker is not defined
    - not devstack
    - EDXAPP_TAHOE_REBUILD_SITE_STYLES
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -474,6 +479,7 @@
     path: "/tmp/old_staticfiles_dir"
     state: absent
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -485,6 +491,7 @@
 - name: Move staticfiles out of the way
   command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -493,6 +500,7 @@
 - name: Replace with new version of staticfiles
   command: "mv {{ staticfiles_tmpdir.stdout }} {{ edxapp_staticfile_dir}}"
   when: celery_worker is not defined and not devstack
+  run_once: true
   tags:
     - gather_static_assets
     - assets
@@ -504,6 +512,7 @@
     state: absent
   with_items: "{{ service_variants_enabled }}"
   when: celery_worker is not defined and not devstack and item != "lms-preview"
+  run_once: true
   tags:
     - gather_static_assets
     - assets

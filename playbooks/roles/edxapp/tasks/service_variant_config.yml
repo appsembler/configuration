@@ -379,7 +379,7 @@
   when:
     - migrate_db is defined
     - migrate_db|lower == "yes"
-    - COMMON_MYSQL_MIGRATE_PASS
+    - COMMON_MYSQL_MIGRATE_PASS|bool
     - item != "lms-preview"
     - inventory_hostname == ansible_play_hosts_all[0]
   run_once: yes

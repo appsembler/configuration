@@ -376,13 +376,17 @@
 # migrate when the migrate user is overridden in extra vars
 - name: migrate
   command: "{{ COMMON_BIN_DIR }}/edxapp-migrate-{{ item }}"
-  when: migrate_db is defined and migrate_db|lower == "yes" and COMMON_MYSQL_MIGRATE_PASS and item != "lms-preview"
+  when:
+    - migrate_db is defined
+    - migrate_db|lower == "yes"
+    - COMMON_MYSQL_MIGRATE_PASS
+    - item != "lms-preview"
+    - inventory_hostname == ansible_play_hosts_all[0]
   run_once: yes
   environment:
     DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
     DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"
   with_items: "{{ service_variants_enabled }}"
-  run_once: true
   tags:
     - migrate
 
@@ -411,8 +415,10 @@
 - name: Create temporary staticfiles directory
   command: "mktemp -d"
   register: staticfiles_tmpdir
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -424,8 +430,10 @@
     owner: "{{ edxapp_user }}"
     group: "{{ common_web_group }}"
     mode:  "0755"
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -439,8 +447,11 @@
     group: "{{ common_web_group }}"
     mode: 0640
   with_items: "{{ service_variants_enabled }}"
-  when: celery_worker is not defined and not devstack and item != "lms-preview"
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - item != "lms-preview"
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -451,8 +462,10 @@
   command: "{{ COMMON_BIN_DIR }}/edxapp-update-assets"
   environment:
     EDX_PLATFORM_SETTINGS_OVERRIDE: "staticfiles_override"
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -467,7 +480,7 @@
    - celery_worker is not defined
    - not devstack
    - EDXAPP_TAHOE_REBUILD_SITE_STYLES
-  run_once: true
+   - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -478,8 +491,10 @@
   file:
     path: "/tmp/old_staticfiles_dir"
     state: absent
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -490,8 +505,10 @@
 # but for now it's useful to have around to debug with
 - name: Move staticfiles out of the way
   command: "mv {{ edxapp_staticfile_dir }} /tmp/old_staticfiles_dir"
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -499,8 +516,10 @@
 
 - name: Replace with new version of staticfiles
   command: "mv {{ staticfiles_tmpdir.stdout }} {{ edxapp_staticfile_dir}}"
-  when: celery_worker is not defined and not devstack
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets
@@ -511,8 +530,11 @@
     path: "{{ edxapp_code_dir }}/{{ item }}/envs/staticfiles_override.py"
     state: absent
   with_items: "{{ service_variants_enabled }}"
-  when: celery_worker is not defined and not devstack and item != "lms-preview"
-  run_once: true
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - item != "lms-preview"
+    - inventory_hostname == ansible_play_hosts_all[0]
   tags:
     - gather_static_assets
     - assets

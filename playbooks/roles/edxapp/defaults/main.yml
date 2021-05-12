@@ -1428,9 +1428,12 @@ generic_env_config:  &edxapp_generic_env
       LOCATION: "{{ EDXAPP_MEMCACHE }}"
     staticfiles:
       <<: *default_generic_cache
-      # Tahoe: Adding a random prefix to invalidate deployment on each deployment to avoid collision.
-      KEY_PREFIX: "{{ ansible_hostname|default('staticfiles') }}_{{ 65000 | random }}_general"
+      # Tahoe: RED-1961 Adding a random prefix to invalidate deployment on each deployment to avoid collision.
+      #        9100100 is just a random big enough number.
+      KEY_PREFIX: "{{ ansible_hostname|default('staticfiles') }}_{{ 9100100 | random }}_general"
       LOCATION: "{{ EDXAPP_MEMCACHE }}"
+      # Tahoe: RED-1961 Increase static files cache timeout to 30 days to improve performance
+      TIMEOUT: "{{ EDXAPP_MEMCACHE_SATICFILES_TIMEOUT | default(30*86400) }}"
     configuration:
       <<: *default_generic_cache
       KEY_PREFIX: "{{ ansible_hostname|default('configuration') }}"

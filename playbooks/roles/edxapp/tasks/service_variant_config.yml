@@ -556,3 +556,4 @@
     - gather_static_assets
     - assets
     - update_lms_themes
+    - sync_webpack_stats

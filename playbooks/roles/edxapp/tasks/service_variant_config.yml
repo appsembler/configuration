@@ -540,11 +540,42 @@
     - assets
     - update_lms_themes
 
-- name: sync webpack-stats.json files
-  synchronize:
-    src: "{{ edxapp_staticfile_dir}}/{{ item }}"
+- name: fetch webpack-stats.json files from the first
+  fetch:
+    src: "{{ edxapp_staticfile_dir}}/webpack-stats.json"
+    dest: "/tmp/webpack-stats.json"
+    flat: True
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_themes
+    - sync_webpack_stats
+
+# fetch doesn't work properly when looped over
+# so we have to do another manually for the studio
+- name: fetch studio/webpack-stats.json files from the first
+  fetch:
+    src: "{{ edxapp_staticfile_dir}}/studio/webpack-stats.json"
+    dest: "/tmp/studio/webpack-stats.json"
+    flat: True
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname == ansible_play_hosts_all[0]
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_themes
+    - sync_webpack_stats
+
+- name: copy webpack-stats.json files
+  ansible.builtin.copy:
+    src: "/tmp/{{item}}"
     dest: "{{ edxapp_staticfile_dir}}/{{ item }}"
-  delegate_to: "{{ ansible_play_hosts_all[0] }}"
   when:
     - celery_worker is not defined
     - not devstack

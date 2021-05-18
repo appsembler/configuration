@@ -544,7 +544,7 @@
   fetch:
     src: "{{ edxapp_staticfile_dir}}/webpack-stats.json"
     dest: "/tmp/webpack-stats.json"
-    flat: True
+    flat: true
   when:
     - celery_worker is not defined
     - not devstack
@@ -560,8 +560,8 @@
 - name: fetch studio/webpack-stats.json files from the first
   fetch:
     src: "{{ edxapp_staticfile_dir}}/studio/webpack-stats.json"
-    dest: "/tmp/studio/webpack-stats.json"
-    flat: True
+    dest: "/tmp/studio-webpack-stats.json"
+    flat: true
   when:
     - celery_worker is not defined
     - not devstack
@@ -572,17 +572,39 @@
     - update_lms_themes
     - sync_webpack_stats
 
+- name: create studio staticfiles directory
+  file:
+    path: "{{ edxapp_staticfile_dir}}/studio"
+    state: directory
+    owner: "{{ edxapp_user }}"
+    group: "{{ edxapp_user }}"
+    mode: 0755
+  when:
+    - celery_worker is not defined
+    - not devstack
+    - inventory_hostname != ansible_play_hosts_all[0]
+  tags:
+    - gather_static_assets
+    - assets
+    - update_lms_themes
+    - sync_webpack_stats
+
 - name: copy webpack-stats.json files
-  ansible.builtin.copy:
-    src: "/tmp/{{item}}"
-    dest: "{{ edxapp_staticfile_dir}}/{{ item }}"
+  copy:
+    src: "/tmp/{{ item.src }}"
+    dest: "{{ edxapp_staticfile_dir}}/{{ item.dest }}"
+    owner: "{{ edxapp_user }}"
+    group: "{{ edxapp_user }}"
+    mode: 0644
   when:
     - celery_worker is not defined
     - not devstack
     - inventory_hostname != ansible_play_hosts_all[0]
   with_items:
-    - "webpack-stats.json"
-    - "studio/webpack-stats.json"
+    - src: "webpack-stats.json"
+      dest: "webpack-stats.json"
+    - src: "studio-webpack-stats.json"
+      dest: "studio/webpack-stats.json"
   tags:
     - gather_static_assets
     - assets

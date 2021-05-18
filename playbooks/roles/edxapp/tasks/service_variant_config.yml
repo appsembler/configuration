@@ -544,7 +544,7 @@
   synchronize:
     src: "{{ edxapp_staticfile_dir}}/{{ item }}"
     dest: "{{ edxapp_staticfile_dir}}/{{ item }}"
-  delegate_to: ansible_play_hosts_all[0]
+  delegate_to: "{{ ansible_play_hosts_all[0] }}"
   when:
     - celery_worker is not defined
     - not devstack

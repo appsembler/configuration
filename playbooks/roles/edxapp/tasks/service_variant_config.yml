@@ -540,31 +540,18 @@
     - assets
     - update_lms_themes
 
-- name: sync LMS webpack-stats.json file
+- name: sync webpack-stats.json files
   synchronize:
-    src: "{{ edxapp_staticfile_dir}}/webpack-stats.json"
-    dest: "{{ edxapp_staticfile_dir}}/webpack-stats.json"
+    src: "{{ edxapp_staticfile_dir}}/{{ item }}"
+    dest: "{{ edxapp_staticfile_dir}}/{{ item }}"
   delegate_to: ansible_play_hosts_all[0]
   when:
     - celery_worker is not defined
     - not devstack
-    - item != "lms-preview"
     - inventory_hostname != ansible_play_hosts_all[0]
-  tags:
-    - gather_static_assets
-    - assets
-    - update_lms_themes
-
-- name: sync CMS webpack-stats.json file
-  synchronize:
-    src: "{{ edxapp_staticfile_dir}}/studio/webpack-stats.json"
-    dest: "{{ edxapp_staticfile_dir}}/studio/webpack-stats.json"
-  delegate_to: ansible_play_hosts_all[0]
-  when:
-    - celery_worker is not defined
-    - not devstack
-    - item != "lms-preview"
-    - inventory_hostname != ansible_play_hosts_all[0]
+  with_items:
+    - "webpack-stats.json"
+    - "studio/webpack-stats.json"
   tags:
     - gather_static_assets
     - assets

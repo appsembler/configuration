@@ -19,6 +19,11 @@ EDXAPP_PYTHON_VERSION: "python3.5"
 EDXAPP_APPSEMBLER_FEATURES: {
   TMP: None
 }
+# we default this to a random number
+# but it really should be set to a different value
+# on each deploy. Normally, this should happen automatically
+# in the Cloud Build deploy we use.
+EDXAPP_APPSEMBLER_BUILD_ID: "{{ 9100100 | random }}"
 
 # Enables the "Update Tahoe site-specific styles" task.
 # This variable should be only enabled for Tahoe deployments.
@@ -1430,7 +1435,7 @@ generic_env_config:  &edxapp_generic_env
       <<: *default_generic_cache
       # Tahoe: RED-1961 Adding a random prefix to invalidate deployment on each deployment to avoid collision.
       #        9100100 is just a random big enough number.
-      KEY_PREFIX: "{{ ansible_hostname|default('staticfiles') }}_{{ 9100100 | random }}_general"
+      KEY_PREFIX: "{{ EDXAPP_APPSEMBLER_BUILD_ID }}_general"
       LOCATION: "{{ EDXAPP_MEMCACHE }}"
       # Tahoe: RED-1961 Increase static files cache timeout to 30 days to improve performance
       TIMEOUT: "{{ EDXAPP_MEMCACHE_SATICFILES_TIMEOUT | default(30*86400) }}"

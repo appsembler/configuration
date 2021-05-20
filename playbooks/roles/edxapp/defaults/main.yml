@@ -1435,7 +1435,7 @@ generic_env_config:  &edxapp_generic_env
       <<: *default_generic_cache
       # Tahoe: RED-1961 Adding a random prefix to invalidate deployment on each deployment to avoid collision.
       #        9100100 is just a random big enough number.
-      KEY_PREFIX: "{{ EDXAPP_APPSEMBLER_BUILD_ID }}_general"
+      KEY_PREFIX: "{{ EDXAPP_APPSEMBLER_BUILD_ID }}_staticfiles"
       LOCATION: "{{ EDXAPP_MEMCACHE }}"
       # Tahoe: RED-1961 Increase static files cache timeout to 30 days to improve performance
       TIMEOUT: "{{ EDXAPP_MEMCACHE_SATICFILES_TIMEOUT | default(30*86400) }}"

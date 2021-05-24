@@ -1,0 +1,62 @@
+  # static pages for server status
+  location ~ ^/server/(?P<file>.*) {
+      root /edx/var/nginx/server-static;
+      try_files /$file =404;
+  }
+
+  location ~ ^/static/(?P<file>.*) {
+    proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$file;
+
+{% if EDXAPP_CORS_ORIGIN_WHITELIST|length > 0 %}
+    add_header Access-Control-Allow-Origin $cors_origin;
+{% endif %}
+
+    # return a 403 for static files that shouldn't be
+    # in the staticfiles directory
+    location ~ ^/static/(?:.*)(?:\.xml|\.json|README.TXT) {
+        return 403;
+    }
+
+    # http://www.red-team-design.com/firefox-doesnt-allow-cross-domain-fonts-by-default
+    location ~ "/static/(?P<collected>.*\.[0-9a-f]{12}\.(eot|otf|ttf|woff|woff2)$)" {
+        add_header "Cache-Control" $cache_header_long_lived always;
+
+        # Prevent the browser from doing MIME-type sniffing
+        add_header X-Content-Type-Options nosniff;
+
+{% if EDXAPP_CORS_ORIGIN_WHITELIST|length > 0 %}
+        add_header Access-Control-Allow-Origin $cors_origin;
+{% endif %}
+
+        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+    }
+
+    # Set django-pipelined files to maximum cache time
+    location ~ "/static/(?P<collected>.*\.[0-9a-f]{12}\..*)" {
+        add_header "Cache-Control" $cache_header_long_lived always;
+        # Without this try_files, files that have been run through
+        # django-pipeline return 404s
+        ## TODO: proxy
+        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+    }
+
+    # Set django-pipelined files for studio to maximum cache time
+    location ~ "/static/(?P<collected>[0-9a-f]{7}/.*)" {
+        add_header "Cache-Control" $cache_header_long_lived always;
+
+        # Without this try_files, files that have been run through
+        # django-pipeline return 404s
+        ## TODO: proxy
+        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+    }
+
+    {% include "static-files-extra.j2" ignore missing %}
+
+    {% if EDXAPP_XBLOCK_SETTINGS.get('ScormXBlock', False) %}
+      # asterisk needed so it doesn't break if the file doesn't exist
+      include {{nginx_app_dir}}/includes/scorm_static_files*;
+    {% endif %}
+
+    # Non-hashed files (there should be very few / none of these)
+    add_header "Cache-Control" $cache_header_short_lived always;
+  }

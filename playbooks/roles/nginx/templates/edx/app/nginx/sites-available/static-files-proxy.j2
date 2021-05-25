@@ -5,7 +5,8 @@
   }
 
   location ~ ^/static/(?P<file>.*) {
-    proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$file;
+    resolver 8.8.8.8;  # need a DNS resolver to use proxy_pass with URLs
+    proxy_pass {{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$file;
 
 {% if EDXAPP_CORS_ORIGIN_WHITELIST|length > 0 %}
     add_header Access-Control-Allow-Origin $cors_origin;
@@ -27,8 +28,8 @@
 {% if EDXAPP_CORS_ORIGIN_WHITELIST|length > 0 %}
         add_header Access-Control-Allow-Origin $cors_origin;
 {% endif %}
-
-        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+        resolver 8.8.8.8;  # need a DNS resolver to use proxy_pass with URLs
+        proxy_pass {{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
     }
 
     # Set django-pipelined files to maximum cache time
@@ -37,7 +38,8 @@
         # Without this try_files, files that have been run through
         # django-pipeline return 404s
         ## TODO: proxy
-        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+        resolver 8.8.8.8;  # need a DNS resolver to use proxy_pass with URLs
+        proxy_pass {{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
     }
 
     # Set django-pipelined files for studio to maximum cache time
@@ -47,7 +49,8 @@
         # Without this try_files, files that have been run through
         # django-pipeline return 404s
         ## TODO: proxy
-        proxy_pass https://{{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
+        resolver 8.8.8.8;  # need a DNS resolver to use proxy_pass with URLs
+        proxy_pass {{ TAHOE_EDXAPP_STUDIO_PROXY_STATICFILES_URL }}$collected;
     }
 
     {% include "static-files-extra.j2" ignore missing %}

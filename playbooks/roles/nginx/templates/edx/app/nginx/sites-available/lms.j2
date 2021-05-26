@@ -158,6 +158,9 @@ error_page {{ k }} {{ v }};
   {% endif -%}
 
   location @proxy_to_lms_app {
+    {% if NGINX_EDXAPP_ENABLE_LOCAL_MAINTENANCE %}
+    return 503;
+    {% endif %}
 {% include "lms_proxy.j2" %}
 
   }

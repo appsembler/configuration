@@ -93,6 +93,9 @@ error_page {{ k }} {{ v }};
   {% include "common-settings.j2" %}
 
   location @proxy_to_cms_app {
+    {% if NGINX_EDXAPP_ENABLE_LOCAL_MAINTENANCE %}
+    return 503;
+    {% endif %}
 {% include "cms_proxy.j2" %}
   }
 

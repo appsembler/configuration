@@ -610,3 +610,19 @@
     - assets
     - update_lms_themes
     - sync_webpack_stats
+
+# make sure the course data dir is set up correctly.
+# sometimes engineers making manual changes on the server
+# run shell commands as `edxapp` instead of `www-data`
+# and that can leave directories with the wrong ownership
+# in place. We run this on every deploy as an additional
+# fallback in case they don't notice.
+- name: fix perms on course data dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ common_web_user }}"
+    group: "{{ edxapp_user }}"
+    recurse: true
+  with_items:
+    - "{{ edxapp_course_data_dir }}"

@@ -626,3 +626,5 @@
     recurse: true
   with_items:
     - "{{ edxapp_course_data_dir }}"
+  tags:
+    - edxapp_fix_perms

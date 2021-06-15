@@ -1,5 +1,13 @@
 ---
 
+- name: Common
+  hosts: all
+  become: True
+  become_method: sudo
+  gather_facts: True
+  roles:
+    - vanta_agent_role
+
 - name: Configure Mongo
   hosts: mongo
   become: True

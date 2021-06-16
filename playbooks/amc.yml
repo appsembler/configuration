@@ -1,7 +1,7 @@
 ---
 
 - name: Common
-  hosts: all
+  hosts: all:!mysql_init
   become: True
   become_method: sudo
   gather_facts: True

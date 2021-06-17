@@ -182,14 +182,21 @@
   vars:
     migrate_db: "yes"
   roles:
-    - mysql_init
-    - edxapp_common
+    - role: mysql_init
+      when: TEMP_DEBUG_XQUEUE|default(false)
+    - role: edxapp_common
+      when: TEMP_DEBUG_XQUEUE|default(false)
     - role: nginx
       nginx_sites:
       - xqueue
+      when: TEMP_DEBUG_XQUEUE|default(false)
     # TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
     #- { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
-    - { role: "xqueue", update_users: True }
+    - role: "xqueue"
+      update_users: True
+      when: TEMP_DEBUG_XQUEUE|default(false)
     - role: custom_domains # This gets the list of domains
       when: nginx_enable_custom_domains|default(False)
-    - { role: letsencrypt_role, letsencrypt_webserver: "" }
+    - role: letsencrypt_role
+      letsencrypt_webserver: ""
+      when: nginx_enable_custom_domains|default(False)

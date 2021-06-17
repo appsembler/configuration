@@ -107,7 +107,7 @@
       service:
         name: nginx
         state: stopped
-      ignore_errors: yes  # Ignore the errors on this because it could potentially be the first 
+      ignore_errors: yes  # Ignore the errors on this because it could potentially be the first
                                      # deploy to a new server, in which case nginx would not yet be installed.
       tags:
         - deploy
@@ -173,22 +173,23 @@
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
     - { role: deploy_info }
 
-# TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
-#- name: Install xqueue and notifier on services node
-#  hosts: "services"
-#  become: True
-#  become_method: sudo
-#  gather_facts: True
-#  vars:
-#    migrate_db: "yes"
-#  roles:
-#    - mysql_init
-#    - edxapp_common
-#    - role: nginx
-#      nginx_sites:
-#      - xqueue
-#    - { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
-#    - { role: "xqueue", update_users: True }
-#    - role: custom_domains # This gets the list of domains
-#      when: nginx_enable_custom_domains|default(False)
-#    - { role: letsencrypt_role, letsencrypt_webserver: "" }
+
+- name: Install xqueue and notifier on services node
+  hosts: "services"
+  become: True
+  become_method: sudo
+  gather_facts: True
+  vars:
+    migrate_db: "yes"
+  roles:
+    - mysql_init
+    - edxapp_common
+    - role: nginx
+      nginx_sites:
+      - xqueue
+    # TODO: Fix the notifier. It's breaking the Ansible deployments. See RED-133
+    #- { role: notifier, NOTIFIER_DIGEST_TASK_INTERVAL: "5" }
+    - { role: "xqueue", update_users: True }
+    - role: custom_domains # This gets the list of domains
+      when: nginx_enable_custom_domains|default(False)
+    - { role: letsencrypt_role, letsencrypt_webserver: "" }

@@ -64,7 +64,6 @@ def _should_sample(trace_id, sample_rate):
 def sampler(fields):
     """
     the goal is to default to sending everything (ie, sample rate = 1)
-
     *except*, the requests for `/heartbeat`, GCP load balancer hits about
     4 times per second, we want to aggressively downsample
 
@@ -72,18 +71,29 @@ def sampler(fields):
     which *can* be interesting, but doesn't directly impact performance
     or user experience and effectively doubles our honeycomb event rate,
     so we also sample that down
+
+    since we've been hitting our quota, we also need to downsample
+    "boring" requests, which is basically anything that was successful
+     and fast. Those requests are unlikely to be interesting to us
+    for investigating bugs or performance problems.
     """
 
     sample_rate = 1
     heartbeat_sample_rate = 100
     event_sample_rate = 10
+    boring_sample_rate = 100
 
     path = fields.get('request.path', fields.get('app.request.path'))
+    response_code = int(fields.get('response.status_code', 404))
+    duration = float(fields.get('duration_ms', 1000))
 
     if path == "/heartbeat":
         sample_rate = heartbeat_sample_rate
     if path == "/event":
         sample_rate = event_sample_rate
+    # a 200 OK response in less than 100ms is "boring"
+    if response_code == 200 and duration < 100.0:
+        sample_rate = boring_sample_rate
 
     # The truthiness of the first return argument determines whether we keep the
     # event. The second argument, the sample rate, tells Honeycomb what rate the

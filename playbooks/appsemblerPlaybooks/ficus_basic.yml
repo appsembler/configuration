@@ -94,7 +94,7 @@
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
     - role: "{{ appsembler_roles }}/node_exporter"
-       node_exporter_enabled_collectors:
+      node_exporter_enabled_collectors:
          - systemd
          - supervisord
          - textfile:

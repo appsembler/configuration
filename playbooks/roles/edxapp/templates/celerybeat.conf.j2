@@ -22,9 +22,9 @@ directory={{ edxapp_code_dir }}
 stdout_logfile={{ supervisor_log_dir }}/%(program_name)s-stdout.log
 stderr_logfile={{ supervisor_log_dir }}/%(program_name)s-stderr.log
 
-command={{ edxapp_app_dir }}/celerybeat.sh beat --app=cms.celery:APP --loglevel=info --pidfile={{ EDXAPP_CELERY_BEAT_LMS_CONFIG.process_id }} --schedule {{ EDXAPP_CELERY_BEAT_LMS_CONFIG.schedule_file }}
+command={{ edxapp_app_dir }}/celerybeat.sh beat --app=cms.celery:APP --loglevel=info --pidfile={{ EDXAPP_CELERY_BEAT_CMS_CONFIG.process_id }} --schedule {{ EDXAPP_CELERY_BEAT_CMS_CONFIG.schedule_file }}
 
-stopwaitsecs={{ EDXAPP_CELERY_BEAT_LMS_CONFIG.stopwaitsecs | default(EDXAPP_WORKER_DEFAULT_STOPWAITSECS) }}
+stopwaitsecs={{ EDXAPP_CELERY_BEAT_CMS_CONFIG.stopwaitsecs | default(EDXAPP_WORKER_DEFAULT_STOPWAITSECS) }}
 {% endif -%}
 #[group:edxapp_celerybeat]
 #programs=lms,cms

@@ -3,7 +3,7 @@
 {% if EDXAPP_CELERY_BEAT_LMS_CONFIG.enabled %}
 [program:lms_celerybeat]
 
-environment=LOGLEVEL=info,DJANGO_SETTINGS_MODULE={{ worker_django_settings_module }},PYTHONPATH={{ edxapp_code_dir }},SERVICE_VARIANT=lms,BOTO_CONFIG="{{ edxapp_app_dir }}/.boto"
+environment=LOGLEVEL=info,DJANGO_SETTINGS_MODULE=lms.envs.{{ worker_django_settings_module }},PYTHONPATH={{ edxapp_code_dir }},SERVICE_VARIANT=lms,BOTO_CONFIG="{{ edxapp_app_dir }}/.boto"
 user={{ common_web_user }}
 directory={{ edxapp_code_dir }}
 stdout_logfile={{ supervisor_log_dir }}/%(program_name)s-stdout.log
@@ -16,15 +16,15 @@ stopwaitsecs={{ EDXAPP_CELERY_BEAT_LMS_CONFIG.stopwaitsecs | default(EDXAPP_WORK
 {% if EDXAPP_CELERY_BEAT_CMS_CONFIG.enabled %}
 [program:cms_celerybeat]
 
-environment=LOGLEVEL=info,DJANGO_SETTINGS_MODULE={{ worker_django_settings_module }},PYTHONPATH={{ edxapp_code_dir }},SERVICE_VARIANT=cms,BOTO_CONFIG="{{ edxapp_app_dir }}/.boto"
+environment=LOGLEVEL=info,DJANGO_SETTINGS_MODULE=cms.envs.{{ worker_django_settings_module }},PYTHONPATH={{ edxapp_code_dir }},SERVICE_VARIANT=cms,BOTO_CONFIG="{{ edxapp_app_dir }}/.boto"
 user={{ common_web_user }}
 directory={{ edxapp_code_dir }}
 stdout_logfile={{ supervisor_log_dir }}/%(program_name)s-stdout.log
 stderr_logfile={{ supervisor_log_dir }}/%(program_name)s-stderr.log
 
-command={{ edxapp_app_dir }}/celerybeat.sh beat --app=cms.celery:APP --loglevel=info --pidfile={{ EDXAPP_CELERY_BEAT_LMS_CONFIG.process_id }} --schedule {{ EDXAPP_CELERY_BEAT_LMS_CONFIG.schedule_file }}
+command={{ edxapp_app_dir }}/celerybeat.sh beat --app=cms.celery:APP --loglevel=info --pidfile={{ EDXAPP_CELERY_BEAT_CMS_CONFIG.process_id }} --schedule {{ EDXAPP_CELERY_BEAT_CMS_CONFIG.schedule_file }}
 
-stopwaitsecs={{ EDXAPP_CELERY_BEAT_LMS_CONFIG.stopwaitsecs | default(EDXAPP_WORKER_DEFAULT_STOPWAITSECS) }}
+stopwaitsecs={{ EDXAPP_CELERY_BEAT_CMS_CONFIG.stopwaitsecs | default(EDXAPP_WORKER_DEFAULT_STOPWAITSECS) }}
 {% endif -%}
 #[group:edxapp_celerybeat]
 #programs=lms,cms

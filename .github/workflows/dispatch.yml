@@ -1,0 +1,18 @@
+name: Dispatch to edx_deploy
+
+on:
+  push:
+    branches:
+      - appsembler/juniper/master
+
+jobs:
+  edx-deploy-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: appsembler/edx_deploy
+          event-type: juniper-configuration
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'

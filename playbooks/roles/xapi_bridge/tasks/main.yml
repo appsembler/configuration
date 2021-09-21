@@ -7,6 +7,9 @@
 #
 
 - include_vars: ../../common_vars/defaults/main.yml
+  tags:
+    - xapi_bridge
+    - xapi_bridge:config
 
 - name: ensure group exists
   group:
@@ -57,7 +60,7 @@
     chdir: "{{ xapi_bridge_code_dir }}"
     requirements: "requirements/base.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
-    virtualenv_python: python2.7
+    virtualenv_python: python3.5
     state: present
   become_user: "{{ xapi_bridge_user }}"
   tags: ["xapi_bridge"]
@@ -67,7 +70,7 @@
     chdir: "{{ xapi_bridge_code_dir }}"
     requirements: "requirements/production.txt"
     virtualenv: "{{ xapi_bridge_venv_dir }}"
-    virtualenv_python: python2.7.12
+    virtualenv_python: python3.5
     state: present
   become_user: "{{ xapi_bridge_user }}"
   when: COMMON_ENVIRONMENT in ("prod", "staging")

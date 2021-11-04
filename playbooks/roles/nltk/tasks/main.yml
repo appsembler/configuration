@@ -20,7 +20,7 @@
     - deploy
 
 - name: unarchive nltk data
-  shell: "unzip {{ NLTK_DATA_DIR }}/{{ item.url|basename }}"
+  shell: "unzip -o {{ NLTK_DATA_DIR }}/{{ item.url|basename }}"
   args:
     chdir: "{{ NLTK_DATA_DIR }}/{{ item.path|dirname }}"
   with_items: "{{ NLTK_DATA }}"

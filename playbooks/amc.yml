@@ -66,7 +66,6 @@
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
     - role: edxapp
       celery_worker: True
-        - role: googlecloudplatform.google_cloud_ops_agents
     - role: googlecloudplatform.google_cloud_ops_agents
       vars:
         agent_type: ops-agent

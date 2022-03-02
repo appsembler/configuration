@@ -57,10 +57,6 @@ COMMON_UBUNTU_APT_KEYSERVER: "http://keyserver.ubuntu.com/pks/lookup?op=get&fing
 common_digicert_name: "DigiCertSHA2SecureServerCA.crt"
 common_digicert_base_url: "https://dl.cacerts.digicert.com/"
 
-COMMON_EDX_PPA: "deb http://ppa.edx.org {{ ansible_distribution_release }} main"
-COMMON_EDX_PPA_KEY_SERVER: "keyserver.ubuntu.com"
-COMMON_EDX_PPA_KEY_ID: "69464050"
-
 #The git checkout url in most roles is constructed from these values
 #e.g. https://{{COMMON_GIT_MIRROR}}/{{COMMON_GIT_PATH}}/repo.git
 COMMON_GIT_PROTOCOL: 'https'  # https|ssh
@@ -133,11 +129,6 @@ common_debian_pkgs:
 
 common_debian_devstack_pkgs:
   - watchman
-
-# Packages that should be installed from our custom PPA, i.e. COMMON_EDX_PPA
-old_python_debian_pkgs:
-  - "python2.7=2.7.10-0+{{ ansible_distribution_release }}1"
-
 
 COMMON_PIP_VERSION: '20.0.2'
 common_pip_version: "{{ COMMON_PIP_VERSION }}"

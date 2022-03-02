@@ -31,7 +31,10 @@
     - elasticsearch
     - memcached
     - certagent_role
-    - google_fluentd_role
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - node_exporter_role
     - { role: 'rabbitmq', rabbitmq_ip: '0.0.0.0' }
     - mysql_init
@@ -63,7 +66,11 @@
             ignored-fs-types: "^(sys|proc|auto|shm|tmp|ns)fs$"
     - role: edxapp
       celery_worker: True
-    - google_fluentd_role
+        - role: googlecloudplatform.google_cloud_ops_agents
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - { role: deploy_info }
 
 # first, do everything we can safely do in parallel
@@ -78,7 +85,10 @@
     - role: aws
     - scriabin
     - nxmon_role
-    - google_fluentd_role
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd
@@ -161,7 +171,10 @@
       tags: ['forum_role']
     - role: forum_docker
       tags: ['forum_role']
-    - google_fluentd_role
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - role: node_exporter_role
       node_exporter_enabled_collectors:
         - systemd

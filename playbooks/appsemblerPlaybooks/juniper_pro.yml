@@ -23,7 +23,10 @@
     - { role: memcached, tags: ['memcached_role'] }
     - { role: rabbitmq, rabbitmq_ip: '0.0.0.0', tags: ['rabbitmq_role'] }
     - backups
-    - google_fluentd_role
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - node_exporter_role
 
 - name: Configure stateless edxapp instance
@@ -106,7 +109,10 @@
         - "EDXAPP_APPSEMBLER_FEATURES.ENABLE_APPSEMBLER_REPORTING|default(false)"
         - "COMMON_ENVIRONMENT == 'prod'"
       tags: ['appsembler_reporting_role']
-    - google_fluentd_role
+    - role: googlecloudplatform.google_cloud_ops_agents
+      vars:
+        agent_type: ops-agent
+    - appsembler_ops_agent_config_role
     - { role: deploy_info, tags: ['deploy'] }
 
 - name: Install xqueue, notifier and rabbitmq

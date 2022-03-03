@@ -24,6 +24,6 @@
   args:
     chdir: "{{ NLTK_DATA_DIR }}/{{ item.path|dirname }}"
   with_items: "{{ NLTK_DATA }}"
-  when: nltk_download|changed
+  when: nltk_download is changed
   tags:
     - deploy

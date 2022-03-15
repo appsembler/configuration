@@ -24,6 +24,7 @@
   roles:
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
+    - docker_ce
     - edxapp_common
     - edx_ansible
     - gcsfuse_role
@@ -53,6 +54,7 @@
     - { role: swapfile, SWAPFILE_SIZE: "4GB" }
     - role: sudo
     - role: aws
+    - docker_ce
     - mysql_init
     - psql_init
     - role: node_exporter_role
@@ -82,6 +84,7 @@
     - { role: swapfile, SWAPFILE_SIZE: "2GB" }
     - role: sudo
     - role: aws
+    - docker_ce
     - scriabin
     - nxmon_role
     - role: googlecloudplatform.google_cloud_ops_agents

@@ -1,0 +1,25 @@
+# if the lms and cms are supposed to be running, we should be able
+# to hit the /heartbeat endpoint on each and get a 200 OK response
+# if we don't it indicates that the process is failing to start
+# and we should end the deploy now
+- name: ping lms heartbeat
+  command: "curl -i http://localhost:{{ edxapp_lms_gunicorn_port }}/heartbeat"
+  register: result
+  when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
+  tags:
+    - manage
+    - deploy:platform
+  retries: 3
+  delay: 60
+  until: result.stdout.find("200 OK") != -1
+
+- name: ping cms heartbeat
+  command: "curl -i http://localhost:{{ edxapp_cms_gunicorn_port }}/heartbeat"
+  register: result
+  when: edxapp_installed is defined and celery_worker is not defined and not disable_edx_services
+  tags:
+    - manage
+    - deploy:platform
+  retries: 3
+  delay: 60
+  until: result.stdout.find("200 OK") != -1

@@ -145,6 +145,7 @@
     - oauth_client_setup
     - { role: letsencrypt_role, letsencrypt_run: false }
     - { role: deploy_info, tags: ['deploy'] }
+    - check_heartbeat
   post_tasks:
     - name: re-add to load balancer
       service:

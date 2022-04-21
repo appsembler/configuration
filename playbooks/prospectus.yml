@@ -3,7 +3,6 @@
   become: True
   gather_facts: True
   vars:
-    ENABLE_DATADOG: False
     ENABLE_NEWRELIC: False
     CLUSTER_NAME: 'prospectus'
     PROSPECTUS_DATA_DIR: "/edx/var/prospectus"

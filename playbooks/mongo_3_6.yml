@@ -25,11 +25,7 @@
       when: COMMON_ENABLE_AWS_ROLE
     - mongo_3_6
     - munin_node
-    - role: datadog
-      when: COMMON_ENABLE_DATADOG
     - role: splunkforwarder
       when: COMMON_ENABLE_SPLUNKFORWARDER
     - role: newrelic_infrastructure
       when: COMMON_ENABLE_NEWRELIC_INFRASTRUCTURE
-    - role: datadog-uninstall
-      when: not COMMON_ENABLE_DATADOG

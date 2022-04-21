@@ -12,10 +12,6 @@
       nginx_sites:
       - xserver
     - xserver
-    - role: datadog
-      when: COMMON_ENABLE_DATADOG
     - role: splunkforwarder
       when: COMMON_ENABLE_SPLUNKFORWARDER
-    - role: datadog-uninstall
-      when: not COMMON_ENABLE_DATADOG
 

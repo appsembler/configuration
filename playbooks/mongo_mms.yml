@@ -9,7 +9,3 @@
     - role: aws
       when: COMMON_ENABLE_AWS_ROLE
     - mongo_mms
-    - role: datadog
-      when: COMMON_ENABLE_DATADOG
-    - role: datadog-uninstall
-      when: not COMMON_ENABLE_DATADOG

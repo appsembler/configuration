@@ -16,7 +16,6 @@
   vars:
     migrate_db: "yes"
     disable_edx_services: false
-    ENABLE_DATADOG: False
     ENABLE_NEWRELIC: False
     SANDBOX_ENABLE_ANALYTICS_API: True
     SANDBOX_ENABLE_ANALYTICS_PIPELINE: True

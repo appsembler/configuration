@@ -11,7 +11,6 @@
   become: True
   gather_facts: True
   vars:
-    COMMON_ENABLE_DATADOG: False
     COMMON_ENABLE_NEWRELIC_INFRASTRUCTURE: True
     COMMON_SECURITY_UPDATES: yes
     SECURITY_UPGRADE_ON_ANSIBLE: true

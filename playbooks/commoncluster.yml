@@ -28,12 +28,8 @@
   roles:
     - role: aws
       when: COMMON_ENABLE_AWS_ROLE
-    - role: datadog
-      when: COMMON_ENABLE_DATADOG
     - role: splunkforwarder
       when: COMMON_ENABLE_SPLUNKFORWARDER
-    - role: datadog-uninstall
-      when: not COMMON_ENABLE_DATADOG
     - role: nginx
       nginx_sites:
       - xqueue

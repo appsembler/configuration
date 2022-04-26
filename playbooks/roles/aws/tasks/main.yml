@@ -27,10 +27,9 @@
 - name: Gather ec2 facts for use in other roles
   action: ec2_metadata_facts
   no_log: True
-  when: AWS_GATHER_FACTS
   tags:
     - deploy
-  when: cloud_provider == "aws"  # Appsembler-specific
+  when: AWS_GATHER_FACTS and cloud_provider == "aws"  # Appsembler-specific
 
 - name: Set the MTU to 1500 temporarily
   shell: "/sbin/ifconfig {{ ansible_default_ipv4.interface }} mtu 1500 up"

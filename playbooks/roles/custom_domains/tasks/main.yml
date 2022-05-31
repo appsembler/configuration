@@ -24,7 +24,7 @@
     executable: /bin/bash
   register: custom_domains_cmd
   run_once: True
-  delegate_to: "{{ groups['edx'][0] }}"
+  delegate_to: "{{ groups['roles_label_edxapp'][0] }}"
   tags:
     - custom_domains
     - custom_domains:get_domains

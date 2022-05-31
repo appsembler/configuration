@@ -251,7 +251,7 @@
 #     group: "{{ common_web_user }}"
 #     mode: 0640
 #   notify: reload nginx
-#   when: inventory_hostname in groups['edx']
+#   when: inventory_hostname in groups['roles_label_edxapp']
 #   tags:
 #     - install
 #     - install:configuration
@@ -262,7 +262,7 @@
 - name: Debug custom domains structure
   debug: var=item
   with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
-  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+  when: nginx_enable_custom_domains and inventory_hostname in groups['roles_label_edxapp']
   tags:
     - nginx:custom_domains
     - nginx:custom_domains:debug
@@ -275,7 +275,7 @@
     group: "{{ common_web_user }}"
     mode: 0640
   with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
-  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+  when: nginx_enable_custom_domains and inventory_hostname in groups['roles_label_edxapp']
   notify: reload nginx
   tags:
     - install
@@ -290,7 +290,7 @@
     owner: root
     group: root
   with_items: "{{ letsencrypt_certs|json_query('[*].domains') }}"
-  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+  when: nginx_enable_custom_domains and inventory_hostname in groups['roles_label_edxapp']
   notify: reload nginx
   tags:
     - install
@@ -299,7 +299,7 @@
 
 #- name: Reload nginx for custom domains to take effect
 #  service: name=nginx state=reloaded
-#  when: nginx_enable_custom_domains and inventory_hostname in groups['edx']
+#  when: nginx_enable_custom_domains and inventory_hostname in groups['roles_label_edxapp']
 #  tags: ['nginx:custom_domains']
 
   # These are static pages that can be used

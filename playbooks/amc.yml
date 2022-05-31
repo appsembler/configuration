@@ -9,7 +9,7 @@
     - vanta_agent_role
 
 - name: Configure Mongo
-  hosts: mongo
+  hosts: labels_role_mongo
   become: True
   become_method: sudo
   gather_facts: True
@@ -17,7 +17,7 @@
     - mongo_3_2
 
 - name: Configure shared services (es, memcached, rabbitmq)
-  hosts: services
+  hosts: labels_role_services
   become: True
   become_method: sudo
   gather_facts: True
@@ -46,7 +46,7 @@
     - { role: deploy_info }
 
 - name: Deploy edxapp workers
-  hosts: workers
+  hosts: labels_role_workers
   become: True
   become_method: sudo
   gather_facts: True
@@ -76,7 +76,7 @@
 
 # first, do everything we can safely do in parallel
 - name: app server common setup
-  hosts: edx
+  hosts: labels_role_edxapp
   become: True
   become_method: sudo
   gather_facts: True
@@ -103,7 +103,7 @@
 
 # rolling deploy to one at a time
 - name: Configure app server instance(s)
-  hosts: edx
+  hosts: labels_role_edxapp
   become: True
   become_method: sudo
   gather_facts: True
@@ -159,7 +159,7 @@
         - deploy
 
 - name: Deploy forum
-  hosts: forum
+  hosts: labels_role_forum
   become: True
   tags: forum
   gather_facts: True

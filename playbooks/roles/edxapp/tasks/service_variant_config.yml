@@ -382,7 +382,7 @@
     - COMMON_MYSQL_MIGRATE_PASS|bool
     - item != "lms-preview"
     - inventory_hostname == ansible_play_hosts_all[0]
-  run_once: yes
+  # run_once: yes  # https://appsembler.atlassian.net/browse/RED-3045
   environment:
     DB_MIGRATION_USER: "{{ COMMON_MYSQL_MIGRATE_USER }}"
     DB_MIGRATION_PASS: "{{ COMMON_MYSQL_MIGRATE_PASS }}"

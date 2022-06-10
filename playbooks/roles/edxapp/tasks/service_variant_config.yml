@@ -375,7 +375,7 @@
 
 - name: Get length of COMMON_MYSQL_MIGRATE_PASS
   set_fact:
-    the_pass_length: "{{ COMMON_MYSQL_MIGRATE_PASS | length }}"
+    the_pass_length: "{{ COMMON_MYSQL_MIGRATE_PASS|length }}"
   tags:
     - migrate
 

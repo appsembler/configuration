@@ -375,7 +375,7 @@
 
 - name: hide value of COMMON_MYSQL_MIGRATE_PASS
   set_fact:
-    the_pass: "{{ COMMON_MYSQL_MIGRATE_PASS | regex_replace('.*', '\*') }}"
+    the_pass: "{{ COMMON_MYSQL_MIGRATE_PASS | regex_replace('.*', '\\*') }}"
   tags:
     - migrate
 

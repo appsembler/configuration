@@ -376,14 +376,26 @@
 - name: Debug value of migrate_db
   ansible.builtin.debug:
     var: migrate_db
+  tags:
+    - migrate
 
 - name: Debug value of COMMON_MYSQL_MIGRATE_USER
   ansible.builtin.debug:
     var: COMMON_MYSQL_MIGRATE_USER
+  tags:
+    - migrate
 
 - name: Debug value of inventory_hostname
   ansible.builtin.debug:
     var: inventory_hostname
+  tags:
+    - migrate
+
+- name: Debug value of ansible_play_hosts_all of 0
+  ansible.builtin.debug:
+    var: ansible_play_hosts_all[0]
+  tags:
+    - migrate
 
 # migrate when the migrate user is overridden in extra vars
 - name: migrate

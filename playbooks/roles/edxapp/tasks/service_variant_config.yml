@@ -373,6 +373,18 @@
     - install
     - install:configuration
 
+- name: hide value of COMMON_MYSQL_MIGRATE_PASS
+  set_fact:
+    the_pass: "{{ COMMON_MYSQL_MIGRATE_PASS | regex_replace('.*', '\*') }}"
+  tags:
+    - migrate
+
+- name: Debug value of COMMON_MYSQL_MIGRATE_PASS
+  ansible.builtin.debug:
+    var: the_pass
+  tags:
+    - migrate
+
 - name: Debug value of migrate_db
   ansible.builtin.debug:
     var: migrate_db
@@ -396,6 +408,7 @@
     var: ansible_play_hosts_all[0]
   tags:
     - migrate
+
 
 # migrate when the migrate user is overridden in extra vars
 - name: migrate

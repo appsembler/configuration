@@ -373,6 +373,18 @@
     - install
     - install:configuration
 
+- name: Debug value of migrate_db
+  ansible.builtin.debug:
+    var: migrate_db
+
+- name: Debug value of COMMON_MYSQL_MIGRATE_USER
+  ansible.builtin.debug:
+    var: COMMON_MYSQL_MIGRATE_USER
+
+- name: Debug value of inventory_hostname
+  ansible.builtin.debug:
+    var: inventory_hostname
+
 # migrate when the migrate user is overridden in extra vars
 - name: migrate
   command: "{{ COMMON_BIN_DIR }}/edxapp-migrate-{{ item }}"

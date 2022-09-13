@@ -62,7 +62,6 @@
     - custom_domains
     - custom_domains:get_domains
 
-
 - name: Print letsencrypt_certs
   debug:
     var: letsencrypt_certs

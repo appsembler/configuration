@@ -116,11 +116,8 @@
     NGINX_SET_X_FORWARDED_HEADERS: True
   pre_tasks:
     - name: remove from load balancer
-      service:
-        name: nginx
-        state: stopped
-      ignore_errors: yes  # Ignore the errors on this because it could potentially be the first 
-                                     # deploy to a new server, in which case nginx would not yet be installed.
+      become_user: root
+      command: 'ufw deny 80 && ufw deny 443'
       tags:
         - deploy
   roles:
@@ -147,14 +144,9 @@
     - { role: deploy_info, tags: ['deploy'] }
     - { role: check_heartbeat, tags: ['deploy'] }
   post_tasks:
-    - name: re-add to load balancer
-      service:
-        name: nginx
-        state: started
-      retries: 3
-      delay: 60
-      register: task_result
-      until: task_result is succeeded
+    - name: unblock http ports to re-add to load balancer
+      become_user: root
+      command: 'ufw allow 80 && ufw allow 443'
       tags:
         - deploy
 

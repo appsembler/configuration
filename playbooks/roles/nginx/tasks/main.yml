@@ -26,6 +26,15 @@
     - install
     - install:configuration
 
+# this creates the "snakeoil" certs as a side-effect
+- name: install ssl-certs
+  apt:
+    name: ssl-cert
+    state: present
+  tags:
+    - install
+    - install:configuration
+
 - name: Create nginx app and data dirs
   file:
     path: "{{ item.path }}"

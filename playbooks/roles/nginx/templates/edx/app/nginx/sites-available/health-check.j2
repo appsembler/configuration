@@ -14,13 +14,10 @@ server {
   listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} ssl;
   server_name gcp-health-check;
 
-  # This should be the wildcard cert. technically not a match
-  # for the `gcp-health-check` hostname, but the GCP health
-  # checker doesn't care if certs match, are self-signed, or
-  # even expired. Once we've fully switched to the HTTPS LB
-  # we will replace this with self-signed certs.
-  ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
-  ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
+  # just use the self-signed "snakeoil" certs
+  # since the health checker doesn't care about validity
+  ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+  ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
 
   # useful as a lightweight liveness check
   location '/status/' {

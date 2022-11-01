@@ -1,0 +1,46 @@
+---
+
+# rolling deploy to one at a time
+- name: Configure app server instance(s)
+  hosts: edx
+  become: True
+  become_method: sudo
+  gather_facts: True
+  serial: 1
+  vars:
+    EDXAPP_LMS_NGINX_PORT: '80'
+    # Set to false if deployed behind another proxy/load balancer.
+    NGINX_SET_X_FORWARDED_HEADERS: True
+  pre_tasks:
+    - name: remove from load balancer
+      service:
+        name: nginx
+        state: stopped
+      ignore_errors: yes  # Ignore the errors on this because it could potentially be the first 
+                          # deploy to a new server, in which case nginx would not yet be installed.
+      tags:
+        - deploy
+  roles:
+    - custom_domains # This gets a list of custom domains
+    - gcsfuse_role
+    - role: nginx
+      nginx_sites:
+      - cms
+      - lms
+      - health-check
+      nginx_default_sites:
+      - lms
+    - fix_dir_perms_role
+    - { role: letsencrypt_role, letsencrypt_run: false }
+    - { role: check_heartbeat, tags: ['deploy'] }
+  post_tasks:
+    - name: re-add to load balancer
+      service:
+        name: nginx
+        state: started
+      retries: 3
+      delay: 60
+      register: task_result
+      until: task_result is succeeded
+      tags:
+        - deploy

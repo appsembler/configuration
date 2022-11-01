@@ -103,8 +103,14 @@ error_page {{ k }} {{ v }};
   {% if NGINX_ENABLE_SSL %}
   listen {{ EDXAPP_LMS_SSL_NGINX_PORT }} {{ default_ssl_site }} ssl;
 
+{% if nginx_use_gcp_https_lb %}
+  # we're behind GCP HTTPS LB, so just use self-signed certs
+  ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
+  ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+{% else %}
   ssl_certificate {{ NGINX_SSL_CERTIFICATE_PATH }};
   ssl_certificate_key {{ NGINX_SSL_KEY_PATH }};
+{% endif %}
   {% endif %}
 
   {% if NGINX_ENABLE_SSL or NGINX_REDIRECT_TO_HTTPS %}

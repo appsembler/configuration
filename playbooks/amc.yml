@@ -131,7 +131,8 @@
     - role: mongo_3_2
       when: "'localhost' in EDXAPP_MONGO_HOSTS"
     - edxapp
-    - custom_domains # This gets a list of custom domains
+    - role: custom_domains # This gets a list of custom domains
+      when: nginx_enable_custom_domains
     - gcsfuse_role
     - role: nginx
       nginx_sites:
@@ -143,7 +144,10 @@
     - fix_dir_perms_role
     - amc
     - oauth_client_setup
-    - { role: letsencrypt_role, letsencrypt_run: false }
+    - role: letsencrypt_role
+      vars:
+        letsencrypt_run: false
+      when: nginx_enable_custom_domains
     - { role: deploy_info, tags: ['deploy'] }
     - { role: check_heartbeat, tags: ['deploy'] }
   post_tasks:

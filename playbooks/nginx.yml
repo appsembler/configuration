@@ -21,8 +21,10 @@
       tags:
         - deploy
   roles:
-    - custom_domains # This gets a list of custom domains
-    - gcsfuse_role
+    - role: custom_domains # This gets a list of custom domains
+      when: nginx_enable_custom_domains
+    - role: gcsfuse_role
+      when: nginx_enable_custom_domains
     - role: nginx
       nginx_sites:
       - cms
@@ -31,7 +33,7 @@
       nginx_default_sites:
       - lms
     - fix_dir_perms_role
-    - { role: letsencrypt_role, letsencrypt_run: false }
+    - { role: letsencrypt_role, letsencrypt_run: false, when: nginx_enable_custom_domains }
     - { role: check_heartbeat, tags: ['deploy'] }
   post_tasks:
     - name: re-add to load balancer

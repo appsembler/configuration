@@ -133,7 +133,8 @@
     - edxapp
     - role: custom_domains # This gets a list of custom domains
       when: nginx_enable_custom_domains
-    - gcsfuse_role
+    - role: gcsfuse_role
+      when: nginx_enable_custom_domains
     - role: nginx
       nginx_sites:
       - cms

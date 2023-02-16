@@ -39,6 +39,29 @@
     - custom_domains
     - custom_domains:get_domains
 
+- name: Set fact letsencrypt_certs for single cert
+  set_fact:
+    letsencrypt_single: ['domains': ['{{ letsencrypt_single_cert }}']]
+  when: letsencrypt_single_cert is defined and letsencrypt_execute_for_single_domain == true
+  tags:
+    - custom_domains
+    - custom_domains:get_domains
+
+- name: Print single domain
+  debug:
+    var: letsencrypt_single
+  tags:
+    - custom_domains
+    - custom_domains:debug
+
+- name: Set fact letsencrypt_certs combined with single cert
+  set_fact:
+    letsencrypt_certs: "{{ letsencrypt_certs + letsencrypt_single }}"
+  when: letsencrypt_single_cert is defined and letsencrypt_execute_for_single_domain == true
+  tags:
+    - custom_domains
+    - custom_domains:get_domains
+
 - name: Print letsencrypt_certs
   debug:
     var: letsencrypt_certs

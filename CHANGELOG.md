@@ -4,7 +4,7 @@ Add any new changes to the top(right below this line).
 
 - Role: nginx
   - Add the possibility to add the header `Content-Security-Policy frame-ancestors`. This is configured by the
-    EDXAPP_LMS_IFRAME_ENABLED switcher and EDXAPP_LMS_FRAME-ANCESTORS value.
+    EDXAPP_LMS_IFRAME_ENABLED switcher and EDXAPP_LMS_FRAME_ANCESTORS value.
 
 - Role: edxapp BREAKING_CHANGE
   - The sandbox environment that runs instructor written python code used to run python 2.7. We update the default to

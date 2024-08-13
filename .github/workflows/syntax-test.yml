@@ -31,7 +31,7 @@ jobs:
         PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
     - name: Install Dependencies
       run: |
-        pip install setuptools<57.4.0
+        pip install "setuptools<58"
         pip install demjson
         pip install -r requirements.txt
     - name: Run Make test.syntax

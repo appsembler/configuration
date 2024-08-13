@@ -121,6 +121,11 @@ error_page {{ k }} {{ v }};
   # prevent the browser from doing MIME-type sniffing
   add_header X-Content-Type-Options nosniff;
 
+  {% if EDXAPP_LMS_IFRAME_ENABLED %}
+  # Allow iFrame for the provided hosts
+  add_header Content-Security-Policy "frame-ancestors 'self' {{ EDXAPP_LMS_FRAME-ANCESTORS }}";
+  {% endif %}
+
   # Prevent invalid display courseware in IE 10+ with high privacy settings
   add_header P3P '{{ NGINX_P3P_MESSAGE }}';
 
